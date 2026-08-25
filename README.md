@@ -1,33 +1,28 @@
 # Forge of Empires Colony Planner
 
-A fan-made colony planning tool for the Space Age colonies in Forge of Empires.
+A colony planner I made for the Space Age colonies in Forge of Empires.
 
-Created by **Lacey49**.
-
-## Features
-
-- Colony planners for SAM, SAAB, SAV, SAJM, SAT, and SASH
-- Free-build mode
-- Built-in colony layout presets
-- Expansion planning
-- Residential, goods, life support, and path placement
-- Move, erase, undo, and clear tools
-- Layout validation
-- Era-specific themes
-- Works as a single HTML file with no installation required
+It currently supports SAM through SASH and includes free building, expansion
+planning, and a few layouts I've found useful.
 
 ## Download
 
-The latest version can be downloaded from the **Releases** section of this repository.
+Grab the newest `.html` file from Releases and open it in your browser.
+There isn't anything to install.
 
-Download the HTML file, open it in your browser, and start planning.
+## Current status
+
+The planner itself is usable, but I'm still working on it. Some layouts and
+features may change as I improve them.
+
+If you find something broken or have a layout that could be improved, open an
+issue.
 
 ## Support
 
-If you find the planner useful and want to support development:
+If the tool has been useful to you:
+https://buymeacoffee.com/lacey49
 
-[Buy Me a Coffee](https://buymeacoffee.com/lacey49)
+Made by Lacey49.
 
-## Disclaimer
-
-This is an independent fan-made project and is not affiliated with or endorsed by InnoGames.
+This is a fan-made tool and isn't affiliated with InnoGames.
