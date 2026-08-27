@@ -2,9 +2,11 @@
 
 # Forge of Empires Colony Planner
 
+[![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen)](https://lacey49.github.io/forge-of-empires-colony-planner/)
 [![Latest Release](https://img.shields.io/badge/Latest-v0.96-success)](https://github.com/Lacey49/forge-of-empires-colony-planner/releases/latest)
-[![Download](https://img.shields.io/badge/Download-HTML-blue)](https://github.com/Lacey49/forge-of-empires-colony-planner/releases/latest)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-yellow)](https://buymeacoffee.com/lacey49)
+
+### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
 
 </div>
 
@@ -12,9 +14,9 @@
 
 ## What is it?
 
-I made this to make planning the Space Age colonies in Forge of Empires a lot easier.
+I made this to make planning Space Age colonies in Forge of Empires much easier.
 
-Instead of rebuilding a colony over and over in-game just to see if something fits, you can lay it out here first.
+Instead of rebuilding a colony over and over in-game just to see if something fits, you can lay it out in the planner first.
 
 The planner currently supports:
 
@@ -29,11 +31,15 @@ The planner currently supports:
 
 ---
 
-## Download
+## Use the Planner
 
-### [Download the newest version here](https://github.com/Lacey49/forge-of-empires-colony-planner/releases/latest)
+### [Open Forge of Empires Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
 
-Download the `.html` file from the latest release and open it in your browser.
+The planner runs directly in your browser. There is nothing to install or download.
+
+Your colonies and settings are saved locally in your browser, so you can come back to the site later and continue where you left off.
+
+If you would rather keep an offline copy, downloadable versions are still available under [Releases](https://github.com/Lacey49/forge-of-empires-colony-planner/releases).
 
 ---
 
