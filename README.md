@@ -1,138 +1,219 @@
-Forge of Empires Colony Planner
+<div align="center">
 
-Plan colonies from SAM through SASH with free building, expansion planning,
-presets, connection checking, and keyboard controls.
+# Forge of Empires Colony Planner
 
-Download the latest release
- | 
-Quick Start Guide
- | 
-Buy Me a Coffee
+### A fan-made Space Age colony planner for Forge of Empires
 
-Supported colonies
+Made by **Lacey49**
 
-SAM · SAAB · SAV · SAJM · SAT · SASH
+[![Latest Release](https://img.shields.io/github/v/release/Lacey49/forge-of-empires-colony-planner?label=Latest%20Release)](https://github.com/Lacey49/forge-of-empires-colony-planner/releases/latest)
+[![Download](https://img.shields.io/badge/Download-HTML-blue)](https://github.com/Lacey49/forge-of-empires-colony-planner/releases/latest)
+[![Quick Start Guide](https://img.shields.io/badge/Quick%20Start-PDF-orange)](./Forge-of-Empires-Colony-Planner-Quick-Start-Guide.pdf)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-yellow)](https://buymeacoffee.com/lacey49)
 
-What it does
+</div>
 
-Free-build colony planning
+---
 
-Built-in layouts and presets
+## What is it?
 
-Expansion planning
+I made this to make planning the Space Age colonies in Forge of Empires a lot easier.
 
-Residential, goods, life support, and path placement
+Instead of rebuilding a colony over and over in-game just to see if something fits, you can lay it out here first.
 
-Move, undo, and right-click erase
+The planner currently supports:
 
-Checks whether paths and buildings are actually connected to the Town Hall
+| Era | Colony |
+|---|---|
+| **SAM** | Space Age Mars |
+| **SAAB** | Space Age Asteroid Belt |
+| **SAV** | Space Age Venus |
+| **SAJM** | Space Age Jupiter Moon |
+| **SAT** | Space Age Titan |
+| **SASH** | Space Age Space Hub |
 
-Compact, Normal, and Spacious layouts
+---
 
-Era-specific themes
+## Download
 
-Saves your colonies and settings locally in your browser
+### [Download the newest version here](https://github.com/Lacey49/forge-of-empires-colony-planner/releases/latest)
 
-Quick start
+Download the `.html` file from the latest release and open it in your browser.
 
-Go to Releases and download the newest .html file.
+That's it.
 
-Open the file in your browser. There is nothing to install.
+There isn't anything to install and it doesn't need a server.
 
-Pick the Space Age colony you want to work on.
+---
 
-Free Build is the default. Choose a building from the panel and click the map to place it.
+## Quick Start Guide
 
-Use Check when you want to verify path connections.
+Don't feel like figuring everything out yourself?
 
-For a fuller walkthrough, use the
-Quick Start Guide.
+### [Open the Quick Start Guide](./Forge-of-Empires-Colony-Planner-Quick-Start-Guide.pdf)
 
-Controls
+It covers:
 
-Action
+- getting started
+- placing buildings
+- moving and deleting things
+- paths
+- expansions
+- presets
+- Check
+- keyboard shortcuts
+- settings
+- saved layouts
 
-Control
+---
 
-Place a building
+## Features
 
-Select it, then left click the map
+### Colony building
 
-Select buildings in the current build tab
+- Free Build for every supported era
+- Residential buildings
+- Goods buildings
+- Life Support buildings
+- Paths for SAM through SAJM
+- SAT and SASH correctly work without paths
+- Movable Town Hall
+- Expansion planning
 
-1 through 9
+### Layouts
 
-Move
+- Built-in presets
+- Save your own presets
+- Hover preview before loading a preset
+- Saved colony layouts
+- Saved purchased expansions
+- Undo support
 
-M
+### Check
 
-Erase a building or path
+The **Check** button follows the actual path network back to the Town Hall.
 
-Right click
+That means a building touching a path does **not** count as connected if that path itself is disconnected.
 
-Undo
+Examples:
 
-Ctrl+Z
+> ✓ 58 buildings connected to Town Hall.
 
-Pan
+> ! 2 buildings need connection
 
-Drag the map or use the arrow keys
+> ! 1 path disconnected
 
-Zoom
+---
 
-Mouse wheel
+## Controls
 
-Change building type
+| Action | Control |
+|---|---|
+| Place building | Select one and left click |
+| Select buildings | `1` through `9` |
+| Move | `M` |
+| Delete building | Right click |
+| Delete path | Right click |
+| Undo | `Ctrl + Z` |
+| Pan | Drag or Arrow Keys |
+| Zoom | Mouse Wheel |
 
-Residential / Goods / Paths / Life Support
+### Number keys
 
-M and Ctrl+Z can be changed in Settings. Building numbers, right-click erase,
-and arrow-key panning are fixed.
+`1` through `9` follow whichever building tab you currently have open.
 
-SAT and SASH do not use paths, so the Paths tab is not shown for those eras.
+For example:
 
-Presets and Check
+**Residential selected**
 
-Presets can load built-in layouts or layouts you save yourself. Loading one
-over Free Build will warn you before replacing what you placed.
+`1` = first residential building  
+`2` = second residential building  
+`3` = third residential building
 
-Check follows the path network all the way back to the Town Hall. A building
-connected only to a disconnected path will still be reported as needing a
-connection.
+Switch to **Goods** and the numbers now select the goods buildings instead.
 
-Settings
+---
 
-Settings includes:
+## Presets
 
-Layout density: Compact / Normal / Spacious
+The planner includes built-in layouts for different colonies.
 
-Zoom sensitivity
+You can also save your own layouts as presets.
 
-Pan sensitivity
+If you already placed buildings in Free Build and try to load a preset, the planner will warn you before replacing them.
 
-Planner theme
+---
 
-Move and Undo keybinds
+## Expansions
 
-Reset all settings
+Unpurchased expansions are shown directly on the colony map.
 
-Resetting settings does not delete your saved colony layouts.
+Purchased expansions are saved separately for each era, so you don't have to set them up again every time you reopen the planner.
 
-Current status
+---
 
-The planner is usable, but I'm still working on it. Some layouts and features
-may change as I improve them. Some SAT and SASH layouts may still need
-verification.
+## Settings
 
-If you find something broken or have a layout that could be improved, open an
-issue.
+You can change:
 
-Buy Me a Coffee
+- Layout density
+  - Compact
+  - Normal
+  - Spacious
+- Zoom sensitivity
+- Pan sensitivity
+- Planner theme
+- Move keybind
+- Undo keybind
+
+Erase is always **Right Click**.
+
+Building shortcuts `1-9` and Arrow Key panning are fixed.
+
+### Reset all settings
+
+This resets your interface settings and keybinds.
+
+It does **not** delete your saved colony layouts or purchased expansions.
+
+---
+
+## Saving
+
+Your colonies and settings are saved locally in your browser.
+
+That means when you reopen the same HTML file later, your layouts should still be there.
+
+Nothing is uploaded anywhere.
+
+---
+
+## Current status
+
+The planner is usable, but I'm still working on it.
+
+Some layouts and features may change as I improve them.
+
+**Some SAT and SASH layouts may still need verification.**
+
+If you find something broken or have a layout that could be improved, please open an Issue.
+
+### [Report a bug or suggestion](https://github.com/Lacey49/forge-of-empires-colony-planner/issues)
+
+---
+
+## Buy Me a Coffee
 
 If the planner has been useful and you want to support it:
 
-https://buymeacoffee.com/lacey49
+### ☕ [Buy Me a Coffee](https://buymeacoffee.com/lacey49)
 
-Made by Lacey49.
+---
+
+<div align="center">
+
+Made by **Lacey49**
 
 This is a fan-made tool and isn't affiliated with InnoGames.
+
+</div>
