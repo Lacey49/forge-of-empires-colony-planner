@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lacey49.github.io/forge-of-empires-colony-planner/sitemap.xml
