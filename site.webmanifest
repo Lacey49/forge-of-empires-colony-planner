@@ -1,0 +1,22 @@
+{
+  "name": "Forge of Empires Colony Planner",
+  "short_name": "FoE Colony Planner",
+  "description": "Free Forge of Empires (FoE) colony planner for SAM, SAAB, SAV, SAJM, SAT and SASH. Plan Space Age buildings, paths, expansions and layouts online.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10171b",
+  "theme_color": "#11181c",
+  "icons": [
+    {
+      "src": "favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
