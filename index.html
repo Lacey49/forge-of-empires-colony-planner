@@ -3082,25 +3082,7 @@ body[data-density="spacious"] .settings-group{padding:18px 0!important}
         </div>
       </section>
 
-      <section class="section" id="spriteSourceSection">
-        <div class="section-title">Sprite / Theme Source</div>
-        <div class="section-body">
-          <div class="note ok">
-            Planner artwork is loaded from the human-readable assets/building-assets folder.
-          </div>
-          <div class="note">
-            ForgeHammer's ZIP contains the Hammer theme/UI source, but not the colony building sprites themselves.
-            ForgeHammer resolves game building art at runtime through ForgeHX's hashed InnoGames asset list.
-            Deep-Seated Housing is still using a placeholder until we add its sprite.
-          </div>
-          <div class="note ok">
-            SAAB sprite library now uses the known building names from the uploaded files, with generic category labels only where the source filename itself is generic. SAV, SAJM, and SAT now have their own sprite libraries via their era buttons.
-          </div>
-          <div class="subtle" style="margin:8px 0 6px">SAAB sprite gallery</div>
-          <div id="saabAssetGallery" class="era-asset-gallery"></div>
-        </div>
-      </section>
-    </aside>
+      </aside>
   </div>
   <div class="version-label" title="Forge of Empires Colony Planner v0.97">v0.97</div>
 </div></div>
@@ -3128,88 +3110,6 @@ const ERA_RULES={
   SAJM:{townHall:{w:5,h:5}},
   SAT:{townHall:{w:5,h:5}},
   SASH:{townHall:{w:7,h:6}}
-};
-
-const ERA_ASSETS={
-  SAM:{
-    townhall:"./assets/building-assets/sam-town-hall.png",
-    residential3:"./assets/building-assets/sam-residential3.png",
-    residential4:"./assets/building-assets/sam-residential4.png",
-    residential5:"./assets/building-assets/sam-residential5.png",
-    residential6:"./assets/building-assets/sam-residential6.png",
-    goods3:"./assets/building-assets/sam-goods3.png",
-    goods4:"./assets/building-assets/sam-goods4.png",
-    goods5:"./assets/building-assets/sam-goods5.png",
-    lifesupport4:"./assets/building-assets/sam-lifesupport4.png",
-    carvedRoad:"./assets/building-assets/sam-carved-road.webp",
-    autonomousFoodDispenser:"./assets/building-assets/sam-autonomous-food-dispenser.webp",
-    oxygenGenerator:"./assets/building-assets/sam-oxygen-generator.webp",
-    recombinationMachine:"./assets/building-assets/sam-recombination-machine.webp",
-    refinementStation:"./assets/building-assets/sam-refinement-station.webp",
-    solarPanelEast:"./assets/building-assets/sam-solar-panel-east.webp",
-    solarPanelSouth:"./assets/building-assets/sam-solar-panel-south.webp"  },
-  SAV:{
-    asset01:"./assets/building-assets/sav-seaweed-farm.webp",
-    asset02:"./assets/building-assets/sav-soy-farm.webp",
-    asset03:"./assets/building-assets/sav-multipurpose-property.webp",
-    asset04:"./assets/building-assets/sav-advanced-apartment.webp",
-    asset05:"./assets/building-assets/sav-inflatable-home.webp",
-    asset06:"./assets/building-assets/sav-floating-shelter.webp",
-    asset07:"./assets/building-assets/sav-town-hall.webp",
-    asset08:"./assets/building-assets/sav-sugarcane-plantation.png",
-    asset09:"./assets/building-assets/sav-horizon-path.webp",
-    asset10:"./assets/building-assets/sav-gas-tank.webp",
-    asset11:"./assets/building-assets/sav-maintenance-ship.webp",
-    asset12:"./assets/building-assets/sav-cargo-platform.webp",
-    asset13:"./assets/building-assets/sav-gas-station.webp",
-    asset14:"./assets/building-assets/sav-herb-garden.webp",
-    asset15:"./assets/building-assets/sav-microgreen-capsules.webp"
-  },
-  SAJM:{
-    spongeFarm:"./assets/building-assets/sajm-sponge-farm.webp",
-    oceanarium:"./assets/building-assets/sajm-oceanarium.webp",
-    researchLaboratory:"./assets/building-assets/sajm-research-laboratory.webp",
-    adventurer:"./assets/building-assets/sajm-adventurer.webp",
-    oxygenConcentrator:"./assets/building-assets/sajm-oxygen-concentrator.webp",
-    organicOxidator:"./assets/building-assets/sajm-organic-oxidator.webp",
-    deepAquamarine:"./assets/building-assets/sajm-deep-aquamarine.webp",
-    hydrographicHub:"./assets/building-assets/sajm-hydrographic-hub.webp",
-    rockweedWay:"./assets/building-assets/sajm-rockweed-way.webp",
-    townhall:"./assets/building-assets/sajm-town-hall.webp",
-    aquaPod:"./assets/building-assets/sajm-aqua-pod.webp",
-    aquaCabin:"./assets/building-assets/sajm-aqua-cabin.webp",
-    autonomousChambers:"./assets/building-assets/sajm-autonomous-chambers.webp",
-    aquariusHabitat:"./assets/building-assets/sajm-aquarius-habitat.webp",
-    redAlgaeFarm:"./assets/building-assets/sajm-red-algae-farm.webp"
-  },
-  SAT:{
-    experimentalTestSite:"./assets/building-assets/sat-experimental-test-site.webp",
-    purificationFacility:"./assets/building-assets/sat-purification-facility.webp",
-    chemicalCleaningPlant:"./assets/building-assets/sat-chemical-cleaning-plant.webp",
-    heatBatteries:"./assets/building-assets/sat-heat-batteries.webp",
-    hotChocolateBar:"./assets/building-assets/sat-hot-chocolate-bar.webp",
-    spicyTitanRestaurant:"./assets/building-assets/sat-spicy-titan-restaurant.webp",
-    townhall:"./assets/building-assets/sat-town-hall.webp",
-    igloo:"./assets/building-assets/sat-igloo.webp",
-    screenedDomicile:"./assets/building-assets/sat-screened-domicile.webp",
-    heatedResidence:"./assets/building-assets/sat-heated-residence.webp",
-    matterCompressionReactor:"./assets/building-assets/sat-matter-compression-reactor.webp",
-    moleculeDrill:"./assets/building-assets/sat-molecule-drill.webp"
-  },
-  SAAB:{
-    storageContainer:"./assets/building-assets/saab-storage-container.webp",
-    asteroidConnector:"./assets/building-assets/saab-asteroid-connector.webp",
-    undergroundReactor:"./assets/building-assets/saab-underground-reactor-alternate-2.webp",
-    lifesupport2:"./assets/building-assets/saab-lifesupport2.png",
-    asset05:"./assets/building-assets/saab-asset05.png",
-    asset06:"./assets/building-assets/saab-asset06.png",
-    asset07:"./assets/building-assets/saab-asset07.png",
-    asset08:"./assets/building-assets/saab-asset08.png",
-    asset09:"./assets/building-assets/saab-asset09.webp",
-    asset10:"./assets/building-assets/saab-spaceview-residence.webp",
-    asset11:"./assets/building-assets/saab-nickel-excavator.webp",
-    asset12:"./assets/building-assets/saab-platinum-quarry.webp"
-  }
 };
 
 const COLONISTS_ICON="./assets/building-assets/shared-colonists.webp";
@@ -6742,40 +6642,6 @@ const legacyAll=$("allExp");
 if(legacyAll)legacyAll.addEventListener("click",()=>setExpansionCount(activeExpansions().length));
 const legacyRange=$("expRange");
 if(legacyRange)legacyRange.addEventListener("input",e=>setExpansionCount(Number(e.target.value)));
-
-const SAAB_GALLERY_ASSETS=[
-  ["Storage Container","storageContainer"],
-  ["Asteroid Connector","asteroidConnector"],
-  ["Underground Reactor","undergroundReactor"],
-  ["Life Support 2","lifesupport2"],
-  ["SAAB Goods Building 1","asset05"],
-  ["SAAB Life Support 4","asset06"],
-  ["SAAB Residential 5","asset07"],
-  ["SAAB Goods Building 5","asset08"],
-  ["Deep-Seated Housing","asset09"],
-  ["Spaceview Residence","asset10"],
-  ["Nickel Excavator","asset11"],
-  ["Platinum Quarry","asset12"],
-];
-
-function renderSaabAssetGallery(){
-  const box=$("saabAssetGallery");
-  if(!box)return;
-  box.innerHTML="";
-  for(const [label,key] of SAAB_GALLERY_ASSETS){
-    const src=ERA_ASSETS.SAAB[key];
-    if(!src)continue;
-    const card=document.createElement("div");
-    card.className="era-asset-card";
-    const img=document.createElement("img");
-    img.src=src;
-    img.alt=label;
-    const cap=document.createElement("span");
-    cap.textContent=label;
-    card.append(img,cap);
-    box.appendChild(card);
-  }
-}
 
 const SAAB_TOWNHALL_SRC=$("townHallImg").src;
 const SAAB_TOWNHALL_ALT=$("townHallImg").alt;
