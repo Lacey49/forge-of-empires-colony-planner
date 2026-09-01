@@ -1,0 +1,83 @@
+name: Reorder header buttons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/reorder-header-buttons.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reorder header buttons
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          files=[Path('index.html'),Path('forge-of-empires-colony-planner-v0.97.html')]
+          old='''.app-settings-btn{margin-left:auto!important}\n.app-support-btn{margin-left:0!important}'''
+          new='''.app-support-btn{margin-left:auto!important}\n.app-settings-btn{margin-left:0!important}'''
+
+          for path in files:
+              text=path.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'Expected button spacing CSS not found in {path}')
+              text=text.replace(old,new,1)
+
+              start=text.index('  <header class="app-header">')
+              end=text.index('  </header>',start)+len('  </header>')
+              block=text[start:end]
+
+              brand='    <button id="appHomeBtn" class="app-brand" type="button" title="Home">Forge of Empires Colony Planner</button>'
+              settings=[line for line in block.splitlines() if 'id="settingsBtn"' in line][0]
+              github=[line for line in block.splitlines() if 'class="app-github-btn"' in line][0]
+              support=[line for line in block.splitlines() if 'id="supportBtn"' in line][0]
+              replacement='  <header class="app-header">\n'+brand+'\n'+support+'\n'+github+'\n'+settings+'\n  </header>'
+              text=text[:start]+replacement+text[end:]
+              path.write_text(text,encoding='utf-8')
+
+          print('Reordered to Support → GitHub → Settings, with Settings remaining at the far right.')
+          PY
+
+      - name: Verify
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ('index.html','forge-of-empires-colony-planner-v0.97.html'):
+              text=Path(name).read_text(encoding='utf-8')
+              header=text.split('<header class="app-header">',1)[1].split('</header>',1)[0]
+              assert header.index('supportBtn') < header.index('app-github-btn') < header.index('settingsBtn')
+              assert '.app-support-btn{margin-left:auto!important}' in text
+              assert '.app-settings-btn{margin-left:0!important}' in text
+          print('Verified Support is leftmost in the right-side group and Settings is rightmost.')
+          PY
+
+      - name: Check JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text=Path('index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',text,flags=re.S|re.I)
+          app=[s for s in scripts if '"use strict"' in s]
+          assert app
+          Path('/tmp/foe.js').write_text(app[-1],encoding='utf-8')
+          PY
+          node --check /tmp/foe.js
+
+      - name: Commit and clean temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/reorder-header-buttons.yml
+          git add index.html forge-of-empires-colony-planner-v0.97.html
+          git commit -m "Keep Settings at far right of header"
+          git push
