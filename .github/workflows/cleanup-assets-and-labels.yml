@@ -6,6 +6,7 @@ on:
     paths:
       - scripts/cleanup_asset_names_and_labels.py
       - scripts/run_asset_cleanup.py
+      - scripts/prune_legacy_asset_gallery.py
       - .github/workflows/cleanup-assets-and-labels.yml
 
 permissions:
@@ -25,8 +26,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Rename assets and correct labels
+      - name: Keep labels and asset references normalized
         run: python3 scripts/run_asset_cleanup.py
+
+      - name: Remove obsolete anonymous gallery assets
+        run: python3 scripts/prune_legacy_asset_gallery.py
 
       - name: Verify asset references and names
         run: |
@@ -36,6 +40,9 @@ jobs:
           index = Path('index.html').read_text(encoding='utf-8')
           assert 'assets/generated/' not in index
           assert 'assets/building-assets/' in index
+          assert 'const ERA_ASSETS=' not in index
+          assert 'SAAB_GALLERY_ASSETS' not in index
+          assert 'spriteSourceSection' not in index
           assert 'def.sizeText=`${def.boardW}×${def.boardH}`;' in index
           assert 'SAV_INFLATABLE_HOME.sizeText="2×3";' in index
           assert 'SAT_HEATED_RESIDENCE.sizeText=`${SAT_HEATED_RESIDENCE.boardW}×${SAT_HEATED_RESIDENCE.boardH}`;' in index
@@ -45,9 +52,13 @@ jobs:
           assert not missing, missing
           hashed = [name for name in refs if re.fullmatch(r'[0-9a-f]{16,}\.(?:png|webp|jpg|jpeg|gif)', name, re.I)]
           assert not hashed, hashed
+          vague = [name for name in refs if re.search(r'(?:^|-)asset\d+|goods\d+|residential\d+|lifesupport\d+', name)]
+          assert not vague, vague
           generated = Path('assets/generated')
           assert not generated.exists() or not any(generated.iterdir())
-          print(f'Verified {len(refs)} human-readable asset references.')
+          existing = {p.name for p in Path('assets/building-assets').iterdir() if p.is_file() and p.name != 'README.md'}
+          assert existing == refs, (sorted(existing - refs), sorted(refs - existing))
+          print(f'Verified {len(refs)} referenced human-readable asset files and no anonymous leftovers.')
           PY
 
       - name: Check JavaScript syntax
@@ -77,5 +88,5 @@ jobs:
             echo "No cleanup changes to commit."
             exit 0
           fi
-          git commit -m "Use readable asset names and correct dimension labels"
+          git commit -m "Remove anonymous legacy asset gallery"
           git push
