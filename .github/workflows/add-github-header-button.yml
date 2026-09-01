@@ -1,0 +1,81 @@
+name: Add GitHub header button
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/add-github-header-button.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch header and standalone build
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          files = [Path('index.html'), Path('forge-of-empires-colony-planner-v0.97.html')]
+          repo_url = 'https://github.com/Lacey49/forge-of-empires-colony-planner'
+
+          old_header = '''  <header class="app-header">\n    <button id="appHomeBtn" class="app-brand" type="button" title="Home">Forge of Empires Colony Planner</button>\n    <button id="supportBtn" class="app-support-btn" type="button" title="Buy Me a Coffee" aria-label="Buy Me a Coffee">☕ Buy Me a Coffee</button>\n    <button id="settingsBtn" class="app-settings-btn" type="button" title="Settings" aria-label="Settings"><svg class="settings-gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.09a2 2 0 0 1 1 1.74v.5a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>\n  </header>'''
+
+          new_header = f'''  <header class="app-header">\n    <button id="appHomeBtn" class="app-brand" type="button" title="Home">Forge of Empires Colony Planner</button>\n    <button id="settingsBtn" class="app-settings-btn" type="button" title="Settings" aria-label="Settings"><svg class="settings-gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.09a2 2 0 0 1 1 1.74v.5a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>\n    <a class="app-github-btn" href="{repo_url}" target="_blank" rel="noopener noreferrer" title="Open GitHub repository" aria-label="Open GitHub repository"><svg class="github-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49 0-.24-.01-1.04-.01-1.89-2.78.62-3.37-1.21-3.37-1.21-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .08 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.86.09-.66.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05A9.4 9.4 0 0 1 12 6.97c.85 0 1.7.12 2.5.37 1.91-1.33 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.8-4.57 5.05.36.32.68.95.68 1.92 0 1.38-.01 2.49-.01 2.83 0 .27.18.59.69.49A10.27 10.27 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/></svg></a>\n    <button id="supportBtn" class="app-support-btn" type="button" title="Buy Me a Coffee" aria-label="Buy Me a Coffee">☕ Buy Me a Coffee</button>\n  </header>'''
+
+          css = '''\n/* GitHub repository shortcut */\n.app-settings-btn{margin-left:auto!important}\n.app-support-btn{margin-left:0!important}\n.app-github-btn{\n  width:30px;\n  height:30px;\n  padding:0;\n  flex:0 0 auto;\n  display:grid;\n  place-items:center;\n  border:1px solid rgba(255,255,255,.18);\n  border-radius:5px;\n  background:#24201d;\n  color:#e7dfd2;\n  line-height:1;\n  text-decoration:none;\n}\n.app-github-btn:hover{\n  background:#302a25;\n  border-color:rgba(255,255,255,.34);\n  color:#fff;\n}\n.github-mark{\n  width:16px;\n  height:16px;\n  display:block;\n  fill:currentColor;\n}\nbody[data-density="compact"] .app-github-btn{width:28px;height:28px}\nbody[data-density="normal"] .app-github-btn{width:30px;height:30px}\nbody[data-density="spacious"] .app-github-btn{width:34px;height:34px}\nbody[data-density="spacious"] .github-mark{width:18px;height:18px}\n'''
+
+          for path in files:
+              text = path.read_text(encoding='utf-8')
+              if old_header not in text:
+                  raise SystemExit(f'Expected header not found in {path}')
+              text = text.replace(old_header, new_header, 1)
+              if '/* GitHub repository shortcut */' not in text:
+                  text = text.replace('</style>', css + '\n</style>', 1)
+              path.write_text(text, encoding='utf-8')
+
+          print('Patched GitHub header button in both builds.')
+          PY
+
+      - name: Verify
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ('index.html','forge-of-empires-colony-planner-v0.97.html'):
+              text=Path(name).read_text(encoding='utf-8')
+              assert 'class="app-github-btn"' in text
+              assert 'https://github.com/Lacey49/forge-of-empires-colony-planner' in text
+              assert 'target="_blank"' in text
+              assert 'rel="noopener noreferrer"' in text
+              header=text.split('<header class="app-header">',1)[1].split('</header>',1)[0]
+              assert header.index('settingsBtn') < header.index('app-github-btn') < header.index('supportBtn')
+          print('Header order and repository link verified.')
+          PY
+
+      - name: Check JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text=Path('index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',text,flags=re.S|re.I)
+          app=[s for s in scripts if '"use strict"' in s]
+          assert app
+          Path('/tmp/foe.js').write_text(app[-1],encoding='utf-8')
+          PY
+          node --check /tmp/foe.js
+
+      - name: Commit site change and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/add-github-header-button.yml
+          git add index.html forge-of-empires-colony-planner-v0.97.html
+          git commit -m "Add GitHub repository button to header"
+          git push
