@@ -3086,7 +3086,7 @@ body[data-density="spacious"] .settings-group{padding:18px 0!important}
         <div class="section-title">Sprite / Theme Source</div>
         <div class="section-body">
           <div class="note ok">
-            SAAB Town Hall, Movable Abode, and credits sprites are embedded directly in this HTML.
+            Planner artwork is loaded from the human-readable assets/building-assets folder.
           </div>
           <div class="note">
             ForgeHammer's ZIP contains the Hammer theme/UI source, but not the colony building sprites themselves.
@@ -3094,9 +3094,9 @@ body[data-density="spacious"] .settings-group{padding:18px 0!important}
             Deep-Seated Housing is still using a placeholder until we add its sprite.
           </div>
           <div class="note ok">
-            SAAB sprite library now uses the known building names from the uploaded files, with generic category labels only where the source filename itself is generic. SAV, SAJM, and SAT now have their own embedded sprite libraries via their era buttons.
+            SAAB sprite library now uses the known building names from the uploaded files, with generic category labels only where the source filename itself is generic. SAV, SAJM, and SAT now have their own sprite libraries via their era buttons.
           </div>
-          <div class="subtle" style="margin:8px 0 6px">Embedded SAAB sprite gallery</div>
+          <div class="subtle" style="margin:8px 0 6px">SAAB sprite gallery</div>
           <div id="saabAssetGallery" class="era-asset-gallery"></div>
         </div>
       </section>
@@ -3226,9 +3226,9 @@ function eraBuildingByKey(era,key){
   return eraBuildingList(era).find(b=>b.key===key)||null;
 }
 
-// Building definitions use the game's canonical width × height order. The
-// established planner layouts used the opposite board orientation, so retain
-// that visual footprint separately while exposing correct w/h values.
+// Preserve the already-verified board footprints, but display dimensions in
+// the same order a player sees them on the grid: top/horizontal edge ×
+// side/vertical edge. This keeps labels consistent with the visible footprint.
 for(const era of Object.keys(ERA_DATA)){
   for(const def of eraBuildingList(era)){
     const match=String(def.sizeText||"").match(/^(\d+)×(\d+)$/);
@@ -3238,6 +3238,7 @@ for(const era of Object.keys(ERA_DATA)){
     def.h=Number(match[2]);
     def.boardW=def.h;
     def.boardH=def.w;
+    def.sizeText=`${def.boardW}×${def.boardH}`;
   }
 }
 
@@ -3258,6 +3259,7 @@ if(SAT_HEATED_RESIDENCE){
   // Confirmed correction: Heated Residence occupies 3 columns × 4 rows.
   SAT_HEATED_RESIDENCE.boardW=SAT_HEATED_RESIDENCE.w;
   SAT_HEATED_RESIDENCE.boardH=SAT_HEATED_RESIDENCE.h;
+  SAT_HEATED_RESIDENCE.sizeText=`${SAT_HEATED_RESIDENCE.boardW}×${SAT_HEATED_RESIDENCE.boardH}`;
 }
 
 const PATHLESS_ERAS=new Set(["SAT","SASH"]);
@@ -3281,10 +3283,10 @@ for(const [era,map] of Object.entries(GOODS_PRODUCTS)){
 
 const SAV_INFLATABLE_HOME=eraBuildingByKey("SAV","inflatableHome");
 if(SAV_INFLATABLE_HOME){
-  // Corrected SAV layout: 3 tiles tall × 2 tiles wide, non-rotatable.
+  // Verified SAV layout: 2 tiles wide × 3 tiles tall, non-rotatable.
   SAV_INFLATABLE_HOME.boardW=2;
   SAV_INFLATABLE_HOME.boardH=3;
-  SAV_INFLATABLE_HOME.sizeText="3×2";
+  SAV_INFLATABLE_HOME.sizeText="2×3";
 }
 
 const BUILDINGS={
