@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - scripts/cleanup_asset_names_and_labels.py
+      - scripts/run_asset_cleanup.py
       - .github/workflows/cleanup-assets-and-labels.yml
 
 permissions:
@@ -24,74 +25,26 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Make ERA data extraction robust
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('scripts/cleanup_asset_names_and_labels.py')
-          text=p.read_text(encoding='utf-8')
-          old='''def extract_era_data(text: str):
-    marker = "const ERA_DATA="
-    start = text.index(marker) + len(marker)
-    end = text.index(";\\n\\n// Building definitions", start)
-    return json.loads(text[start:end])'''
-          new='''def extract_era_data(text: str):
-    marker = "const ERA_DATA="
-    start = text.index(marker) + len(marker)
-    depth = 0
-    in_string = False
-    escaped = False
-    end = None
-    for i in range(start, len(text)):
-        ch = text[i]
-        if in_string:
-            if escaped:
-                escaped = False
-            elif ch == "\\\\":
-                escaped = True
-            elif ch == '"':
-                in_string = False
-            continue
-        if ch == '"':
-            in_string = True
-        elif ch == '{':
-            depth += 1
-        elif ch == '}':
-            depth -= 1
-            if depth == 0:
-                end = i + 1
-                break
-    if end is None:
-        raise RuntimeError("Could not find end of ERA_DATA")
-    return json.loads(text[start:end])'''
-          if old not in text:
-              raise SystemExit('Expected extract_era_data block not found')
-          p.write_text(text.replace(old,new,1),encoding='utf-8')
-          PY
-
       - name: Rename assets and correct labels
-        run: python3 scripts/cleanup_asset_names_and_labels.py
+        run: python3 scripts/run_asset_cleanup.py
 
       - name: Verify asset references and names
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
-
           index = Path('index.html').read_text(encoding='utf-8')
           assert 'assets/generated/' not in index
           assert 'assets/building-assets/' in index
           assert 'def.sizeText=`${def.boardW}×${def.boardH}`;' in index
           assert 'SAV_INFLATABLE_HOME.sizeText="2×3";' in index
           assert 'SAT_HEATED_RESIDENCE.sizeText=`${SAT_HEATED_RESIDENCE.boardW}×${SAT_HEATED_RESIDENCE.boardH}`;' in index
-
           refs = set(re.findall(r'\./assets/building-assets/([A-Za-z0-9._-]+)', index))
           assert refs
           missing = [name for name in refs if not (Path('assets/building-assets') / name).is_file()]
           assert not missing, missing
           hashed = [name for name in refs if re.fullmatch(r'[0-9a-f]{16,}\.(?:png|webp|jpg|jpeg|gif)', name, re.I)]
           assert not hashed, hashed
-
           generated = Path('assets/generated')
           assert not generated.exists() or not any(generated.iterdir())
           print(f'Verified {len(refs)} human-readable asset references.')
