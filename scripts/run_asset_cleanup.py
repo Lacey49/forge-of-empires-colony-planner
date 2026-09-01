@@ -33,5 +33,20 @@ def extract_era_data(text: str):
     raise RuntimeError("Could not find end of ERA_DATA")
 
 
+original_build_semantic_mapping = cleanup.build_semantic_mapping
+
+
+def build_semantic_mapping(text: str):
+    # These two PNGs are the precise max-footprint preview images used for the
+    # SAT and SASH expansion overlays. Add semantic aliases so the generic
+    # migration logic can give them readable filenames too.
+    semantic_aliases = '''
+const SAT_PENDING_EXPANSION_PREVIEW="./assets/generated/1fa18b5adf3f9ef57cb4.png";
+const SASH_PENDING_EXPANSION_PREVIEW="./assets/generated/1e4c1a96582dbf9543cb.png";
+'''
+    return original_build_semantic_mapping(text + semantic_aliases)
+
+
 cleanup.extract_era_data = extract_era_data
+cleanup.build_semantic_mapping = build_semantic_mapping
 cleanup.main()
