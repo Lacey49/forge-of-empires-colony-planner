@@ -1,0 +1,55 @@
+name: Externalize embedded planner images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/externalize-images.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Externalize embedded images
+        run: python scripts/externalize_embedded_images.py
+
+      - name: Check JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path('index.html').read_text(encoding='utf-8')
+          scripts = []
+          for match in re.finditer(r'<script(?:\s[^>]*)?>(.*?)</script>', text, re.S | re.I):
+              tag = text[match.start():text.find('>', match.start()) + 1]
+              if 'application/ld+json' not in tag:
+                  scripts.append(match.group(1))
+          Path('/tmp/planner-check.js').write_text('\n'.join(scripts), encoding='utf-8')
+          PY
+          node --check /tmp/planner-check.js
+
+      - name: Verify migration
+        run: |
+          ! grep -q 'data:image/png;base64' index.html
+          ! grep -q 'data:image/webp;base64' index.html
+          test -d assets/generated
+          test "$(find assets/generated -type f | wc -l)" -gt 50
+
+      - name: Commit optimized site
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/generated
+          git commit -m 'Externalize planner images for caching'
+          git push
