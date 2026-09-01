@@ -3,7 +3,7 @@
 # Forge of Empires Colony Planner
 
 [![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen)](https://lacey49.github.io/forge-of-empires-colony-planner/)
-[![Latest Release](https://img.shields.io/badge/Latest-v0.96-success)](https://github.com/Lacey49/forge-of-empires-colony-planner/releases/latest)
+[![Website Build](https://img.shields.io/badge/Website-v0.96.1-success)](https://lacey49.github.io/forge-of-empires-colony-planner/)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-yellow)](https://buymeacoffee.com/lacey49)
 
 ### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
@@ -41,7 +41,7 @@ The planner runs directly in your browser. There is nothing to install or downlo
 
 Your colonies and settings are saved locally in your browser, so you can come back to the site later and continue where you left off.
 
-If you would rather keep an offline copy, downloadable versions are still available under [Releases](https://github.com/Lacey49/forge-of-empires-colony-planner/releases).
+A standalone copy of the current build is also kept in the repository. Packaged downloads can be published under Releases when a release is ready.
 
 ---
 
