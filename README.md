@@ -35,6 +35,8 @@ The planner currently supports:
 
 ### [Open Forge of Empires Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
 
+**Current website build:** `v0.96.1`
+
 The planner runs directly in your browser. There is nothing to install or download.
 
 Your colonies and settings are saved locally in your browser, so you can come back to the site later and continue where you left off.
@@ -50,7 +52,7 @@ If you would rather keep an offline copy, downloadable versions are still availa
 | Place building | Select one and left-click |
 | Select buildings | `1` through `9` |
 | Move | `M` |
-| Delete buildings and paths | Right click |
+| Delete buildings and paths | Right click, or `Delete` then left-click |
 | Undo | `Ctrl + Z` |
 | Pan | Drag or Arrow Keys |
 | Zoom | Mouse Wheel |
@@ -63,7 +65,7 @@ The planner is usable, but I'm still working on it.
 
 Some layouts and features may change as I improve them.
 
-**SAT and SASH layouts still need verification.**
+**All six supported Space Age colony layouts are available and have been checked for the current planner build.**
 
 If you find something broken or have a layout that could be improved, please open an Issue.
 
