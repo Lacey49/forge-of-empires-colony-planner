@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Free Forge of Empires colony planner for SAM, SAAB, SAV, SAJM, SAT and SASH. Plan buildings, paths, expansions and colony layouts online.">
+  <meta name="keywords" content="Forge of Empires, FoE, Forge of Empires Colony Planner, FoE Colony Planner, Forge of Empires Colony Optimizer, FoE Colony Optimizer, Forge of Empires planner, FoE planner, Forge of Empires optimizer, FoE optimizer, Forge of Empires tool, FoE tool, colony planner, colony optimizer, colony tool, colony layout, colony layout planner, colony layout optimizer, Space Age colony planner, Space Age planner, Space Age optimizer, Space Age tool, layout planner, layout optimizer, building planner, expansion planner, path planner, city builder planner, Forge of Empires Space Age, FoE Space Age, Space Age Mars, SAM, FoE SAM, Forge of Empires SAM, Space Age Mars colony, Space Age Mars planner, Space Age Asteroid Belt, SAAB, FoE SAAB, Forge of Empires SAAB, Space Age Asteroid Belt colony, Space Age Asteroid Belt planner, Space Age Venus, SAV, FoE SAV, Forge of Empires SAV, Space Age Venus colony, Space Age Venus planner, Space Age Jupiter Moon, SAJM, FoE SAJM, Forge of Empires SAJM, Space Age Jupiter Moon colony, Space Age Jupiter Moon planner, Space Age Titan, SAT, FoE SAT, Forge of Empires SAT, Space Age Titan colony, Space Age Titan planner, Space Age Space Hub, SASH, FoE SASH, Forge of Empires SASH, Space Age Space Hub colony, Space Age Space Hub planner">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="author" content="Lacey49">
   <meta name="application-name" content="Forge of Empires Colony Planner">
@@ -36,6 +37,8 @@
   "name": "Forge of Empires Colony Planner",
   "alternateName": [
     "FoE Colony Planner",
+    "Forge of Empires Colony Optimizer",
+    "FoE Colony Optimizer",
     "FoE Space Age Planner",
     "Forge of Empires Space Age Planner"
   ],
@@ -54,14 +57,68 @@
     "FoE",
     "Forge of Empires Colony Planner",
     "FoE Colony Planner",
-    "Space Age colony planner",
+    "Forge of Empires Colony Optimizer",
+    "FoE Colony Optimizer",
+    "Forge of Empires planner",
+    "FoE planner",
+    "Forge of Empires optimizer",
+    "FoE optimizer",
+    "Forge of Empires tool",
+    "FoE tool",
+    "colony planner",
+    "colony optimizer",
+    "colony tool",
+    "colony layout",
     "colony layout planner",
+    "colony layout optimizer",
+    "Space Age colony planner",
+    "Space Age planner",
+    "Space Age optimizer",
+    "Space Age tool",
+    "layout planner",
+    "layout optimizer",
+    "building planner",
+    "expansion planner",
+    "path planner",
+    "city builder planner",
+    "Forge of Empires Space Age",
+    "FoE Space Age",
     "Space Age Mars",
+    "SAM",
+    "FoE SAM",
+    "Forge of Empires SAM",
+    "Space Age Mars colony",
+    "Space Age Mars planner",
     "Space Age Asteroid Belt",
+    "SAAB",
+    "FoE SAAB",
+    "Forge of Empires SAAB",
+    "Space Age Asteroid Belt colony",
+    "Space Age Asteroid Belt planner",
     "Space Age Venus",
+    "SAV",
+    "FoE SAV",
+    "Forge of Empires SAV",
+    "Space Age Venus colony",
+    "Space Age Venus planner",
     "Space Age Jupiter Moon",
+    "SAJM",
+    "FoE SAJM",
+    "Forge of Empires SAJM",
+    "Space Age Jupiter Moon colony",
+    "Space Age Jupiter Moon planner",
     "Space Age Titan",
-    "Space Age Space Hub"
+    "SAT",
+    "FoE SAT",
+    "Forge of Empires SAT",
+    "Space Age Titan colony",
+    "Space Age Titan planner",
+    "Space Age Space Hub",
+    "SASH",
+    "FoE SASH",
+    "Forge of Empires SASH",
+    "Space Age Space Hub colony",
+    "Space Age Space Hub planner"
   ],
   "about": [
     {
@@ -2484,7 +2541,7 @@ body[data-density="spacious"] .settings-page-panel{
 body[data-density="spacious"] .settings-group{padding:18px 0!important}
 
 
-/* v0.96.1 controls */
+/* v0.97 controls */
 .app-settings-btn{
   display:flex!important;
   align-items:center!important;
@@ -2576,7 +2633,7 @@ body[data-density="spacious"] .settings-group{padding:18px 0!important}
   font-weight:800;
 }
 
-/* v0.96.1 release hardening: viewport-safe layout.
+/* v0.97 release hardening: viewport-safe layout.
    Keep the desktop split view when it fits, but remove fixed-height density
    overrides that clipped shorter laptop screens. */
 @media (min-width:1051px) and (max-height:850px){
@@ -2813,11 +2870,11 @@ body[data-density="spacious"] .settings-group{padding:18px 0!important}
       <div class="settings-group settings-hotkeys-group">
         <div class="settings-section-heading">
           <b>Keybinds</b>
-          <small>Move and Undo can be changed. Erase is right click or Delete. 1–9, Delete and arrow keys are fixed.</small>
+          <small>Move and Undo can be changed. Delete is right click or the Delete key. 1–9, Delete and arrow keys are fixed.</small>
         </div>
         <div class="hotkey-grid">
           <label class="hotkey-row"><span>Move</span><input class="hotkey-input" data-hotkey-setting="hotkeyMove" type="text" readonly value="M"></label>
-          <div class="hotkey-row"><span>Erase</span><span class="hotkey-fixed">Right click / Delete</span></div>
+          <div class="hotkey-row"><span>Delete</span><span class="hotkey-fixed">Right click / Delete</span></div>
           <label class="hotkey-row"><span>Undo</span><input class="hotkey-input" data-hotkey-setting="hotkeyUndo" type="text" readonly value="Ctrl+Z"></label>
         </div>
       </div>
@@ -2839,7 +2896,7 @@ body[data-density="spacious"] .settings-group{padding:18px 0!important}
     <span class="compact-sep"></span>
 
     <button class="compact-tool" id="compactMoveBtn" type="button" title="Move a building or path" aria-pressed="false">Move</button>
-    <button class="compact-tool" id="compactEraseBtn" type="button" title="Erase a building or path (Delete or right click)" aria-keyshortcuts="Delete" aria-pressed="false">Erase</button>
+    <button class="compact-tool" id="compactEraseBtn" type="button" title="Delete a building or path (Delete or right click)" aria-keyshortcuts="Delete" aria-pressed="false">Delete</button>
     <button class="compact-tool" id="clearAllBtn" type="button">Clear All</button>
     <button class="compact-tool" id="compactUndoBtn" type="button" title="Undo (Ctrl+Z)">Undo</button>
 
@@ -3002,7 +3059,7 @@ body[data-density="spacious"] .settings-group{padding:18px 0!important}
             <button class="tool" id="deepBtn">Deep 3×2</button>
             <button class="tool" id="roadBtn">Road 1×1</button>
             <button class="tool" id="hubBtn">Move Hall 5×5</button>
-            <button class="tool" id="eraseBtn">Erase</button>
+            <button class="tool" id="eraseBtn">Delete</button>
             <button class="tool" id="undoBtn">Undo</button>
           </div>
           <div id="status" class="note">Loaded Speedrun 1.</div>
@@ -3045,7 +3102,7 @@ body[data-density="spacious"] .settings-group{padding:18px 0!important}
       </section>
     </aside>
   </div>
-  <div class="version-label" title="Forge of Empires Colony Planner v0.96.1">v0.96.1</div>
+  <div class="version-label" title="Forge of Empires Colony Planner v0.97">v0.97</div>
 </div></div>
 
 <script>
@@ -7228,7 +7285,7 @@ document.querySelectorAll(".hotkey-input").forEach(input=>{
     if(!binding)return;
 
     if(isReservedHotkey(binding)){
-      const use=/^[1-9]$/.test(binding)?"building selection":binding==="Delete"?"erase":"map panning";
+      const use=/^[1-9]$/.test(binding)?"building selection":binding==="Delete"?"delete":"map panning";
       notifyToast(
         "Key is reserved",
         `${binding} is fixed for ${use}.`,

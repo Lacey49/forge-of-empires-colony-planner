@@ -3,7 +3,7 @@
 # Forge of Empires Colony Planner
 
 [![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen)](https://lacey49.github.io/forge-of-empires-colony-planner/)
-[![Website Build](https://img.shields.io/badge/Website-v0.96.1-success)](https://lacey49.github.io/forge-of-empires-colony-planner/)
+[![Website Build](https://img.shields.io/badge/Website-v0.97-success)](https://lacey49.github.io/forge-of-empires-colony-planner/)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-yellow)](https://buymeacoffee.com/lacey49)
 
 ### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
@@ -35,7 +35,7 @@ The planner currently supports:
 
 ### [Open Forge of Empires Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
 
-**Current website build:** `v0.96.1`
+**Current website build:** `v0.97`
 
 The planner runs directly in your browser. There is nothing to install or download.
 
