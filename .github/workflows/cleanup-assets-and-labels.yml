@@ -24,6 +24,51 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      - name: Make ERA data extraction robust
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/cleanup_asset_names_and_labels.py')
+          text=p.read_text(encoding='utf-8')
+          old='''def extract_era_data(text: str):
+    marker = "const ERA_DATA="
+    start = text.index(marker) + len(marker)
+    end = text.index(";\\n\\n// Building definitions", start)
+    return json.loads(text[start:end])'''
+          new='''def extract_era_data(text: str):
+    marker = "const ERA_DATA="
+    start = text.index(marker) + len(marker)
+    depth = 0
+    in_string = False
+    escaped = False
+    end = None
+    for i in range(start, len(text)):
+        ch = text[i]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif ch == "\\\\":
+                escaped = True
+            elif ch == '"':
+                in_string = False
+            continue
+        if ch == '"':
+            in_string = True
+        elif ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                end = i + 1
+                break
+    if end is None:
+        raise RuntimeError("Could not find end of ERA_DATA")
+    return json.loads(text[start:end])'''
+          if old not in text:
+              raise SystemExit('Expected extract_era_data block not found')
+          p.write_text(text.replace(old,new,1),encoding='utf-8')
+          PY
+
       - name: Rename assets and correct labels
         run: python3 scripts/cleanup_asset_names_and_labels.py
 
@@ -33,7 +78,6 @@ jobs:
           from pathlib import Path
           import re
 
-          root = Path('.')
           index = Path('index.html').read_text(encoding='utf-8')
           assert 'assets/generated/' not in index
           assert 'assets/building-assets/' in index
