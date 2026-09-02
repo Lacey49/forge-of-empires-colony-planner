@@ -1,0 +1,96 @@
+name: Fix coffee icon render
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-coffee-icon-render.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Embed selected coffee icon directly
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, re
+
+          asset = Path('assets/ui/buy-me-a-coffee-icon.png')
+          if not asset.exists() or asset.stat().st_size < 100:
+              raise SystemExit('Coffee icon asset is missing or invalid')
+
+          data_uri = 'data:image/png;base64,' + base64.b64encode(asset.read_bytes()).decode('ascii')
+
+          for name in ('index.html', 'forge-of-empires-colony-planner-v0.97.html'):
+              p = Path(name)
+              text = p.read_text(encoding='utf-8')
+
+              # Replace either the existing external image or any previous inline image.
+              pattern = r'<img class="support-btn-icon" src="[^"]+" alt="" aria-hidden="true">'
+              replacement = f'<img class="support-btn-icon" src="{data_uri}" alt="" aria-hidden="true">'
+              text, count = re.subn(pattern, replacement, text, count=1)
+              if count != 1:
+                  raise SystemExit(f'Coffee icon image element not found in {name}')
+
+              # Make the selected icon unambiguously visible and preserve the existing text.
+              text = re.sub(
+                  r'\.support-btn-icon\{.*?\}',
+                  '.support-btn-icon{\n  width:26px!important;\n  height:26px!important;\n  min-width:26px!important;\n  display:block!important;\n  flex:0 0 26px!important;\n  object-fit:cover!important;\n  object-position:center!important;\n  border-radius:5px;\n  visibility:visible!important;\n  opacity:1!important;\n}',
+                  text,
+                  count=1,
+                  flags=re.S,
+              )
+              text = text.replace(
+                  'body[data-density="compact"] .support-btn-icon{width:24px;height:24px}',
+                  'body[data-density="compact"] .support-btn-icon{width:24px!important;height:24px!important;min-width:24px!important;flex-basis:24px!important}'
+              )
+              text = text.replace(
+                  'body[data-density="spacious"] .support-btn-icon{width:30px;height:30px}',
+                  'body[data-density="spacious"] .support-btn-icon{width:30px!important;height:30px!important;min-width:30px!important;flex-basis:30px!important}'
+              )
+
+              p.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Verify icon markup
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ('index.html', 'forge-of-empires-colony-planner-v0.97.html'):
+              text = Path(name).read_text(encoding='utf-8')
+              assert '<span>Buy Me a Coffee</span>' in text
+              assert 'class="support-btn-icon" src="data:image/png;base64,' in text
+              assert 'visibility:visible!important' in text
+              assert 'opacity:1!important' in text
+          print('Coffee icon is embedded and forced visible in both builds.')
+          PY
+
+      - name: Check JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text=Path('index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',text,flags=re.S|re.I)
+          app=[s for s in scripts if '"use strict"' in s]
+          assert app
+          Path('/tmp/foe.js').write_text(app[-1],encoding='utf-8')
+          PY
+          node --check /tmp/foe.js
+
+      - name: Commit as Lacey49 and remove temporary workflow
+        run: |
+          git config user.name "Lacey49"
+          git config user.email "gridleykasey@gmail.com"
+          git rm .github/workflows/fix-coffee-icon-render.yml
+          git add index.html forge-of-empires-colony-planner-v0.97.html
+          git commit -m "Fix Buy Me a Coffee icon rendering"
+          git push
