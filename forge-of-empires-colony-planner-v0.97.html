@@ -2822,18 +2822,21 @@ body[data-density="spacious"] .github-mark{width:18px;height:18px}
   padding-left:4px!important;
 }
 .support-btn-icon{
-  width:26px;
-  height:26px;
-  display:block;
-  flex:0 0 auto;
-  object-fit:cover;
-  object-position:center;
+  width:26px!important;
+  height:26px!important;
+  min-width:26px!important;
+  display:block!important;
+  flex:0 0 26px!important;
+  object-fit:cover!important;
+  object-position:center!important;
   border-radius:5px;
+  visibility:visible!important;
+  opacity:1!important;
 }
 body[data-density="compact"] .app-support-btn{padding-left:3px!important}
-body[data-density="compact"] .support-btn-icon{width:24px;height:24px}
+body[data-density="compact"] .support-btn-icon{width:24px!important;height:24px!important;min-width:24px!important;flex-basis:24px!important}
 body[data-density="spacious"] .app-support-btn{padding-left:4px!important}
-body[data-density="spacious"] .support-btn-icon{width:30px;height:30px}
+body[data-density="spacious"] .support-btn-icon{width:30px!important;height:30px!important;min-width:30px!important;flex-basis:30px!important}
 
 </style>
 </head>
