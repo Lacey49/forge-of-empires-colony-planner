@@ -21,34 +21,16 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
           files = [Path('index.html'), Path('forge-of-empires-colony-planner-v0.97.html')]
-          anchor = '''const SAV_INFLATABLE_HOME=eraBuildingByKey("SAV","inflatableHome");
-if(SAV_INFLATABLE_HOME){
-  // Verified SAV layout: 2 tiles wide × 3 tiles tall, non-rotatable.
-  SAV_INFLATABLE_HOME.boardW=2;
-  SAV_INFLATABLE_HOME.boardH=3;
-  SAV_INFLATABLE_HOME.sizeText="2×3";
-}
-'''
-          addition = '''
-const SAJM_AQUA_CABIN=eraBuildingByKey("SAJM","aquaCabin");
-if(SAJM_AQUA_CABIN){
-  // Verified in-game: Aqua Cabin is 2 tiles wide × 3 tiles tall.
-  // Override the legacy width/height swap used by older planner footprints.
-  SAJM_AQUA_CABIN.boardW=2;
-  SAJM_AQUA_CABIN.boardH=3;
-  SAJM_AQUA_CABIN.sizeText="2×3";
-}
-'''
-
+          anchor = 'const BUILDINGS={'
+          addition = 'const SAJM_AQUA_CABIN=eraBuildingByKey("SAJM","aquaCabin");\nif(SAJM_AQUA_CABIN){\n  // Verified in-game: Aqua Cabin is 2 tiles wide × 3 tiles tall.\n  // Override the legacy width/height swap used by older planner footprints.\n  SAJM_AQUA_CABIN.boardW=2;\n  SAJM_AQUA_CABIN.boardH=3;\n  SAJM_AQUA_CABIN.sizeText="2×3";\n}\n\n'
           for path in files:
               text = path.read_text(encoding='utf-8')
               if 'const SAJM_AQUA_CABIN=eraBuildingByKey("SAJM","aquaCabin");' in text:
                   raise SystemExit(f'Aqua Cabin override already exists in {path}')
               if anchor not in text:
                   raise SystemExit(f'Insertion anchor not found in {path}')
-              text = text.replace(anchor, anchor + addition, 1)
+              text = text.replace(anchor, addition + anchor, 1)
               path.write_text(text, encoding='utf-8')
           PY
 
@@ -57,22 +39,12 @@ if(SAJM_AQUA_CABIN){
           python3 - <<'PY'
           from pathlib import Path
           import re
-
-          required = '''const SAJM_AQUA_CABIN=eraBuildingByKey("SAJM","aquaCabin");
-if(SAJM_AQUA_CABIN){
-  // Verified in-game: Aqua Cabin is 2 tiles wide × 3 tiles tall.
-  // Override the legacy width/height swap used by older planner footprints.
-  SAJM_AQUA_CABIN.boardW=2;
-  SAJM_AQUA_CABIN.boardH=3;
-  SAJM_AQUA_CABIN.sizeText="2×3";
-}'''
-
+          required = 'SAJM_AQUA_CABIN.boardW=2;\n  SAJM_AQUA_CABIN.boardH=3;\n  SAJM_AQUA_CABIN.sizeText="2×3";'
           for name in ('index.html','forge-of-empires-colony-planner-v0.97.html'):
               text = Path(name).read_text(encoding='utf-8')
               assert required in text
               assert 'builtin:sajm-aqua-cabins' not in text
               assert 'Aqua Cabins (40)' not in text
-
           text = Path('index.html').read_text(encoding='utf-8')
           scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', text, flags=re.S|re.I)
           app = [s for s in scripts if '"use strict"' in s]
