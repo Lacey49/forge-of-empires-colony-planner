@@ -1,0 +1,170 @@
+name: Add SAJM Aqua Cabins 39 preset
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/add-sajm-aqua-cabins-39.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add Aqua Cabins 39 preset
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          files = [Path('index.html'), Path('forge-of-empires-colony-planner-v0.97.html')]
+
+          pod_constants = 'const SAJM_AQUA_POD_PRESET_PATHS=[[6,10],[6,11],[6,12],[6,13],[6,14],[6,15],[6,16],[6,17],[6,18],[7,10],[7,15],[8,10],[8,15],[9,10],[9,15],[10,10],[10,15],[11,10],[11,15],[12,10],[12,15],[12,20],[13,10],[13,15],[13,20],[14,10],[14,15],[14,20],[15,10],[15,15],[15,20],[16,10],[16,15],[16,20],[17,10],[17,15],[17,20],[18,10],[18,15],[18,20],[19,10],[19,15],[19,20],[20,10],[20,15],[20,20],[21,10],[21,15],[21,20],[22,10],[22,15],[22,20],[23,10],[23,20],[24,10],[24,20],[24,21],[25,10],[25,11],[25,12],[27,20],[27,21]];\n'
+
+          cabin_constants = '''const SAJM_AQUA_CABIN_PRESET_HUB=[19,15];
+const SAJM_AQUA_CABIN_PRESET_BUILDINGS=[[4,8],[4,10],[4,12],[4,14],[4,16],[4,18],[8,8],[8,12],[8,14],[8,18],[9,16],[11,12],[11,14],[11,18],[12,8],[12,16],[12,20],[12,22],[15,8],[16,11],[16,13],[16,15],[16,18],[16,20],[16,22],[19,8],[19,11],[21,20],[21,22],[22,8],[22,11],[22,13],[24,16],[25,8],[25,11],[25,14],[25,18],[25,20],[25,22]];
+const SAJM_AQUA_CABIN_PRESET_PATHS=[[7,9],[7,10],[7,11],[7,12],[7,13],[7,14],[7,15],[7,16],[7,17],[7,18],[8,10],[8,17],[9,10],[10,10],[11,10],[12,10],[13,10],[14,10],[14,11],[14,12],[14,13],[14,14],[14,18],[15,10],[15,14],[15,15],[15,16],[15,17],[15,18],[15,19],[15,20],[15,21],[15,22],[16,10],[16,17],[17,10],[17,17],[18,10],[18,17],[19,10],[20,10],[21,10],[22,10],[23,10],[24,10],[24,15],[24,19],[24,20],[24,21],[24,22],[25,10],[26,10]];
+'''
+
+          aqua_pods_branch = '''  if(kind==="aquaPods"){
+    addHub(SAJM_AQUA_POD_PRESET_HUB);
+    for(const [r,c] of SAJM_AQUA_POD_PRESET_PATHS){
+      state.grid[r][c]="road";
+    }
+    for(const [r,c] of SAJM_AQUA_POD_PRESET_BUILDINGS){
+      addBuilding("aquaPod",r,c);
+    }
+    return state;
+  }
+'''
+
+          aqua_cabins_branch = '''  if(kind==="aquaCabins"){
+    addHub(SAJM_AQUA_CABIN_PRESET_HUB);
+    for(const [r,c] of SAJM_AQUA_CABIN_PRESET_PATHS){
+      state.grid[r][c]="road";
+    }
+    for(const [r,c] of SAJM_AQUA_CABIN_PRESET_BUILDINGS){
+      const cells=[];
+      for(let dr=0;dr<3;dr++){
+        for(let dc=0;dc<2;dc++)cells.push([r+dr,c+dc]);
+      }
+      state.buildings.push({type:"aquaCabin",r,c,cells});
+      for(const [rr,cc] of cells)state.grid[rr][cc]="aquaCabin";
+    }
+    return state;
+  }
+
+'''
+
+          pod_catalog = '''    result.push(
+      {
+        id:"builtin:sajm-aqua-pods",
+        name:"Aqua Pods (60)",
+        kind:"Built-in",
+        state:makeSajmPresetState("aquaPods")
+      }
+    );
+'''
+
+          new_catalog = '''    result.push(
+      {
+        id:"builtin:sajm-aqua-pods",
+        name:"Aqua Pods (60)",
+        kind:"Built-in",
+        state:makeSajmPresetState("aquaPods")
+      },
+      {
+        id:"builtin:sajm-aqua-cabins",
+        name:"Aqua Cabins (39)",
+        kind:"Built-in",
+        state:makeSajmPresetState("aquaCabins")
+      }
+    );
+'''
+
+          for path in files:
+              text = path.read_text(encoding='utf-8')
+              if 'builtin:sajm-aqua-cabins' in text:
+                  raise SystemExit(f'Aqua Cabin preset already exists in {path}')
+              if pod_constants not in text:
+                  raise SystemExit(f'SAJM pod constants anchor missing in {path}')
+              if aqua_pods_branch not in text:
+                  raise SystemExit(f'SAJM aquaPods branch anchor missing in {path}')
+              if text.count(pod_catalog) != 1:
+                  raise SystemExit(f'Expected one SAJM pod catalog block in {path}, found {text.count(pod_catalog)}')
+
+              text = text.replace(pod_constants, pod_constants + cabin_constants, 1)
+              text = text.replace(aqua_pods_branch, aqua_cabins_branch + aqua_pods_branch, 1)
+              text = text.replace(pod_catalog, new_catalog, 1)
+              path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Verify preset geometry and syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, ast
+          from collections import deque
+
+          expected_buildings=[[4,8],[4,10],[4,12],[4,14],[4,16],[4,18],[8,8],[8,12],[8,14],[8,18],[9,16],[11,12],[11,14],[11,18],[12,8],[12,16],[12,20],[12,22],[15,8],[16,11],[16,13],[16,15],[16,18],[16,20],[16,22],[19,8],[19,11],[21,20],[21,22],[22,8],[22,11],[22,13],[24,16],[25,8],[25,11],[25,14],[25,18],[25,20],[25,22]]
+          expected_roads=[[7,9],[7,10],[7,11],[7,12],[7,13],[7,14],[7,15],[7,16],[7,17],[7,18],[8,10],[8,17],[9,10],[10,10],[11,10],[12,10],[13,10],[14,10],[14,11],[14,12],[14,13],[14,14],[14,18],[15,10],[15,14],[15,15],[15,16],[15,17],[15,18],[15,19],[15,20],[15,21],[15,22],[16,10],[16,17],[17,10],[17,17],[18,10],[18,17],[19,10],[20,10],[21,10],[22,10],[23,10],[24,10],[24,15],[24,19],[24,20],[24,21],[24,22],[25,10],[26,10]]
+          hub=[19,15]
+          base_chunks=[[1,2],[1,3],[1,4],[2,2],[2,3],[2,4],[3,2],[3,3],[3,4],[3,5],[4,2],[4,3],[4,4],[4,5],[5,2],[5,3],[5,4],[5,5],[6,2],[6,3],[6,4],[6,5]]
+          land={(r,c) for br,bc in base_chunks for r in range(br*4,br*4+4) for c in range(bc*4,bc*4+4)}
+          buildings={(r+dr,c+dc) for r,c in expected_buildings for dr in range(3) for dc in range(2)}
+          roads=set(map(tuple, expected_roads))
+          hall={(hub[0]+dr,hub[1]+dc) for dr in range(5) for dc in range(5)}
+
+          assert len(expected_buildings)==39
+          assert len(buildings)==39*6
+          assert len(roads)==52
+          assert len(land-(buildings|roads|hall))==41
+          assert buildings <= land and roads <= land and hall <= land
+          assert not (buildings & roads or buildings & hall or roads & hall)
+
+          dirs=((1,0),(-1,0),(0,1),(0,-1))
+          seeds={p for p in roads if any((p[0]+dr,p[1]+dc) in hall for dr,dc in dirs)}
+          seen=set(seeds); q=deque(seeds)
+          while q:
+              r,c=q.popleft()
+              for dr,dc in dirs:
+                  n=(r+dr,c+dc)
+                  if n in roads and n not in seen:
+                      seen.add(n); q.append(n)
+          assert seen==roads
+
+          for r,c in expected_buildings:
+              cells={(r+dr,c+dc) for dr in range(3) for dc in range(2)}
+              assert any((rr+dr,cc+dc) in roads for rr,cc in cells for dr,dc in dirs)
+
+          for name in ('index.html','forge-of-empires-colony-planner-v0.97.html'):
+              text=Path(name).read_text(encoding='utf-8')
+              assert 'id:"builtin:sajm-aqua-cabins"' in text
+              assert 'name:"Aqua Cabins (39)"' in text
+              assert 'state:makeSajmPresetState("aquaCabins")' in text
+              assert 'SAJM_AQUA_CABIN_PRESET_HUB=[19,15]' in text
+              assert 'SAJM_AQUA_CABIN.boardW=2' in text
+              assert 'SAJM_AQUA_CABIN.boardH=3' in text
+
+          text=Path('index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',text,flags=re.S|re.I)
+          app=[s for s in scripts if '"use strict"' in s]
+          assert app
+          Path('/tmp/foe.js').write_text(app[-1],encoding='utf-8')
+          print('Verified Aqua Cabins (39): 39 cabins, 52 roads, 41 unused, 5x5 hall, all connected.')
+          PY
+          node --check /tmp/foe.js
+
+      - name: Commit as Lacey49 and remove temporary workflow
+        run: |
+          git config user.name "Lacey49"
+          git config user.email "gridleykasey@gmail.com"
+          git rm .github/workflows/add-sajm-aqua-cabins-39.yml
+          git add index.html forge-of-empires-colony-planner-v0.97.html
+          git commit -m "Add SAJM Aqua Cabins 39 preset"
+          git push
