@@ -3256,6 +3256,15 @@ if(SAV_INFLATABLE_HOME){
   SAV_INFLATABLE_HOME.sizeText="2×3";
 }
 
+const SAJM_AQUA_CABIN=eraBuildingByKey("SAJM","aquaCabin");
+if(SAJM_AQUA_CABIN){
+  // Verified in-game: Aqua Cabin is 2 tiles wide × 3 tiles tall.
+  // Override the legacy width/height swap used by older planner footprints.
+  SAJM_AQUA_CABIN.boardW=2;
+  SAJM_AQUA_CABIN.boardH=3;
+  SAJM_AQUA_CABIN.sizeText="2×3";
+}
+
 const BUILDINGS={
   hub:{
     key:"hub",
