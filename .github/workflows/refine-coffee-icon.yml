@@ -24,58 +24,43 @@ jobs:
           import re
 
           files = [Path('index.html'), Path('forge-of-empires-colony-planner-v0.97.html')]
-
-          css = '''/* Buy Me a Coffee icon */
-.app-support-btn{
-  gap:7px!important;
-  padding-left:6px!important;
-}
-.support-btn-icon{
-  width:28px!important;
-  height:28px!important;
-  min-width:28px!important;
-  display:block!important;
-  flex:0 0 28px!important;
-  overflow:visible!important;
-  visibility:visible!important;
-  opacity:1!important;
-}
-body[data-density="compact"] .app-support-btn{padding-left:5px!important}
-body[data-density="compact"] .support-btn-icon{width:26px!important;height:26px!important;min-width:26px!important;flex-basis:26px!important}
-body[data-density="spacious"] .app-support-btn{padding-left:7px!important}
-body[data-density="spacious"] .support-btn-icon{width:30px!important;height:30px!important;min-width:30px!important;flex-basis:30px!important}
-'''
-
-          svg = '''<svg class="support-btn-icon" viewBox="0 0 72 72" aria-hidden="true" focusable="false">
-      <path fill="#ffbd20" d="M15 20h34v22c0 12-6.8 19-17 19S15 54 15 42V20Z"/>
-      <ellipse cx="32" cy="20" rx="17" ry="5.5" fill="#ffbd20"/>
-      <ellipse cx="32" cy="20" rx="12" ry="3" fill="#171311"/>
-      <path d="M50 27h4c7.2 0 11.5 4.2 11.5 10.5S61.2 48 54 48h-5" fill="none" stroke="#ffbd20" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>'''
+          css = "\n".join([
+              "/* Buy Me a Coffee icon */",
+              ".app-support-btn{",
+              "  gap:7px!important;",
+              "  padding-left:6px!important;",
+              "}",
+              ".support-btn-icon{",
+              "  width:28px!important;",
+              "  height:28px!important;",
+              "  min-width:28px!important;",
+              "  display:block!important;",
+              "  flex:0 0 28px!important;",
+              "  overflow:visible!important;",
+              "  visibility:visible!important;",
+              "  opacity:1!important;",
+              "}",
+              "body[data-density=\"compact\"] .app-support-btn{padding-left:5px!important}",
+              "body[data-density=\"compact\"] .support-btn-icon{width:26px!important;height:26px!important;min-width:26px!important;flex-basis:26px!important}",
+              "body[data-density=\"spacious\"] .app-support-btn{padding-left:7px!important}",
+              "body[data-density=\"spacious\"] .support-btn-icon{width:30px!important;height:30px!important;min-width:30px!important;flex-basis:30px!important}",
+          ]) + "\n"
+          svg = '<svg class="support-btn-icon" viewBox="0 0 72 72" aria-hidden="true" focusable="false"><path fill="#ffbd20" d="M15 20h34v22c0 12-6.8 19-17 19S15 54 15 42V20Z"/><ellipse cx="32" cy="20" rx="17" ry="5.5" fill="#ffbd20"/><ellipse cx="32" cy="20" rx="12" ry="3" fill="#171311"/><path d="M50 27h4c7.2 0 11.5 4.2 11.5 10.5S61.2 48 54 48h-5" fill="none" stroke="#ffbd20" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
           for path in files:
               text = path.read_text(encoding='utf-8')
-
               text, css_count = re.subn(
                   r'/\* Buy Me a Coffee icon \*/\s*\.app-support-btn\{.*?body\[data-density="spacious"\] \.support-btn-icon\{[^}]*\}\s*',
-                  css + '\n',
-                  text,
-                  count=1,
-                  flags=re.S,
+                  css + '\n', text, count=1, flags=re.S
               )
               if css_count != 1:
                   raise SystemExit(f'Coffee icon CSS block not found exactly once in {path}')
-
               text, svg_count = re.subn(
                   r'<svg class="support-btn-icon"[^>]*>.*?</svg>',
-                  svg,
-                  text,
-                  count=1,
-                  flags=re.S,
+                  svg, text, count=1, flags=re.S
               )
               if svg_count != 1:
                   raise SystemExit(f'Coffee icon SVG not found exactly once in {path}')
-
               path.write_text(text, encoding='utf-8')
 
           print('Replaced coffee icon with centered SVG with internal padding.')
