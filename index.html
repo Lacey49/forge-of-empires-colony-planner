@@ -2836,6 +2836,17 @@ body[data-density="compact"] .support-btn-icon{width:26px!important;height:26px!
 body[data-density="spacious"] .app-support-btn{padding-left:7px!important}
 body[data-density="spacious"] .support-btn-icon{width:30px!important;height:30px!important;min-width:30px!important;flex-basis:30px!important}
 
+
+/* Keep app screens isolated at every browser zoom / responsive breakpoint. */
+body.home-mode .compact-topbar,
+body.home-mode #compactStatus,
+body.home-mode .main,
+body.settings-mode .compact-topbar,
+body.settings-mode #compactStatus,
+body.settings-mode .main{
+  display:none!important;
+}
+
 </style>
 </head>
 <body>
