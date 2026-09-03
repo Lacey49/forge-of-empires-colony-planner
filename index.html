@@ -3193,9 +3193,8 @@ function eraBuildingByKey(era,key){
   return eraBuildingList(era).find(b=>b.key===key)||null;
 }
 
-// Preserve the already-verified board footprints, but display dimensions in
-// the same order a player sees them on the grid: top/horizontal edge ×
-// side/vertical edge. This keeps labels consistent with the visible footprint.
+// Forge of Empires dimensions are always width × height.
+// ERA_DATA already stores that order, so placement and rendering preserve it.
 for(const era of Object.keys(ERA_DATA)){
   for(const def of eraBuildingList(era)){
     const match=String(def.sizeText||"").match(/^(\d+)×(\d+)$/);
@@ -3203,9 +3202,9 @@ for(const era of Object.keys(ERA_DATA)){
 
     def.w=Number(match[1]);
     def.h=Number(match[2]);
-    def.boardW=def.h;
-    def.boardH=def.w;
-    def.sizeText=`${def.boardW}×${def.boardH}`;
+    def.boardW=def.w;
+    def.boardH=def.h;
+    def.sizeText=`${def.w}×${def.h}`;
   }
 }
 
@@ -3219,14 +3218,6 @@ function boardBuildingDef(def){
 }
 function eraBoardBuildingByKey(era,key){
   return boardBuildingDef(eraBuildingByKey(era,key));
-}
-
-const SAT_HEATED_RESIDENCE=eraBuildingByKey("SAT","heatedResidence");
-if(SAT_HEATED_RESIDENCE){
-  // Confirmed correction: Heated Residence occupies 3 columns × 4 rows.
-  SAT_HEATED_RESIDENCE.boardW=SAT_HEATED_RESIDENCE.w;
-  SAT_HEATED_RESIDENCE.boardH=SAT_HEATED_RESIDENCE.h;
-  SAT_HEATED_RESIDENCE.sizeText=`${SAT_HEATED_RESIDENCE.boardW}×${SAT_HEATED_RESIDENCE.boardH}`;
 }
 
 const PATHLESS_ERAS=new Set(["SAT","SASH"]);
@@ -3246,23 +3237,6 @@ for(const [era,map] of Object.entries(GOODS_PRODUCTS)){
     const def=eraBuildingByKey(era,key);
     if(def)def.product=product;
   }
-}
-
-const SAV_INFLATABLE_HOME=eraBuildingByKey("SAV","inflatableHome");
-if(SAV_INFLATABLE_HOME){
-  // Verified SAV layout: 2 tiles wide × 3 tiles tall, non-rotatable.
-  SAV_INFLATABLE_HOME.boardW=2;
-  SAV_INFLATABLE_HOME.boardH=3;
-  SAV_INFLATABLE_HOME.sizeText="2×3";
-}
-
-const SAJM_AQUA_CABIN=eraBuildingByKey("SAJM","aquaCabin");
-if(SAJM_AQUA_CABIN){
-  // Verified in-game: Aqua Cabin is 2 tiles wide × 3 tiles tall.
-  // Override the legacy width/height swap used by older planner footprints.
-  SAJM_AQUA_CABIN.boardW=2;
-  SAJM_AQUA_CABIN.boardH=3;
-  SAJM_AQUA_CABIN.sizeText="2×3";
 }
 
 const BUILDINGS={
@@ -4438,27 +4412,15 @@ function getPresetCatalog(){
   const result=[];
 
   if(selectedEra==="SAAB"){
-    result.push(
-      {
-        id:"builtin:early",
-        name:"Movable Abodes (58)",
-        kind:"Built-in",
-        state:makeSaabPresetState("early")
-      },
-      {
-        id:"builtin:late",
-        name:"Deep-Seated Housing (40)",
-        kind:"Built-in",
-        state:makeSaabPresetState("late")
-      },
-      {
-        id:"builtin:goods",
-        name:"Maximum Goods",
-        kind:"Built-in",
-        state:makeSaabGoodsPresetState()
-      }
-    );
-  }else if(selectedEra==="SAM"){
+  result.push(
+    {
+      id:"builtin:early",
+      name:"Movable Abodes (58)",
+      kind:"Built-in",
+      state:makeSaabPresetState("early")
+    }
+  );
+}else if(selectedEra==="SAM"){
     result.push(
       {
         id:"builtin:sam-drop-pods",
@@ -4474,21 +4436,15 @@ function getPresetCatalog(){
       }
     );
   }else if(selectedEra==="SAV"){
-    result.push(
-      {
-        id:"builtin:sav-floating-shelters",
-        name:"Floating Shelters (58)",
-        kind:"Built-in",
-        state:makeSavPresetState("floatingShelters")
-      },
-      {
-        id:"builtin:sav-inflatable-homes",
-        name:"Inflatable Homes (37)",
-        kind:"Built-in",
-        state:makeSavPresetState("inflatableHomes")
-      }
-    );
-  }else if(selectedEra==="SAJM"){
+  result.push(
+    {
+      id:"builtin:sav-floating-shelters",
+      name:"Floating Shelters (58)",
+      kind:"Built-in",
+      state:makeSavPresetState("floatingShelters")
+    }
+  );
+}else if(selectedEra==="SAJM"){
     result.push(
       {
         id:"builtin:sajm-aqua-pods",
@@ -4519,21 +4475,15 @@ function getPresetCatalog(){
       }
     );
   }else if(selectedEra==="SASH"){
-    result.push(
-      {
-        id:"builtin:sash-simple-crew",
-        name:"Simple Crew Quarters (52)",
-        kind:"Built-in",
-        state:makeSashPresetState("simpleCrew")
-      },
-      {
-        id:"builtin:sash-officers",
-        name:"Officers Quarters (21)",
-        kind:"Built-in",
-        state:makeSashPresetState("officers")
-      }
-    );
-  }
+  result.push(
+    {
+      id:"builtin:sash-officers",
+      name:"Officers Quarters (21)",
+      kind:"Built-in",
+      state:makeSashPresetState("officers")
+    }
+  );
+}
 
   const custom=workspace.eras[selectedEra]?.customPresets||{};
   for(const [id,p] of Object.entries(custom)){
