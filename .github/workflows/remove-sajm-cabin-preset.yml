@@ -24,51 +24,25 @@ jobs:
           import re
 
           files = [Path('index.html'), Path('forge-of-empires-colony-planner-v0.97.html')]
+          expected_def = '"key":"aquaCabin","name":"Aqua Cabin","category":"residential","sizeText":"2×3","h":3,"w":2'
+          catalog = ',\n      {\n        id:"builtin:sajm-aqua-cabins",\n        name:"Aqua Cabins (40)",\n        kind:"Built-in",\n        state:makeSajmPresetState("aquaCabins")\n      }'
 
           for path in files:
               text = path.read_text(encoding='utf-8')
-
-              # The actual Aqua Cabin footprint is 2 wide x 3 tall. Keep the
-              # building definition, but remove the invalid built-in preset
-              # until a new layout is supplied for that orientation.
-              expected_def = '"key":"aquaCabin","name":"Aqua Cabin","category":"residential","sizeText":"2×3","h":3,"w":2'
               if expected_def not in text:
-                  raise SystemExit(f'Aqua Cabin definition is not 2x3 in {path}')
+                  raise SystemExit(f'Aqua Cabin definition is not 2 wide x 3 tall in {path}')
 
-              # Remove stale preset constants.
-              text, n = re.subn(
-                  r'^const SAJM_AQUA_CABIN_PRESET_(?:HUB|BUILDINGS|PATHS|PODS)=.*?;\n',
-                  '',
-                  text,
-                  flags=re.M,
-              )
+              text, n = re.subn(r'^const SAJM_AQUA_CABIN_PRESET_(?:HUB|BUILDINGS|PATHS|PODS)=.*?;\n', '', text, flags=re.M)
               if n != 4:
                   raise SystemExit(f'Expected 4 Aqua Cabin preset constants in {path}, removed {n}')
 
-              # Remove the preset-construction branch.
-              text, n = re.subn(
-                  r'\n  if\(kind==="aquaCabins"\)\{.*?\n    return state;\n  \}\n',
-                  '\n',
-                  text,
-                  count=1,
-                  flags=re.S,
-              )
+              text, n = re.subn(r'\n  if\(kind==="aquaCabins"\)\{.*?\n    return state;\n  \}\n', '\n', text, count=1, flags=re.S)
               if n != 1:
                   raise SystemExit(f'Could not remove Aqua Cabin preset builder in {path}')
 
-              # Remove the catalog entry while leaving Aqua Pods as SAJM's only preset.
-              old_catalog = '''      },
-      {
-        id:"builtin:sajm-aqua-cabins",
-        name:"Aqua Cabins (40)",
-        kind:"Built-in",
-        state:makeSajmPresetState("aquaCabins")
-      }'''
-              new_catalog = '''      }'''
-              if text.count(old_catalog) != 1:
-                  raise SystemExit(f'Expected one Aqua Cabin catalog entry in {path}, found {text.count(old_catalog)}')
-              text = text.replace(old_catalog, new_catalog, 1)
-
+              if text.count(catalog) != 1:
+                  raise SystemExit(f'Expected one Aqua Cabin catalog entry in {path}, found {text.count(catalog)}')
+              text = text.replace(catalog, '', 1)
               path.write_text(text, encoding='utf-8')
 
           print('Removed invalid SAJM Aqua Cabins preset. Aqua Cabin remains 2 wide x 3 tall.')
@@ -80,9 +54,10 @@ jobs:
           from pathlib import Path
           import re
 
+          expected_def = '"key":"aquaCabin","name":"Aqua Cabin","category":"residential","sizeText":"2×3","h":3,"w":2'
           for name in ('index.html','forge-of-empires-colony-planner-v0.97.html'):
               text = Path(name).read_text(encoding='utf-8')
-              assert '"key":"aquaCabin","name":"Aqua Cabin","category":"residential","sizeText":"2×3","h":3,"w":2' in text
+              assert expected_def in text
               assert 'builtin:sajm-aqua-cabins' not in text
               assert 'Aqua Cabins (40)' not in text
               assert 'SAJM_AQUA_CABIN_PRESET_' not in text
@@ -94,7 +69,7 @@ jobs:
           app = [s for s in scripts if '"use strict"' in s]
           assert app
           Path('/tmp/foe.js').write_text(app[-1], encoding='utf-8')
-          print('Preset removal and 2x3 Aqua Cabin definition verified.')
+          print('Preset removed and Aqua Cabin 2x3 definition verified.')
           PY
           node --check /tmp/foe.js
 
