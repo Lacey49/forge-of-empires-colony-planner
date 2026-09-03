@@ -1,0 +1,344 @@
+name: Fix colony building width and height
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-width-height.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Correct width x height handling
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, re
+
+          FILES=[Path('index.html'),Path('forge-of-empires-colony-planner-v0.97.html')]
+
+          old_normalize='''// Preserve the already-verified board footprints, but display dimensions in
+          // the same order a player sees them on the grid: top/horizontal edge ×
+          // side/vertical edge. This keeps labels consistent with the visible footprint.
+          for(const era of Object.keys(ERA_DATA)){
+            for(const def of eraBuildingList(era)){
+              const match=String(def.sizeText||"").match(/^(\\d+)×(\\d+)$/);
+              if(!match)continue;
+
+              def.w=Number(match[1]);
+              def.h=Number(match[2]);
+              def.boardW=def.h;
+              def.boardH=def.w;
+              def.sizeText=`${def.boardW}×${def.boardH}`;
+            }
+          }
+          '''
+
+          new_normalize='''// Forge of Empires dimensions are always width × height.
+          // ERA_DATA already stores that order, so placement and rendering must preserve it.
+          for(const era of Object.keys(ERA_DATA)){
+            for(const def of eraBuildingList(era)){
+              const match=String(def.sizeText||"").match(/^(\\d+)×(\\d+)$/);
+              if(!match)continue;
+
+              def.w=Number(match[1]);
+              def.h=Number(match[2]);
+              def.boardW=def.w;
+              def.boardH=def.h;
+              def.sizeText=`${def.w}×${def.h}`;
+            }
+          }
+          '''
+
+          sat_override='''const SAT_HEATED_RESIDENCE=eraBuildingByKey("SAT","heatedResidence");
+          if(SAT_HEATED_RESIDENCE){
+            // Confirmed correction: Heated Residence occupies 3 columns × 4 rows.
+            SAT_HEATED_RESIDENCE.boardW=SAT_HEATED_RESIDENCE.w;
+            SAT_HEATED_RESIDENCE.boardH=SAT_HEATED_RESIDENCE.h;
+            SAT_HEATED_RESIDENCE.sizeText=`${SAT_HEATED_RESIDENCE.boardW}×${SAT_HEATED_RESIDENCE.boardH}`;
+          }
+
+          '''
+
+          sav_override='''const SAV_INFLATABLE_HOME=eraBuildingByKey("SAV","inflatableHome");
+          if(SAV_INFLATABLE_HOME){
+            // Verified SAV layout: 2 tiles wide × 3 tiles tall, non-rotatable.
+            SAV_INFLATABLE_HOME.boardW=2;
+            SAV_INFLATABLE_HOME.boardH=3;
+            SAV_INFLATABLE_HOME.sizeText="2×3";
+          }
+
+          '''
+
+          sajm_override='''const SAJM_AQUA_CABIN=eraBuildingByKey("SAJM","aquaCabin");
+          if(SAJM_AQUA_CABIN){
+            // Verified in-game: Aqua Cabin is 2 tiles wide × 3 tiles tall.
+            // Override the legacy width/height swap used by older planner footprints.
+            SAJM_AQUA_CABIN.boardW=2;
+            SAJM_AQUA_CABIN.boardH=3;
+            SAJM_AQUA_CABIN.sizeText="2×3";
+          }
+
+          '''
+
+          saab_late='''      {
+                id:"builtin:late",
+                name:"Deep-Seated Housing (40)",
+                kind:"Built-in",
+                state:makeSaabPresetState("late")
+              },
+          '''
+          saab_goods='''      {
+                id:"builtin:goods",
+                name:"Maximum Goods",
+                kind:"Built-in",
+                state:makeSaabGoodsPresetState()
+              }
+          '''
+          sav_inflatable='''      },
+              {
+                id:"builtin:sav-inflatable-homes",
+                name:"Inflatable Homes (37)",
+                kind:"Built-in",
+                state:makeSavPresetState("inflatableHomes")
+              }
+          '''
+          sash_simple='''      {
+                id:"builtin:sash-simple-crew",
+                name:"Simple Crew Quarters (52)",
+                kind:"Built-in",
+                state:makeSashPresetState("simpleCrew")
+              },
+          '''
+
+          for path in FILES:
+              text=path.read_text(encoding='utf-8')
+
+              if old_normalize not in text:
+                  raise SystemExit(f'{path}: legacy dimension swap block not found')
+              text=text.replace(old_normalize,new_normalize,1)
+
+              for block,label in [
+                  (sat_override,'SAT one-off override'),
+                  (sav_override,'SAV one-off override'),
+                  (sajm_override,'SAJM one-off override')
+              ]:
+                  if block not in text:
+                      raise SystemExit(f'{path}: {label} not found')
+                  text=text.replace(block,'',1)
+
+              # These built-ins were designed around the old reversed footprint and
+              # become geometrically invalid once the real width × height is used.
+              # Hide them instead of shipping presets that overlap roads/buildings.
+              if saab_late not in text or saab_goods not in text:
+                  raise SystemExit(f'{path}: SAAB preset catalog anchors not found')
+              text=text.replace(saab_late,'',1)
+              text=text.replace(saab_goods,'''      {
+                id:"builtin:early",
+                name:"Movable Abodes (58)",
+                kind:"Built-in",
+                state:makeSaabPresetState("early")
+              }
+          ''',1) if False else text
+
+              # Remove Maximum Goods without disturbing the preceding Early preset.
+              text,n=re.subn(
+                  r',\n\s*\{\n\s*id:"builtin:goods",\n\s*name:"Maximum Goods",\n\s*kind:"Built-in",\n\s*state:makeSaabGoodsPresetState\(\)\n\s*\}',
+                  '',text,count=1
+              )
+              if n!=1: raise SystemExit(f'{path}: SAAB Maximum Goods catalog entry not found')
+
+              if sav_inflatable not in text:
+                  raise SystemExit(f'{path}: SAV Inflatable Homes catalog entry not found')
+              text=text.replace(sav_inflatable,'      }\n',1)
+
+              if sash_simple not in text:
+                  raise SystemExit(f'{path}: SASH Simple Crew catalog entry not found')
+              text=text.replace(sash_simple,'',1)
+
+              path.write_text(text,encoding='utf-8')
+          PY
+
+      - name: Audit dimensions and remaining presets
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,re
+
+          EXPECTED={
+            'SAM':{
+              'dropPod':(2,2),'simpleShelter':(3,3),'modularHome':(5,3),'dome':(4,5),
+              'surfaceDrill':(4,4),'chemicalMillingFacility':(4,3),'fusionPlant':(4,3),'bioTechFarm':(3,4),'microbeResearchLab':(4,4),
+              'oxygenGenerator':(1,1),'solarPanelEast':(2,1),'solarPanelSouth':(1,2),'refinementStation':(3,4),'recombinationMachine':(2,2),'autonomousFoodDispenser':(4,4)
+            },
+            'SAAB':{
+              'movable':(2,2),'deep':(2,3),'vaultHouse':(4,3),'spaceviewResidence':(4,4),
+              'nickelExcavator':(6,4),'bedrockProcessor':(4,5),'asteroidDrill':(5,4),'brominePump':(4,5),'platinumQuarry':(5,5),
+              'storageContainer':(2,2),'fuelTank':(3,2),'undergroundReactor':(2,4),'spaceWharf':(4,4)
+            },
+            'SAV':{
+              'floatingShelter':(2,2),'inflatableHome':(3,2),'advancedApartment':(3,4),'multipurposeProperty':(5,3),
+              'seaweedFarm':(5,4),'soyFarm':(5,4),'microgreenCapsules':(4,5),'herbGarden':(6,4),'sugarcanePlantation':(5,5),
+              'gasTank':(2,2),'maintenanceShip':(2,3),'cargoPlatform':(4,2),'gasStation':(4,4)
+            },
+            'SAJM':{
+              'aquaPod':(2,2),'aquaCabin':(2,3),'autonomousChambers':(4,3),'aquariusHabitat':(3,5),
+              'redAlgaeFarm':(5,4),'spongeFarm':(4,6),'oceanarium':(4,5),'researchLaboratory':(6,4),'adventurer':(6,3),
+              'oxygenConcentrator':(2,2),'organicOxidator':(3,2),'deepAquamarine':(2,4),'hydrographicHub':(4,4)
+            },
+            'SAT':{
+              'igloo':(3,3),'heatedResidence':(3,4),'screenedDomicile':(4,4),
+              'matterCompressionReactor':(6,4),'moleculeDrill':(4,6),'experimentalTestSite':(4,5),'purificationFacility':(5,4),'chemicalCleaningPlant':(6,3),
+              'heatBatteries':(3,3),'hotChocolateBar':(3,4),'spicyTitanRestaurant':(4,4)
+            },
+            'SASH':{
+              'simpleCrewQuarters':(3,2),'enhancedCrewQuarters':(4,3),'officersQuarters':(4,4),
+              'crystalCrafter':(4,5),'photonosphereHarvester':(5,5),'aeroFusionPlant':(5,5),'deepSpaceDataConverter':(5,5),'fmmManufacture':(5,4),
+              'floraShipExpress':(3,3),'cosmicCleanExpress':(4,3),'sitEatSpacePizza':(4,4)
+            }
+          }
+          HALLS={'SAM':(6,6),'SAAB':(5,5),'SAV':(5,5),'SAJM':(5,5),'SAT':(5,5),'SASH':(7,6)}
+
+          def get_const(text,name):
+              m=re.search(rf'const {re.escape(name)}=(\[[^;]+\]);',text)
+              if not m: raise AssertionError(f'missing {name}')
+              return json.loads(m.group(1))
+
+          def parse_era_data(text):
+              m=re.search(r'const ERA_DATA=(\{.*?\});\nfunction eraBuildingList',text,re.S)
+              if not m: raise AssertionError('ERA_DATA not found')
+              return json.loads(m.group(1))
+
+          def cells(r,c,w,h):
+              return {(r+dr,c+dc) for dr in range(h) for dc in range(w)}
+
+          def validate_layout(text,era,base_name,hub,buildings,roads=None):
+              base=get_const(text,base_name)
+              land={(r,c) for br,bc in base for r in range(br*4,br*4+4) for c in range(bc*4,bc*4+4)}
+              hw,hh=HALLS[era]
+              occupied={}
+              hall=cells(hub[0],hub[1],hw,hh)
+              assert hall<=land,(era,'hall outside')
+              for p in hall: occupied[p]='hub'
+              roadset=set(tuple(x) for x in (roads or []))
+              assert roadset<=land,(era,'road outside')
+              for p in roadset:
+                  assert p not in occupied,(era,'road/hub overlap',p)
+                  occupied[p]='road'
+              for typ,coords in buildings:
+                  w,h=EXPECTED[era][typ]
+                  for r,c in coords:
+                      rect=cells(r,c,w,h)
+                      assert rect<=land,(era,typ,'outside',r,c)
+                      for p in rect:
+                          assert p not in occupied,(era,typ,'overlap',p,occupied.get(p))
+                          occupied[p]=typ
+              if roads is not None:
+                  dirs=((1,0),(-1,0),(0,1),(0,-1))
+                  roots={p for p in roadset if any((p[0]+dr,p[1]+dc) in hall for dr,dc in dirs)}
+                  seen=set(roots); q=list(roots)
+                  for p in q:
+                      for dr,dc in dirs:
+                          n=(p[0]+dr,p[1]+dc)
+                          if n in roadset and n not in seen:
+                              seen.add(n);q.append(n)
+                  assert seen==roadset,(era,'disconnected roads',roadset-seen)
+                  for typ,coords in buildings:
+                      w,h=EXPECTED[era][typ]
+                      for r,c in coords:
+                          rect=cells(r,c,w,h)
+                          assert any((rr+dr,cc+dc) in seen for rr,cc in rect for dr,dc in dirs),(era,typ,'no road',r,c)
+
+          for path in [Path('index.html'),Path('forge-of-empires-colony-planner-v0.97.html')]:
+              text=path.read_text(encoding='utf-8')
+              data=parse_era_data(text)
+              assert set(data)==set(EXPECTED)
+              for era,defs in EXPECTED.items():
+                  hall=data[era]['townHall']
+                  assert (hall['w'],hall['h'])==HALLS[era],(path,era,'hall',hall)
+                  found={d['key']:d for cat in ('residential','goods','lifeSupport') for d in data[era][cat]}
+                  assert set(found)==set(defs),(path,era,'building keys mismatch')
+                  for key,(w,h) in defs.items():
+                      d=found[key]
+                      assert (d['w'],d['h'])==(w,h),(path,era,key,'data',d['w'],d['h'],'expected',w,h)
+                      assert d['sizeText']==f'{w}×{h}',(path,era,key,d['sizeText'])
+
+              assert 'def.boardW=def.w;' in text
+              assert 'def.boardH=def.h;' in text
+              assert 'def.boardW=def.h;' not in text
+              assert 'const SAV_INFLATABLE_HOME=' not in text
+              assert 'const SAJM_AQUA_CABIN=' not in text
+              assert 'const SAT_HEATED_RESIDENCE=' not in text
+
+              # Presets known to depend on the old reversed footprint are hidden
+              # until rebuilt using the corrected geometry.
+              for bad_id in ('builtin:late','builtin:goods','builtin:sav-inflatable-homes','builtin:sash-simple-crew'):
+                  assert f'id:"{bad_id}"' not in text,(path,bad_id,'still exposed')
+
+              # Validate every remaining built-in layout against corrected footprints.
+              validate_layout(text,'SAAB','BASE_CHUNKS',get_const(text,'CURRENT_HUB'),[
+                  ('movable',get_const(text,'CURRENT_MOVABLES'))
+              ],get_const(text,'CURRENT_ROADS'))
+
+              validate_layout(text,'SAM','SAM_BASE_CHUNKS',get_const(text,'SAM_DROP_POD_PRESET_HUB'),[
+                  ('dropPod',get_const(text,'SAM_DROP_POD_PRESET_BUILDINGS'))
+              ],get_const(text,'SAM_DROP_POD_PRESET_PATHS'))
+              validate_layout(text,'SAM','SAM_BASE_CHUNKS',get_const(text,'SAM_SIMPLE_SHELTER_PRESET_HUB'),[
+                  ('simpleShelter',get_const(text,'SAM_SIMPLE_SHELTER_PRESET_BUILDINGS')),
+                  ('dropPod',get_const(text,'SAM_SIMPLE_SHELTER_PRESET_DROP_PODS'))
+              ],get_const(text,'SAM_SIMPLE_SHELTER_PRESET_PATHS'))
+
+              validate_layout(text,'SAV','SAV_BASE_CHUNKS',get_const(text,'SAV_FLOATING_SHELTER_PRESET_HUB'),[
+                  ('floatingShelter',get_const(text,'SAV_FLOATING_SHELTER_PRESET_BUILDINGS'))
+              ],get_const(text,'SAV_FLOATING_SHELTER_PRESET_PATHS'))
+
+              validate_layout(text,'SAJM','SAJM_BASE_CHUNKS',get_const(text,'SAJM_AQUA_POD_PRESET_HUB'),[
+                  ('aquaPod',get_const(text,'SAJM_AQUA_POD_PRESET_BUILDINGS'))
+              ],get_const(text,'SAJM_AQUA_POD_PRESET_PATHS'))
+              validate_layout(text,'SAJM','SAJM_BASE_CHUNKS',get_const(text,'SAJM_AQUA_CABIN_PRESET_HUB'),[
+                  ('aquaCabin',get_const(text,'SAJM_AQUA_CABIN_PRESET_BUILDINGS')),
+                  ('aquaPod',get_const(text,'SAJM_AQUA_CABIN_PRESET_PODS'))
+              ],get_const(text,'SAJM_AQUA_CABIN_PRESET_PATHS'))
+
+              validate_layout(text,'SAT','SAT_BASE_CHUNKS',get_const(text,'SAT_IGLOO_PRESET_HUB'),[
+                  ('igloo',get_const(text,'SAT_IGLOO_PRESET_BUILDINGS'))
+              ],None)
+              validate_layout(text,'SAT','SAT_BASE_CHUNKS',get_const(text,'SAT_DOMICILE_PRESET_HUB'),[
+                  ('screenedDomicile',get_const(text,'SAT_DOMICILE_PRESET_BUILDINGS')),
+                  ('igloo',get_const(text,'SAT_DOMICILE_PRESET_IGLOOS'))
+              ],None)
+
+              validate_layout(text,'SASH','SASH_BASE_CHUNKS',get_const(text,'SASH_OFFICER_PRESET_HUB'),[
+                  ('officersQuarters',get_const(text,'SASH_OFFICER_PRESET_BUILDINGS'))
+              ],None)
+
+              scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',text,re.S|re.I)
+              app=[s for s in scripts if '"use strict"' in s]
+              assert app,(path,'app script missing')
+              tmp=Path('/tmp')/(path.name+'.js')
+              tmp.write_text(app[-1],encoding='utf-8')
+              print(f'{path}: audited {sum(map(len,EXPECTED.values()))} buildings and remaining built-ins')
+          PY
+
+          node --check /tmp/index.html.js
+          node --check /tmp/forge-of-empires-colony-planner-v0.97.html.js
+
+      - name: Commit correction as Lacey49
+        shell: bash
+        run: |
+          git config user.name "Lacey49"
+          git config user.email "Lacey49@users.noreply.github.com"
+          git rm .github/workflows/fix-width-height.yml
+          git add index.html forge-of-empires-colony-planner-v0.97.html
+          git commit -m "Fix colony building width and height"
+          git push origin main
