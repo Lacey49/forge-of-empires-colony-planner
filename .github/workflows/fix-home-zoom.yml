@@ -21,30 +21,17 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
           files = [Path('index.html'), Path('forge-of-empires-colony-planner-v0.97.html')]
-          css = '''
-/* Keep app screens isolated at every browser zoom / responsive breakpoint. */
-body.home-mode .compact-topbar,
-body.home-mode #compactStatus,
-body.home-mode .main,
-body.settings-mode .compact-topbar,
-body.settings-mode #compactStatus,
-body.settings-mode .main{
-  display:none!important;
-}
-'''
-
+          marker = '/* Keep app screens isolated at every browser zoom / responsive breakpoint. */'
+          css = "\n" + marker + "\nbody.home-mode .compact-topbar,\nbody.home-mode #compactStatus,\nbody.home-mode .main,\nbody.settings-mode .compact-topbar,\nbody.settings-mode #compactStatus,\nbody.settings-mode .main{\n  display:none!important;\n}\n"
           for path in files:
               text = path.read_text(encoding='utf-8')
-              marker = '/* Keep app screens isolated at every browser zoom / responsive breakpoint. */'
               if marker not in text:
                   pos = text.rfind('</style>')
                   if pos < 0:
                       raise SystemExit(f'No closing style tag in {path}')
                   text = text[:pos] + css + '\n' + text[pos:]
                   path.write_text(text, encoding='utf-8')
-
           print('Added final screen-isolation CSS after all responsive rules.')
           PY
 
@@ -53,7 +40,6 @@ body.settings-mode .main{
           python3 - <<'PY'
           from pathlib import Path
           import re
-
           marker = '/* Keep app screens isolated at every browser zoom / responsive breakpoint. */'
           for name in ('index.html','forge-of-empires-colony-planner-v0.97.html'):
               text = Path(name).read_text(encoding='utf-8')
@@ -62,7 +48,6 @@ body.settings-mode .main{
               assert 'body.settings-mode .main' in text
               assert text.rfind(marker) > text.rfind('@media')
               assert text.rfind(marker) < text.rfind('</style>')
-
           text = Path('index.html').read_text(encoding='utf-8')
           scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', text, flags=re.S|re.I)
           app = [s for s in scripts if '"use strict"' in s]
