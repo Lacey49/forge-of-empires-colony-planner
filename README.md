@@ -41,7 +41,7 @@ The planner runs directly in your browser. There is nothing to install or downlo
 
 Your colonies and settings are saved locally in your browser, so you can come back to the site later and continue where you left off.
 
-A standalone copy of the current build is also kept in the repository. Packaged downloads can be published under Releases when a release is ready.
+A standalone copy of the current build is kept at the repository root. Older builds remain available through Git history/tags instead of being kept as extra loose files.
 
 ---
 
