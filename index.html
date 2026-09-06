@@ -3029,7 +3029,7 @@ body.settings-mode .main{
         <div class="compact-table-head">
           <span>Building</span>
           <span>#</span>
-          <span class="colonist-head" title="Colonists"><img src="./assets/buildings/shared/shared-colonists.webp" alt="Colonists"></span>
+          <span class="colonist-head" title="Colonists"><img src="./assets/ui/colonists.webp" alt="Colonists"></span>
           <span>Credits</span>
         </div>
 
@@ -3077,11 +3077,11 @@ body.settings-mode .main{
       </div>
       <div class="building-row" id="movableRow">
         <div class="building-main"><span class="dot mov"></span><div class="building-icon"><img id="movableSpriteImg" src="./assets/buildings/saab/saab-movable-abode.webp" alt="Movable Abode"></div><div class="building-name"><b>Movable Abode</b>2×2, needs road</div></div>
-        <div class="val"><span id="movCount">0</span><div class="tiny">×80 pop.</div></div><div class="production"><span>440</span><img class="resource-icon" src="./assets/buildings/shared/credits.png" alt="credits"></div>
+        <div class="val"><span id="movCount">0</span><div class="tiny">×80 pop.</div></div><div class="production"><span>440</span><img class="resource-icon" src="./assets/ui/credits.png" alt="credits"></div>
       </div>
       <div class="building-row" id="deepRow">
         <div class="building-main"><span class="dot deep"></span><div class="building-icon placeholder" title="Deep-Seated Housing sprite still needed">DS</div><div class="building-name"><b>Deep-Seated Housing</b>3×2, needs road</div></div>
-        <div class="val"><span id="deepCount">0</span><div class="tiny">pop. TBD</div></div><div class="production"><span>2,090</span><img class="resource-icon" src="./assets/buildings/shared/credits.png" alt="credits"></div>
+        <div class="val"><span id="deepCount">0</span><div class="tiny">pop. TBD</div></div><div class="production"><span>2,090</span><img class="resource-icon" src="./assets/ui/credits.png" alt="credits"></div>
       </div>
 
       <section class="section" id="optimizationSection">
@@ -3177,7 +3177,7 @@ const ERA_RULES={
   SASH:{townHall:{w:7,h:6}}
 };
 
-const COLONISTS_ICON="./assets/buildings/shared/shared-colonists.webp";
+const COLONISTS_ICON="./assets/ui/colonists.webp";
 // Building arrays are ordered by colony-building research unlock progression.
 // Parallel tech branches use the technology-list/tree order; same-tech unlocks
 // use the order shown in that technology's Provides list.
@@ -3866,7 +3866,7 @@ const SASH_BASE_CHUNKS=[[1,1],[1,2],[1,3],[1,4],[1,5],[2,1],[2,2],[2,3],[2,4],[2
 const SASH_EXPANSIONS=[{"id":"H01","br":0,"bc":2},{"id":"H02","br":0,"bc":3},{"id":"H03","br":0,"bc":4},{"id":"H04","br":1,"bc":0},{"id":"H05","br":2,"bc":0},{"id":"H06","br":3,"bc":0},{"id":"H07","br":4,"bc":0},{"id":"H08","br":5,"bc":0},{"id":"H09","br":1,"bc":6},{"id":"H10","br":2,"bc":6},{"id":"H11","br":3,"bc":6},{"id":"H12","br":4,"bc":6},{"id":"H13","br":5,"bc":6},{"id":"H14","br":6,"bc":2},{"id":"H15","br":6,"bc":3},{"id":"H16","br":6,"bc":4}];
 const PENDING_MAX_FOOTPRINTS={SAT:SAT_MAX_CHUNKS,SASH:SASH_MAX_CHUNKS};
 
-const PRECISE_PENDING_PREVIEWS={SAT:"./assets/buildings/shared/shared-sat-pending-expansion-preview.png",SASH:"./assets/buildings/shared/shared-sash-pending-expansion-preview.png"};
+const PRECISE_PENDING_PREVIEWS={SAT:"./assets/previews/sat-pending-expansion.png",SASH:"./assets/previews/sash-pending-expansion.png"};
 
 const SASH_SIMPLE_PRESET_HUB=[18,17];
 const SASH_SIMPLE_PRESET_BUILDINGS=[[4,4],[4,6],[4,8],[4,10],[4,12],[4,14],[4,16],[4,18],[4,20],[4,22],[7,4],[7,6],[7,8],[7,10],[7,12],[7,14],[7,16],[7,18],[7,20],[7,22],[10,4],[10,6],[10,8],[10,10],[10,12],[10,14],[10,16],[10,18],[10,20],[10,22],[13,4],[13,6],[13,8],[13,10],[13,12],[13,14],[13,16],[13,18],[13,20],[13,22],[16,4],[16,6],[16,8],[16,10],[16,12],[16,14],[19,4],[19,6],[19,8],[19,10],[19,12],[19,14]];
@@ -5233,7 +5233,7 @@ function makeSummaryRow({name,count,colonists=null,creditAmount=null,creditHours
     wrap.append(amount,period);
 
     const icon=document.createElement("img");
-    icon.src="./assets/buildings/shared/credits.png";
+    icon.src="./assets/ui/credits.png";
     icon.alt="credits";
     credits.append(icon,wrap);
   }else{

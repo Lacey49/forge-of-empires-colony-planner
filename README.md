@@ -4,7 +4,7 @@
 
 [![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen)](https://lacey49.github.io/forge-of-empires-colony-planner/)
 [![Website Build](https://img.shields.io/badge/Website-v0.97-success)](https://lacey49.github.io/forge-of-empires-colony-planner/)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-yellow)](https://buymeacoffee.com/lacey49)
+<a href="https://buymeacoffee.com/lacey49"><img src="./assets/ui/buy-me-a-coffee.svg" width="22" height="22" alt="Buy Me a Coffee"> Buy Me a Coffee</a>
 
 ### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
 
@@ -41,7 +41,7 @@ The planner runs directly in your browser. There is nothing to install or downlo
 
 Your colonies and settings are saved locally in your browser, so you can come back to the site later and continue where you left off.
 
-A standalone copy of the current build is kept at the repository root. Older builds remain available through Git history/tags instead of being kept as extra loose files.
+A standalone copy of the current build is kept at the repository root. Older builds remain available through Git history instead of being kept as extra loose files.
 
 ---
 
@@ -77,7 +77,7 @@ If you find something broken or have a layout that could be improved, please ope
 
 If the planner has been useful and you want to support it:
 
-### ☕ [Buy Me a Coffee](https://buymeacoffee.com/lacey49)
+<h3><a href="https://buymeacoffee.com/lacey49"><img src="./assets/ui/buy-me-a-coffee.svg" width="26" height="26" alt=""> Buy Me a Coffee</a></h3>
 
 ---
 
