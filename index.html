@@ -724,16 +724,17 @@ background:linear-gradient(#687635,#4f5e25);position:relative
   box-shadow:inset 0 0 0 1px rgba(210,240,255,.25);
 }
 .placement-preview.road-preview{
-  border-color:rgba(190,190,190,.95);
-  background:rgba(140,140,140,.32);
+  border-color:rgba(82,205,230,.95);
+  background:rgba(70,190,220,.30);
 }
 .placement-preview.hub-preview{
   border-color:rgba(244,175,30,.95);
   background:rgba(244,175,30,.26);
 }
 .placement-preview.invalid-preview{
-  border-color:rgba(255,78,78,.95)!important;
-  background:rgba(255,70,70,.22)!important;
+  border-color:transparent!important;
+  background:rgba(255,70,70,.18)!important;
+  box-shadow:none!important;
 }
 
 .build-menu{
@@ -2957,6 +2958,7 @@ body.settings-mode .main{
   <div class="topbar compact-topbar">
     <button class="compact-tool active" id="freeBuildBtn" type="button">Free Build</button>
     <button class="compact-tool" id="presetsBtn" type="button">Presets</button>
+    <button class="compact-tool" id="savePresetBtn" type="button" title="Save the current layout as a preset">Save</button>
 
     <span class="compact-sep"></span>
 
@@ -2988,7 +2990,6 @@ body.settings-mode .main{
         <canvas id="presetPreviewCanvas" width="280" height="280"></canvas>
       </div>
     </div>
-    <button class="preset-save-btn" id="savePresetBtn" type="button">+ Save current as preset</button>
   </div>
 
   <dialog id="appDialog" class="app-dialog">
@@ -3384,6 +3385,7 @@ function applyColonyState(state,{preserveCamera=false}={}){
   }
 
   movingItem=null;
+  clearRoadChain();
   renderExpGrid();
   render();
   applyViewTransform();
@@ -3812,6 +3814,7 @@ let enabledExpansions=new Set();
 let grid=[], buildings=[], hubTop=[...CURRENT_HUB], history=[];
 let mode=null, preset="none";
 let movingItem=null;
+let roadChainAnchor=null;
 
 const $=id=>document.getElementById(id);
 const chunkKey=(br,bc)=>`${br},${bc}`;
@@ -3995,6 +3998,7 @@ function restore(raw){
   hubTop=o.hubTop;
   enabledExpansions=new Set(o.enabled);
   movingItem=null;
+  clearRoadChain();
   renderExpGrid();
   render();
   persistColonyState(selectedEra);
@@ -4576,7 +4580,7 @@ function placeBuilding(type,r,c){
   if(!def)return;
   const cells=cellsFor(type,r,c);
   if(!cells.every(([rr,cc])=>ownedCell(rr,cc)&&grid[rr][cc]==="empty"))
-    return status("That building doesn't fit there.",false);
+    return status("Cannot place building there.",false);
   snapshot();
   addKnownBuilding(type,r,c);
   render();
@@ -4585,7 +4589,7 @@ function moveHub(r,c){
   const def=activeTownHallDef();
   const cells=hubCells(r,c);
   if(!cells.every(([rr,cc])=>ownedCell(rr,cc)&&(grid[rr][cc]==="empty"||grid[rr][cc]==="hub")))
-    return status(`The ${def.sizeText} Town Hall cannot fit there.`,false);
+    return status("Cannot place Town Hall there.",false);
   snapshot();
   for(const [rr,cc] of hubCells(...hubTop)){
     if(grid[rr][cc]==="hub")grid[rr][cc]=cellStateBase(rr,cc);
@@ -4707,6 +4711,111 @@ function commitMove(r,c){
   return true;
 }
 
+function clearRoadChain(){
+  roadChainAnchor=null;
+}
+
+function roadSegmentTo(r,c){
+  if(!roadChainAnchor)return null;
+
+  const ar=roadChainAnchor.r;
+  const ac=roadChainAnchor.c;
+  let er=r;
+  let ec=c;
+
+  // FoE-style road dragging snaps to one straight axis from the last click.
+  if(r!==ar&&c!==ac){
+    const dr=Math.abs(r-ar);
+    const dc=Math.abs(c-ac);
+    if(dc>=dr)er=ar;
+    else ec=ac;
+  }
+
+  const cells=[];
+  if(er===ar){
+    if(ec!==ac){
+      const step=ec>ac?1:-1;
+      for(let cc=ac+step;cc!==ec+step;cc+=step)cells.push([ar,cc]);
+    }
+  }else if(ec===ac){
+    const step=er>ar?1:-1;
+    for(let rr=ar+step;rr!==er+step;rr+=step)cells.push([rr,ac]);
+  }
+
+  if(!cells.length){
+    return {endR:er,endC:ec,cells,topR:ar,leftC:ac,w:1,h:1};
+  }
+
+  const rows=cells.map(([rr])=>rr);
+  const cols=cells.map(([,cc])=>cc);
+  const topR=Math.min(...rows);
+  const leftC=Math.min(...cols);
+
+  return {
+    endR:er,
+    endC:ec,
+    cells,
+    topR,
+    leftC,
+    w:Math.max(...cols)-leftC+1,
+    h:Math.max(...rows)-topR+1
+  };
+}
+
+function roadSegmentFits(segment){
+  return !!segment&&segment.cells.every(([rr,cc])=>
+    ownedCell(rr,cc)&&(grid[rr][cc]==="empty"||grid[rr][cc]==="road")
+  );
+}
+
+function placeRoadClick(r,c){
+  if(!ownedCell(r,c)){
+    status("Cannot place path there.",false);
+    return false;
+  }
+
+  // First click places one tile and starts the straight-line hologram.
+  if(!roadChainAnchor){
+    if(grid[r][c]==="road"){
+      roadChainAnchor={r,c};
+      render();
+      status("",true);
+      return true;
+    }
+    if(grid[r][c]!=="empty"){
+      status("Cannot place path there.",false);
+      return false;
+    }
+
+    snapshot();
+    grid[r][c]="road";
+    roadChainAnchor={r,c};
+    render();
+    status("",true);
+    return true;
+  }
+
+  const segment=roadSegmentTo(r,c);
+  if(!segment||!segment.cells.length)return true;
+
+  if(!roadSegmentFits(segment)){
+    status("Cannot place path there.",false);
+    return false;
+  }
+
+  const newCells=segment.cells.filter(([rr,cc])=>grid[rr][cc]!=="road");
+  if(newCells.length){
+    snapshot();
+    for(const [rr,cc] of newCells)grid[rr][cc]="road";
+  }
+
+  // Keep chaining from the last clicked endpoint, like the in-game road tool.
+  roadChainAnchor={r:segment.endR,c:segment.endC};
+  render();
+  status("",true);
+  return true;
+}
+
 function edit(r,c){
   if(!mode)return;
   if(!ownedCell(r,c))return;
@@ -4728,10 +4837,8 @@ function edit(r,c){
     return;
   }
 
-  if(mode==="road"&&grid[r][c]==="empty"){
-    snapshot();
-    grid[r][c]="road";
-    render();
+  if(mode==="road"){
+    placeRoadClick(r,c);
   }
 }
 function neigh(r,c){
@@ -4825,7 +4932,20 @@ function placeOverlayRect(el,r,c,w,h){
   el.style.height=`${h*cellSize+(h-1)*gapSize}px`;
 }
 
-function previewSpec(){
+function previewSpec(r=null,c=null){
+  if(mode==="road"&&roadChainAnchor&&Number.isInteger(r)&&Number.isInteger(c)){
+    const segment=roadSegmentTo(r,c);
+    if(!segment||!segment.cells.length)return null;
+    return {
+      w:segment.w,
+      h:segment.h,
+      kind:"road",
+      r:segment.topR,
+      c:segment.leftC,
+      segment
+    };
+  }
+
   if(mode==="move"&&movingItem){
     const kind=movingItem.kind==="hub"?"hub":
       movingItem.kind==="road"?"road":
@@ -4847,6 +4967,7 @@ function previewSpec(){
 function previewFits(r,c,spec){
   if(!spec)return false;
 
+  if(spec.segment)return roadSegmentFits(spec.segment);
   if(mode==="move"&&movingItem)return moveDestinationFits(r,c);
 
   const cells=[];
@@ -4869,7 +4990,7 @@ function showPlacementPreview(r,c){
     return;
   }
 
-  const spec=previewSpec();
+  const spec=previewSpec(r,c);
   if(!spec){
     preview.style.display="none";
     return;
@@ -4882,7 +5003,9 @@ function showPlacementPreview(r,c){
   if(spec.kind==="lifeSupport")preview.classList.add("life-support-preview");
   if(!previewFits(r,c,spec))preview.classList.add("invalid-preview");
 
-  placeGridOverlay(preview,r,c,spec.w,spec.h);
+  const previewR=Number.isInteger(spec.r)?spec.r:r;
+  const previewC=Number.isInteger(spec.c)?spec.c:c;
+  placeGridOverlay(preview,previewR,previewC,spec.w,spec.h);
   preview.style.display="block";
 }
 
@@ -5058,6 +5181,7 @@ function render(){
           }
 
           grid[r][c]=cellStateBase(r,c);
+          if(roadChainAnchor?.r===r&&roadChainAnchor?.c===c)clearRoadChain();
           render();
         }
       });
@@ -6475,6 +6599,7 @@ function setMode(next,renderNow=true){
   mode=next||null;
 
   if(previous==="move"&&mode!=="move")movingItem=null;
+  if(mode!=="road"||previous!=="road")clearRoadChain();
 
   const topMap={
     move:"compactMoveBtn",
