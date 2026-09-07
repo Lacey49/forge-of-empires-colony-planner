@@ -6420,6 +6420,7 @@ function clearPlacedObjects(){
   buildings=[];
   applyHub();
   movingItem=null;
+  clearRoadChain();
   render();
   status("",true);
 }
@@ -6837,6 +6838,7 @@ function showEditableColonyUi(era){
 
   $("presetsBtn").style.display="";
   $("freeBuildBtn").style.display="";
+  $("savePresetBtn").style.display="";
 
   const expCount=$("compactExpCount");
   if(expCount&&expCount.parentElement){
@@ -6955,6 +6957,7 @@ function showPendingEra(era){
   $("validateBtn").style.display="none";
   $("presetsBtn").style.display="none";
   $("freeBuildBtn").style.display="none";
+  $("savePresetBtn").style.display="none";
   $("compactMoveBtn").style.display="none";
   $("compactUndoBtn").style.display="none";
   $("clearAllBtn").style.display="none";
