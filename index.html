@@ -1148,7 +1148,6 @@ background:linear-gradient(#687635,#4f5e25);position:relative
 .optimizer-field select{width:100%;height:30px;padding:3px 7px;border:1px solid var(--theme-border);border-radius:3px;background:var(--theme-panel3);color:var(--theme-text);font-size:10px}
 .optimizer-progress{min-height:62px;padding:8px;border:1px solid var(--theme-soft-border);border-radius:4px;background:var(--theme-panel3);display:flex;flex-direction:column;gap:3px;color:var(--theme-muted);font-size:10px;line-height:1.35}
 .optimizer-progress strong{color:var(--theme-title-text);font-size:11px}
-.optimizer-note{color:var(--theme-subtle);font-size:9px;line-height:1.35}
 
 .app-dialog{
   padding:0;
@@ -2975,7 +2974,6 @@ body.settings-mode .main{
     <button class="compact-tool active" id="freeBuildBtn" type="button">Free Build</button>
     <button class="compact-tool" id="presetsBtn" type="button">Presets</button>
     <button class="compact-tool" id="savePresetBtn" type="button" title="Save the current layout as a preset">Save</button>
-    <button class="compact-tool" id="optimizeBtn" type="button" title="Search for a better layout">Optimize</button>
 
     <span class="compact-sep"></span>
 
@@ -2992,6 +2990,7 @@ body.settings-mode .main{
 
     <div class="spacer"></div>
 
+    <button class="btn compact-action" id="optimizeBtn" type="button" title="Search for a better layout">Optimize</button>
     <button class="btn compact-action" id="validateBtn">Check</button>
   </div>
 
@@ -3030,7 +3029,6 @@ body.settings-mode .main{
         <label class="optimizer-field" id="optimizerPrimaryRow"><span>Building</span><select id="optimizerPrimary"></select></label>
         <label class="optimizer-field"><span>Search</span><select id="optimizerSearch"><option value="fast">Fast · ~0.6s</option><option value="normal" selected>Normal · ~3s</option><option value="deep">Deep · ~15s</option></select></label>
         <div id="optimizerProgress" class="optimizer-progress"><strong>Ready</strong><span>Current layout and matching presets are protected baselines.</span></div>
-        <div class="optimizer-note">Uses only your enabled expansions. Buildings keep their fixed width × height orientation. Results are best found, not automatically claimed as a proven maximum.</div>
       </div>
       <div class="dialog-actions">
         <button class="compact-tool" type="button" id="optimizerCancelBtn">Cancel</button>
