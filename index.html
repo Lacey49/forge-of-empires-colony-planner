@@ -3931,10 +3931,10 @@ const PENDING_MAX_FOOTPRINTS={SAT:SAT_MAX_CHUNKS,SASH:SASH_MAX_CHUNKS};
 const PRECISE_PENDING_PREVIEWS={SAT:"./assets/previews/sat-pending-expansion.png",SASH:"./assets/previews/sash-pending-expansion.png"};
 
 const SASH_SIMPLE_PRESET_HUB=[18,17];
-const SASH_SIMPLE_PRESET_BUILDINGS=[[4,4],[4,6],[4,8],[4,10],[4,12],[4,14],[4,16],[4,18],[4,20],[4,22],[7,4],[7,6],[7,8],[7,10],[7,12],[7,14],[7,16],[7,18],[7,20],[7,22],[10,4],[10,6],[10,8],[10,10],[10,12],[10,14],[10,16],[10,18],[10,20],[10,22],[13,4],[13,6],[13,8],[13,10],[13,12],[13,14],[13,16],[13,18],[13,20],[13,22],[16,4],[16,6],[16,8],[16,10],[16,12],[16,14],[19,4],[19,6],[19,8],[19,10],[19,12],[19,14]];
+const SASH_SIMPLE_PRESET_BUILDINGS=[[4,4],[4,7],[4,10],[4,13],[4,16],[4,19],[6,4],[6,7],[6,10],[6,13],[6,16],[6,19],[8,4],[8,7],[8,10],[8,13],[8,16],[8,19],[10,4],[10,7],[10,10],[10,13],[10,16],[10,19],[12,4],[12,7],[12,10],[12,13],[12,16],[12,19],[14,4],[14,7],[14,10],[14,13],[14,16],[14,19],[16,4],[16,7],[16,10],[16,13],[16,16],[16,19],[18,4],[18,7],[18,10],[18,13],[20,4],[20,7],[20,10],[20,13],[22,4],[22,7],[22,10],[22,13]];
 const SASH_OFFICER_PRESET_HUB=[18,17];
 const SASH_OFFICER_PRESET_BUILDINGS=[[4,4],[4,8],[4,12],[4,16],[4,20],[8,4],[8,8],[8,12],[8,16],[8,20],[12,4],[12,8],[12,12],[12,16],[12,20],[16,4],[16,8],[16,12],[20,4],[20,8],[20,12]];
-const SASH_OFFICER_PRESET_FILLERS=[];
+const SASH_OFFICER_PRESET_FILLERS=[[16,16],[16,19]];
 
 const COLONY_CONFIGS={
   SAAB:{
@@ -4571,6 +4571,12 @@ function getPresetCatalog(){
     );
   }else if(selectedEra==="SASH"){
   result.push(
+    {
+      id:"builtin:sash-simple-crew",
+      name:"Simple Crew Quarters (54)",
+      kind:"Built-in",
+      state:makeSashPresetState("simpleCrew")
+    },
     {
       id:"builtin:sash-officers",
       name:"Officers Quarters (21)",
@@ -7560,6 +7566,6 @@ populateHomeTownHallGrid();
 showSamUi();
 setAppPage("home");
 </script>
-<script src="./assets/js/optimizer.js?v=3"></script>
+<script src="./assets/js/optimizer.js?v=4"></script>
 </body>
 </html>
