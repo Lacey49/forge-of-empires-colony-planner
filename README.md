@@ -94,7 +94,7 @@ If you find something broken or have a layout that could be improved, please ope
 
 If the planner has been useful and you want to support it:
 
-<h3><a href="https://buymeacoffee.com/lacey49"><img src="./assets/ui/buy-me-a-coffee.svg" width="24" height="24" align="middle" alt=""> Buy Me a Coffee</a></h3>
+<h3><a href="https://buymeacoffee.com/lacey49"><img src="./assets/ui/buy-me-a-coffee.svg" width="28" height="28" align="middle" alt="">Buy Me a Coffee</a></h3>
 
 ---
 
