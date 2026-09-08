@@ -2899,7 +2899,7 @@ body.settings-mode .main{
         <label class="settings-control" for="densitySetting">
           <span class="settings-control-copy">
             <b>Layout density</b>
-            <small>Changes workspace spacing and control sizes.</small>
+            <small>Changes the spacing and size of buttons and panels.</small>
           </span>
         </label>
         <select id="densitySetting" class="settings-select">
@@ -2913,7 +2913,7 @@ body.settings-mode .main{
         <label class="settings-control" for="zoomSensitivitySetting">
           <span class="settings-control-copy">
             <b>Zoom sensitivity</b>
-            <small>Mouse-wheel zoom speed.</small>
+            <small>How fast the map zooms when you use the mouse wheel.</small>
           </span>
           <span class="settings-control-value" id="zoomSensitivityValue">100%</span>
         </label>
@@ -2924,7 +2924,7 @@ body.settings-mode .main{
         <label class="settings-control" for="panSensitivitySetting">
           <span class="settings-control-copy">
             <b>Pan sensitivity</b>
-            <small>Map drag speed.</small>
+            <small>How fast the map moves when you drag it.</small>
           </span>
           <span class="settings-control-value" id="panSensitivityValue">100%</span>
         </label>
@@ -2935,7 +2935,7 @@ body.settings-mode .main{
         <label class="settings-control" for="themeSetting">
           <span class="settings-control-copy">
             <b>Planner theme</b>
-            <small>Use the selected era theme or pick one.</small>
+            <small>Match the current era or choose a different theme.</small>
           </span>
         </label>
         <select id="themeSetting" class="settings-select">
@@ -2952,22 +2952,22 @@ body.settings-mode .main{
 
       <div class="settings-group settings-hotkeys-group">
         <div class="settings-section-heading">
-          <b>Keybinds</b>
-          <small>Move and Undo can be changed. Delete is right click or the Delete key. 1–9, Delete and arrow keys are fixed.</small>
+          <b>Keyboard shortcuts</b>
+          <small>Click the shortcut for Move or Undo, then press the keys you want to use. Delete always uses right-click or the Delete key.</small>
         </div>
         <div class="hotkey-grid">
-          <label class="hotkey-row"><span>Move</span><input class="hotkey-input" data-hotkey-setting="hotkeyMove" type="text" readonly value="M"></label>
-          <div class="hotkey-row"><span>Delete</span><span class="hotkey-fixed">Right click / Delete</span></div>
-          <label class="hotkey-row"><span>Undo</span><input class="hotkey-input" data-hotkey-setting="hotkeyUndo" type="text" readonly value="Ctrl+Z"></label>
+          <label class="hotkey-row"><span>Move mode</span><input class="hotkey-input" data-hotkey-setting="hotkeyMove" type="text" readonly value="M"></label>
+          <div class="hotkey-row"><span>Delete building/path</span><span class="hotkey-fixed">Right-click / Delete</span></div>
+          <label class="hotkey-row"><span>Undo last change</span><input class="hotkey-input" data-hotkey-setting="hotkeyUndo" type="text" readonly value="Ctrl+Z"></label>
         </div>
       </div>
 
       <div class="settings-reset-zone">
         <div class="settings-control-copy">
-          <b>Reset all settings</b>
-          <small>Restore interface defaults. Colony data stays.</small>
+          <b>Reset settings</b>
+          <small>Reset all settings to default.</small>
         </div>
-        <button id="resetSettingsBtn" class="settings-reset-btn" type="button">Reset all settings</button>
+        <button id="resetSettingsBtn" class="settings-reset-btn" type="button">Reset to default</button>
       </div>
     </div>
   </section>
@@ -7206,7 +7206,7 @@ const HOTKEY_SETTING_KEYS=[
 ];
 
 const HOTKEY_LABELS={
-  hotkeyMove:"Move",
+  hotkeyMove:"Move mode",
   hotkeyUndo:"Undo"
 };
 
@@ -7471,10 +7471,10 @@ document.querySelectorAll(".hotkey-input").forEach(input=>{
     if(!binding)return;
 
     if(isReservedHotkey(binding)){
-      const use=/^[1-9]$/.test(binding)?"building selection":binding==="Delete"?"delete":"map panning";
+      const use=/^[1-9]$/.test(binding)?"building shortcuts":binding==="Delete"?"deleting":"moving the map";
       notifyToast(
-        "Key is reserved",
-        `${binding} is fixed for ${use}.`,
+        "That shortcut is already in use",
+        `${binding} is already used for ${use}. Choose another shortcut.`,
         "warning",
         3200
       );
@@ -7486,8 +7486,8 @@ document.querySelectorAll(".hotkey-input").forEach(input=>{
     );
     if(conflict){
       notifyToast(
-        "Key already in use",
-        `${binding} is assigned to ${HOTKEY_LABELS[conflict]}.`,
+        "That shortcut is already in use",
+        `${binding} is already used for ${HOTKEY_LABELS[conflict]}. Choose another shortcut.`,
         "warning",
         3200
       );
@@ -7531,9 +7531,9 @@ $("themeSetting")?.addEventListener("change",e=>{
 
 $("resetSettingsBtn")?.addEventListener("click",async()=>{
   const ok=await showConfirmDialog({
-    title:"Reset all settings?",
-    message:"Reset interface and keybind settings to their defaults? Saved colony data will stay.",
-    confirmText:"Reset settings",
+    title:"Reset settings?",
+    message:"Reset all settings to their default values? Your colony layouts and saved presets will not be deleted.",
+    confirmText:"Reset to default",
     cancelText:"Cancel"
   });
   if(!ok)return;
@@ -7543,7 +7543,7 @@ $("resetSettingsBtn")?.addEventListener("click",async()=>{
   applyDensityMode();
   syncSettingsUi();
   applyPageTheme("settings");
-  notifyToast("Settings reset","Defaults restored.","success",2800);
+  notifyToast("Settings reset","Settings are back to default.","success",2800);
 });
 
 document.querySelectorAll(".era-btn").forEach(btn=>{
