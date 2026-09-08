@@ -688,6 +688,8 @@ background:linear-gradient(#687635,#4f5e25);position:relative
 #board{
   transform-origin:center center!important;
   will-change:transform;
+  backface-visibility:hidden;
+  contain:paint;
 }
 
 .exp-label{display:none!important}
@@ -3393,6 +3395,26 @@ function persistColonyState(era=selectedEra){
   saveWorkspace();
 }
 
+let colonyPersistTimer=null;
+let colonyPersistEra=null;
+function scheduleColonyPersist(era=selectedEra,delay=120){
+  colonyPersistEra=era;
+  if(colonyPersistTimer)clearTimeout(colonyPersistTimer);
+  colonyPersistTimer=setTimeout(()=>{
+    colonyPersistTimer=null;
+    const target=colonyPersistEra;
+    colonyPersistEra=null;
+    persistColonyState(target);
+  },delay);
+}
+window.addEventListener("pagehide",()=>{
+  if(colonyPersistTimer){
+    clearTimeout(colonyPersistTimer);
+    colonyPersistTimer=null;
+  }
+  persistColonyState(selectedEra);
+});
+
 function applyColonyState(state,{preserveCamera=false}={}){
   if(!state||!Array.isArray(state.grid)||state.grid.length!==28)return false;
 
@@ -5088,11 +5110,15 @@ function updateBuyHover(id){
   });
 }
 
+let hoverTooltipWidth=180;
+let hoverTooltipHeight=30;
 function showHoverTooltip(text,e){
   const tip=$("hoverTooltip");
   if(!tip||!text)return;
   tip.textContent=text;
   tip.hidden=false;
+  hoverTooltipWidth=tip.offsetWidth||180;
+  hoverTooltipHeight=tip.offsetHeight||30;
   moveHoverTooltip(e);
 }
 function moveHoverTooltip(e){
@@ -5101,8 +5127,8 @@ function moveHoverTooltip(e){
   const margin=14;
   let x=e.clientX+margin;
   let y=e.clientY+margin;
-  const w=tip.offsetWidth||180;
-  const h=tip.offsetHeight||30;
+  const w=hoverTooltipWidth;
+  const h=hoverTooltipHeight;
   if(x+w>window.innerWidth-8)x=e.clientX-w-margin;
   if(y+h>window.innerHeight-8)y=e.clientY-h-margin;
   tip.style.left=`${Math.max(6,x)}px`;
@@ -5122,9 +5148,8 @@ function placedThingTooltip(r,c){
     const d=ERA_DATA[selectedEra].path;
     return `${d.name}, ${d.sizeText}`;
   }
-  const b=buildingAt(r,c);
-  if(b){
-    const d=activeBuildingDef(b.type);
+  if(state!=="empty"&&state!=="future"&&state!=="out"){
+    const d=activeBuildingDef(state);
     if(d)return `${d.name}, ${d.sizeText}`;
   }
   return null;
@@ -5146,10 +5171,132 @@ function buildMenuTooltip(def){
   return `${def.name}, ${def.sizeText}`;
 }
 
+function boardCellFromTarget(target){
+  const cell=target?.closest?.(".cell");
+  return cell&&cell.parentElement===$("board")?cell:null;
+}
+function boardCellCoords(cell){
+  if(!cell)return null;
+  const r=Number(cell.dataset.r),c=Number(cell.dataset.c);
+  return Number.isInteger(r)&&Number.isInteger(c)?{r,c}:null;
+}
+function ensureBoardDelegatedEvents(){
+  const board=$("board");
+  if(!board||board.dataset.delegatedEvents==="1")return;
+  board.dataset.delegatedEvents="1";
+
+  board.addEventListener("pointerover",e=>{
+    const cell=boardCellFromTarget(e.target);
+    if(!cell)return;
+    if(boardCellFromTarget(e.relatedTarget)===cell)return;
+
+    const pos=boardCellCoords(cell);
+    if(!pos)return;
+
+    const expId=cell.dataset.expansion;
+    if(expId){
+      if(canBuyExpansion())updateBuyHover(expId);
+      return;
+    }
+
+    if(grid[pos.r][pos.c]==="out")return;
+    const label=placedThingTooltip(pos.r,pos.c);
+    if(label)showHoverTooltip(label,e);
+    if(!panMoved)showPlacementPreview(pos.r,pos.c);
+  });
+
+  board.addEventListener("pointermove",e=>{
+    if(!$("hoverTooltip")?.hidden)moveHoverTooltip(e);
+  });
+
+  board.addEventListener("pointerout",e=>{
+    const cell=boardCellFromTarget(e.target);
+    if(!cell)return;
+    if(boardCellFromTarget(e.relatedTarget)===cell)return;
+
+    const expId=cell.dataset.expansion;
+    if(expId){
+      if(hoveredExpansionId===expId)updateBuyHover(null);
+      return;
+    }
+
+    hideHoverTooltip();
+    if(!panMoved)hidePlacementPreview();
+  });
+
+  board.addEventListener("click",e=>{
+    const cell=boardCellFromTarget(e.target);
+    if(!cell||performance.now()<suppressClickUntil)return;
+
+    const pos=boardCellCoords(cell);
+    if(!pos)return;
+
+    const expId=cell.dataset.expansion;
+    if(expId){
+      if(!canBuyExpansion())return;
+      toggleExpansion(expId);
+      updateBuyHover(null);
+      return;
+    }
+
+    if(grid[pos.r][pos.c]!=="out")edit(pos.r,pos.c);
+  });
+
+  board.addEventListener("contextmenu",e=>{
+    const cell=boardCellFromTarget(e.target);
+    if(!cell||cell.dataset.expansion)return;
+
+    const pos=boardCellCoords(cell);
+    if(!pos||grid[pos.r][pos.c]==="out")return;
+    e.preventDefault();
+
+    if(grid[pos.r][pos.c]==="hub")return;
+
+    const b=buildingAt(pos.r,pos.c);
+    if(b){
+      snapshot();
+
+      if(
+        mode==="move" &&
+        movingItem?.kind==="building" &&
+        movingItem.r===b.r &&
+        movingItem.c===b.c
+      ){
+        movingItem=null;
+        hidePlacementPreview();
+      }
+
+      removeBuilding(b);
+      render();
+      return;
+    }
+
+    if(grid[pos.r][pos.c]==="road"){
+      snapshot();
+
+      if(
+        mode==="move" &&
+        movingItem?.kind==="road" &&
+        movingItem.r===pos.r &&
+        movingItem.c===pos.c
+      ){
+        movingItem=null;
+        hidePlacementPreview();
+      }
+
+      grid[pos.r][pos.c]=cellStateBase(pos.r,pos.c);
+      if(roadChainAnchor?.r===pos.r&&roadChainAnchor?.c===pos.c)clearRoadChain();
+      render();
+    }
+  });
+}
+
 function render(){
   const board=$("board");
-  board.innerHTML="";
+  ensureBoardDelegatedEvents();
+  board.replaceChildren();
   board.classList.toggle("erase-mode",mode==="erase");
+  const fragment=document.createDocumentFragment();
 
   for(let r=0;r<28;r++)for(let c=0;c<28;c++){
     const st=grid[r][c],d=document.createElement("div");
@@ -5172,80 +5319,8 @@ function render(){
       if(rr===3)d.classList.add("chunk-edge-bottom");
       if(cc===0)d.classList.add("chunk-edge-left");
       if(cc===3)d.classList.add("chunk-edge-right");
-
-      d.addEventListener("mouseenter",()=>{
-        if(canBuyExpansion())updateBuyHover(exp.id);
-      });
-      d.addEventListener("mouseleave",()=>{
-        if(hoveredExpansionId===exp.id)updateBuyHover(null);
-      });
-      d.addEventListener("click",()=>{
-        if(performance.now()<suppressClickUntil)return;
-        if(!canBuyExpansion())return;
-        toggleExpansion(exp.id);
-        updateBuyHover(null);
-      });
-    }else if(st!=="out"){
-      d.addEventListener("mouseenter",e=>{
-        const label=placedThingTooltip(r,c);
-        if(label)showHoverTooltip(label,e);
-        if(!panMoved)showPlacementPreview(r,c);
-      });
-      d.addEventListener("mousemove",e=>{
-        if(!$("hoverTooltip")?.hidden)moveHoverTooltip(e);
-      });
-      d.addEventListener("mouseleave",()=>{
-        hideHoverTooltip();
-        if(!panMoved)hidePlacementPreview();
-      });
-      d.addEventListener("click",()=>{
-        if(performance.now()<suppressClickUntil)return;
-        edit(r,c);
-      });
-      d.addEventListener("contextmenu",e=>{
-        e.preventDefault();
-
-        if(grid[r][c]==="hub")return;
-
-        const b=buildingAt(r,c);
-        if(b){
-          snapshot();
-
-          if(
-            mode==="move" &&
-            movingItem?.kind==="building" &&
-            movingItem.r===b.r &&
-            movingItem.c===b.c
-          ){
-            movingItem=null;
-            hidePlacementPreview();
-          }
-
-          removeBuilding(b);
-          render();
-          return;
-        }
-
-        if(grid[r][c]==="road"){
-          snapshot();
-
-          if(
-            mode==="move" &&
-            movingItem?.kind==="road" &&
-            movingItem.r===r &&
-            movingItem.c===c
-          ){
-            movingItem=null;
-            hidePlacementPreview();
-          }
-
-          grid[r][c]=cellStateBase(r,c);
-          if(roadChainAnchor?.r===r&&roadChainAnchor?.c===c)clearRoadChain();
-          render();
-        }
-      });
     }
-    board.appendChild(d);
+    fragment.appendChild(d);
   }
 
   // Every building is one continuous top-view block.
@@ -5269,7 +5344,7 @@ function render(){
     overlay.dataset.r=b.r;
     overlay.dataset.c=b.c;
     placeGridOverlay(overlay,b.r,b.c,dims.w,dims.h);
-    board.appendChild(overlay);
+    fragment.appendChild(overlay);
   }
 
   // Town Hall remains one continuous block.
@@ -5286,7 +5361,7 @@ function render(){
       activeTownHallDef().w,
       activeTownHallDef().h
     );
-    board.appendChild(hubOverlay);
+    fragment.appendChild(hubOverlay);
   }
 
   for(const exp of activeExpansions()){
@@ -5296,17 +5371,18 @@ function render(){
     overlay.dataset.buyExpansion=exp.id;
     overlay.textContent="BUY";
     placeGridOverlay(overlay,exp.br*4,exp.bc*4,4,4);
-    board.appendChild(overlay);
+    fragment.appendChild(overlay);
   }
 
   const preview=document.createElement("div");
   preview.id="placementPreview";
   preview.className="placement-preview";
-  board.appendChild(preview);
+  fragment.appendChild(preview);
 
-  board.style.transform=`translate(${panX}px,${panY}px) scale(${viewZoom})`;
+  board.appendChild(fragment);
+  board.style.transform=`translate3d(${panX}px,${panY}px,0) scale(${viewZoom})`;
   updateStats();
-  if(isEditableColonyEra(selectedEra))persistColonyState(selectedEra);
+  if(isEditableColonyEra(selectedEra))scheduleColonyPersist(selectedEra);
 }
 
 function renderExpGrid(){
@@ -6726,8 +6802,8 @@ document.addEventListener("keydown",e=>{
     else if(e.key==="ArrowUp")panY-=step;
     else if(e.key==="ArrowDown")panY+=step;
 
-    applyViewTransform();
-    persistColonyState(selectedEra);
+    scheduleViewTransform();
+    scheduleColonyPersist(selectedEra,120);
     return;
   }
 
@@ -6792,12 +6868,18 @@ if(mapWrap){
     eraseAt(hit.r,hit.c);
   },true);
 }
+let viewTransformFrame=0;
 function applyViewTransform(){
   const board=$("board");
-  if(board)board.style.transform=`translate(${panX}px,${panY}px) scale(${viewZoom})`;
-  if(workspace){
-    saveSharedCamera();
-  }
+  if(board)board.style.transform=`translate3d(${panX}px,${panY}px,0) scale(${viewZoom})`;
+  if(workspace)saveSharedCamera();
+}
+function scheduleViewTransform(){
+  if(viewTransformFrame)return;
+  viewTransformFrame=requestAnimationFrame(()=>{
+    viewTransformFrame=0;
+    applyViewTransform();
+  });
 }
 if(mapWrap){
   mapWrap.addEventListener("wheel",e=>{
@@ -6805,8 +6887,8 @@ if(mapWrap){
     e.preventDefault();
     const direction=e.deltaY>0?-1:1;
     viewZoom=Math.max(.55,Math.min(2.5,viewZoom+direction*.015*(Number(appSettings.zoomSensitivity||100)/100)));
-    applyViewTransform();
-    persistColonyState(selectedEra);
+    scheduleViewTransform();
+    scheduleColonyPersist(selectedEra,160);
   },{passive:false});
 
   mapWrap.addEventListener("pointerdown",e=>{
@@ -6834,7 +6916,7 @@ if(mapWrap){
         const panFactor=Number(appSettings.panSensitivity||100)/100;
         panX=panOriginX+dx*panFactor;
         panY=panOriginY+dy*panFactor;
-        applyViewTransform();
+        scheduleViewTransform();
       }
       return;
     }
