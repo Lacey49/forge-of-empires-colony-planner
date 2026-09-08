@@ -3,7 +3,7 @@
 # Forge of Empires Colony Planner
 
 [![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen)](https://lacey49.github.io/forge-of-empires-colony-planner/)
-[![Website Build](https://img.shields.io/badge/Website-v0.97-success)](https://lacey49.github.io/forge-of-empires-colony-planner/)
+[![Website Build](https://img.shields.io/badge/Website-v0.98-success)](https://lacey49.github.io/forge-of-empires-colony-planner/)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-yellow)](https://buymeacoffee.com/lacey49)
 
 ### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
@@ -16,7 +16,9 @@
 
 I made this to make planning Space Age colonies in Forge of Empires much easier.
 
-Instead of rebuilding a colony over and over in-game just to see if something fits, you can lay it out in the planner first.
+You can build a colony by hand, load one of the built-in presets, or use the optimizer to search for a higher-credit layout using the buildings and expansions you choose.
+
+Instead of rebuilding a colony over and over in-game just to see if something fits, you can work it out in the planner first.
 
 The planner currently supports:
 
@@ -35,13 +37,13 @@ The planner currently supports:
 
 ### [Open Forge of Empires Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
 
-**Current website build:** `v0.97`
+**Current website build:** `v0.98 — Optimizer Update`
 
-The planner runs directly in your browser. There is nothing to install or download.
+The website is the easiest way to use the planner. Your colonies and settings are saved locally in your browser, so you can come back later and continue where you left off.
 
-Your colonies and settings are saved locally in your browser, so you can come back to the site later and continue where you left off.
+### [Download v0.98 standalone HTML](https://github.com/Lacey49/forge-of-empires-colony-planner/raw/refs/heads/main/forge-of-empires-colony-planner-v0.98.html)
 
-A standalone copy of the current build is kept at the repository root. Older builds remain available through Git history instead of being kept as extra loose files.
+The standalone version is a single HTML file you can keep on your computer and open in a browser. Older builds remain available through Git history instead of being kept as extra loose files.
 
 ---
 
@@ -56,6 +58,21 @@ A standalone copy of the current build is kept at the repository root. Older bui
 | Undo | `Ctrl + Z` |
 | Pan | Drag or Arrow Keys |
 | Zoom | Mouse Wheel |
+| Optimize layout | Click **Optimize** |
+
+---
+
+## v0.98 — Optimizer Update
+
+The optimizer can search for a higher-credit residential layout without making you rebuild the colony by hand.
+
+- Choose the residential building you want to focus on.
+- The optimizer can use earlier unlocked residential buildings to fill leftover space, but never buildings that unlock later than your choice.
+- It uses your current layout and matching presets as starting points.
+- It only offers a result when it actually increases your credit output.
+- Choose how long you want the search to run, then preview the result before applying it.
+
+The optimizer is still being improved, so the built-in presets remain useful layouts and starting points.
 
 ---
 
