@@ -1140,6 +1140,16 @@ background:linear-gradient(#687635,#4f5e25);position:relative
   background:color-mix(in srgb,var(--theme-panel) 75%,var(--theme-accent-soft) 25%);
 }
 
+
+/* Optimizer */
+.optimizer-card{width:min(470px,calc(100vw - 28px))}
+.optimizer-body{padding:11px;display:grid;gap:9px;background:var(--theme-panel2)}
+.optimizer-field{display:grid;grid-template-columns:118px minmax(0,1fr);align-items:center;gap:8px;color:var(--theme-muted);font-size:10px}
+.optimizer-field select{width:100%;height:30px;padding:3px 7px;border:1px solid var(--theme-border);border-radius:3px;background:var(--theme-panel3);color:var(--theme-text);font-size:10px}
+.optimizer-progress{min-height:62px;padding:8px;border:1px solid var(--theme-soft-border);border-radius:4px;background:var(--theme-panel3);display:flex;flex-direction:column;gap:3px;color:var(--theme-muted);font-size:10px;line-height:1.35}
+.optimizer-progress strong{color:var(--theme-title-text);font-size:11px}
+.optimizer-note{color:var(--theme-subtle);font-size:9px;line-height:1.35}
+
 .app-dialog{
   padding:0;
   border:0;
@@ -2965,6 +2975,7 @@ body.settings-mode .main{
     <button class="compact-tool active" id="freeBuildBtn" type="button">Free Build</button>
     <button class="compact-tool" id="presetsBtn" type="button">Presets</button>
     <button class="compact-tool" id="savePresetBtn" type="button" title="Save the current layout as a preset">Save</button>
+    <button class="compact-tool" id="optimizeBtn" type="button" title="Search for a better layout">Optimize</button>
 
     <span class="compact-sep"></span>
 
@@ -3008,6 +3019,24 @@ body.settings-mode .main{
         <button class="btn green compact-action" value="default" id="appDialogConfirm">Confirm</button>
       </div>
     </form>
+  </dialog>
+
+
+  <dialog id="optimizerDialog" class="app-dialog">
+    <div class="dialog-card optimizer-card">
+      <div class="dialog-title">Optimize Colony</div>
+      <div class="optimizer-body">
+        <label class="optimizer-field"><span>Goal</span><select id="optimizerGoal"><option value="maxPrimary">Max selected building</option><option value="maxCredits">Max credits</option></select></label>
+        <label class="optimizer-field" id="optimizerPrimaryRow"><span>Building</span><select id="optimizerPrimary"></select></label>
+        <label class="optimizer-field"><span>Search</span><select id="optimizerSearch"><option value="fast">Fast · ~0.6s</option><option value="normal" selected>Normal · ~3s</option><option value="deep">Deep · ~15s</option></select></label>
+        <div id="optimizerProgress" class="optimizer-progress"><strong>Ready</strong><span>Current layout and matching presets are protected baselines.</span></div>
+        <div class="optimizer-note">Uses only your enabled expansions. Buildings keep their fixed width × height orientation. Results are best found, not automatically claimed as a proven maximum.</div>
+      </div>
+      <div class="dialog-actions">
+        <button class="compact-tool" type="button" id="optimizerCancelBtn">Cancel</button>
+        <button class="btn green compact-action" type="button" id="optimizerRunBtn">Optimize</button>
+      </div>
+    </div>
   </dialog>
 
   <div class="main">
@@ -6683,7 +6712,7 @@ bindClick("compactExpAll",()=>setExpansionCount(activeExpansions().length));
 document.addEventListener("keydown",e=>{
   const tag=(e.target?.tagName||"").toLowerCase();
   const editable=e.target?.isContentEditable||["input","textarea","select","button"].includes(tag);
-  if(editable||appPage!=="planner"||$("appDialog")?.open)return;
+  if(editable||appPage!=="planner"||$("appDialog")?.open||$("optimizerDialog")?.open)return;
 
   const plainArrow=
     ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)&&
@@ -6870,6 +6899,7 @@ function showEditableColonyUi(era){
 
   $("presetsBtn").style.display="";
   $("freeBuildBtn").style.display="";
+  $("optimizeBtn").style.display="";
   $("savePresetBtn").style.display="";
 
   const expCount=$("compactExpCount");
@@ -6989,6 +7019,7 @@ function showPendingEra(era){
   $("validateBtn").style.display="none";
   $("presetsBtn").style.display="none";
   $("freeBuildBtn").style.display="none";
+  $("optimizeBtn").style.display="none";
   $("savePresetBtn").style.display="none";
   $("compactMoveBtn").style.display="none";
   $("compactUndoBtn").style.display="none";
@@ -7449,5 +7480,6 @@ populateHomeTownHallGrid();
 showSamUi();
 setAppPage("home");
 </script>
+<script src="./assets/js/optimizer.js?v=1"></script>
 </body>
 </html>
