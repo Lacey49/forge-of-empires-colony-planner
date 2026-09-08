@@ -1,0 +1,131 @@
+name: Build v0.98 standalone
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-v098.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build single-file v0.98
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+          import mimetypes
+          import re
+
+          root = Path(".")
+          html = Path("index.html").read_text(encoding="utf-8")
+          optimizer = Path("assets/js/optimizer.js").read_text(encoding="utf-8")
+
+          optimizer_tag = '<script src="./assets/js/optimizer.js?v=5"></script>'
+          if optimizer_tag not in html:
+              raise SystemExit("optimizer script tag not found")
+          html = html.replace(optimizer_tag, "<script>\n" + optimizer + "\n</script>")
+
+          # A web app manifest is useful on the hosted site but unnecessary in a
+          # single-file offline release.
+          html = re.sub(
+              r'\s*<link rel="manifest" href="\./assets/site\.webmanifest\?v=\d+">\s*',
+              "\n",
+              html,
+              count=1,
+          )
+
+          asset_pattern = re.compile(
+              r'\./(?:assets/[^"\'<>\s)]+|favicon\.ico(?:\?v=\d+)?)'
+          )
+          refs = sorted(set(asset_pattern.findall(html)), key=len, reverse=True)
+
+          mime_overrides = {
+              ".webp": "image/webp",
+              ".svg": "image/svg+xml",
+              ".ico": "image/x-icon",
+              ".webmanifest": "application/manifest+json",
+          }
+
+          missing = []
+          for ref in refs:
+              file_name = ref[2:].split("?", 1)[0]
+              path = root / file_name
+              if not path.is_file():
+                  missing.append((ref, file_name))
+                  continue
+
+              mime = mime_overrides.get(path.suffix.lower())
+              if not mime:
+                  mime = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+              encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+              html = html.replace(ref, f"data:{mime};base64,{encoded}")
+
+          if missing:
+              raise SystemExit("Missing assets: " + repr(missing))
+
+          if "./assets/" in html or "./favicon.ico" in html:
+              raise SystemExit("Standalone still contains local asset references")
+          if "assets/js/optimizer.js" in html:
+              raise SystemExit("Standalone still references external optimizer.js")
+          if 'title="Forge of Empires Colony Planner v0.98">v0.98</div>' not in html:
+              raise SystemExit("v0.98 version label missing")
+
+          out = Path("forge-of-empires-colony-planner-v0.98.html")
+          out.write_text(html, encoding="utf-8")
+          print(f"Wrote {out} ({out.stat().st_size:,} bytes), embedded {len(refs)} local assets.")
+          PY
+
+      - name: Verify standalone
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import subprocess
+          import tempfile
+
+          path = Path("forge-of-empires-colony-planner-v0.98.html")
+          html = path.read_text(encoding="utf-8")
+          if path.stat().st_size < 1_000_000:
+              raise SystemExit("Standalone file is unexpectedly small")
+
+          scripts = re.findall(r'<script(?![^>]*src=)(?:\s[^>]*)?>([\s\S]*?)</script>', html, flags=re.I)
+          checked = 0
+          for i, code in enumerate(scripts):
+              stripped = code.strip()
+              if not stripped:
+                  continue
+              if stripped.startswith("{") and '"@context"' in stripped:
+                  continue
+              temp = Path(tempfile.gettempdir()) / f"foecp-v098-{i}.js"
+              temp.write_text(code, encoding="utf-8")
+              subprocess.run(["node", "--check", str(temp)], check=True)
+              checked += 1
+
+          if checked < 2:
+              raise SystemExit(f"Expected at least two JavaScript blocks, checked {checked}")
+          print(f"JavaScript syntax passed for {checked} blocks.")
+          PY
+
+      - name: Commit release
+        shell: bash
+        run: |
+          git config user.name "Lacey49"
+          git config user.email "gridleykasey@gmail.com"
+
+          git rm -f forge-of-empires-colony-planner-v0.97.html
+          git rm -f .github/workflows/release-v098.yml
+          git add forge-of-empires-colony-planner-v0.98.html
+
+          git commit -m "Release v0.98 Optimizer Update"
+          git push
