@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Download Forge of Empires Colony Planner v0.98</title>
+  <meta name="robots" content="noindex,nofollow">
+  <style>
+    :root{color-scheme:dark}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111820;color:#edf3f8;font:16px system-ui,-apple-system,Segoe UI,sans-serif}
+    main{width:min(520px,calc(100% - 32px));padding:28px;border:1px solid #3b4a5c;border-radius:10px;background:#18212c;text-align:center}
+    h1{margin:0 0 10px;font-size:24px}
+    p{margin:8px 0 20px;color:#b8c5d3;line-height:1.5}
+    button{border:1px solid #6e8db1;border-radius:6px;padding:10px 16px;background:#294c72;color:white;font:inherit;font-weight:700;cursor:pointer}
+    button:hover{background:#345f8d}
+    small{display:block;margin-top:16px;color:#8293a5}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Forge of Empires Colony Planner v0.98</h1>
+    <p>The Optimizer Update should start downloading automatically.</p>
+    <button id="downloadBtn" type="button">Download v0.98</button>
+    <small>If nothing happens, click the button above.</small>
+  </main>
+  <script>
+    const file="./forge-of-empires-colony-planner-v0.98.html";
+    const filename="forge-of-empires-colony-planner-v0.98.html";
+    function startDownload(){
+      const a=document.createElement("a");
+      a.href=file;
+      a.download=filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+    document.getElementById("downloadBtn").addEventListener("click",startDownload);
+    window.addEventListener("load",()=>setTimeout(startDownload,150));
+  </script>
+</body>
+</html>
