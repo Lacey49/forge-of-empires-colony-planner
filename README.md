@@ -16,7 +16,9 @@
 
 I made this to make planning Space Age colonies in Forge of Empires much easier.
 
-You can build a colony by hand, load one of the built-in presets, or use the optimizer to search for a higher-credit layout using the buildings and expansions you choose.
+You can build a colony by hand, load one of the built-in presets, or let the optimizer search for a higher-credit layout using the buildings and expansions you choose.
+
+**v0.98 adds the Colony Optimizer**, so you can pick the building you want to focus on and have the planner search for a better layout automatically.
 
 Instead of rebuilding a colony over and over in-game just to see if something fits, you can work it out in the planner first.
 
@@ -41,7 +43,7 @@ The planner currently supports:
 
 The website is the easiest way to use the planner. Your colonies and settings are saved locally in your browser, so you can come back later and continue where you left off.
 
-### [Download v0.98 standalone HTML](https://github.com/Lacey49/forge-of-empires-colony-planner/raw/refs/heads/main/forge-of-empires-colony-planner-v0.98.html)
+### [Download v0.98 standalone HTML](https://lacey49.github.io/forge-of-empires-colony-planner/download.html)
 
 The standalone version is a single HTML file you can keep on your computer and open in a browser. Older builds remain available through Git history instead of being kept as extra loose files.
 
