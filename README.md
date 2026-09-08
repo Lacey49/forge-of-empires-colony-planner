@@ -4,7 +4,7 @@
 
 [![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen)](https://lacey49.github.io/forge-of-empires-colony-planner/)
 [![Website Build](https://img.shields.io/badge/Website-v0.97-success)](https://lacey49.github.io/forge-of-empires-colony-planner/)
-<a href="https://buymeacoffee.com/lacey49"><img src="./assets/ui/buy-me-a-coffee.svg" width="22" height="22" alt="Buy Me a Coffee"> Buy Me a Coffee</a>
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-yellow)](https://buymeacoffee.com/lacey49)
 
 ### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
 
@@ -77,7 +77,7 @@ If you find something broken or have a layout that could be improved, please ope
 
 If the planner has been useful and you want to support it:
 
-<h3><a href="https://buymeacoffee.com/lacey49"><img src="./assets/ui/buy-me-a-coffee.svg" width="26" height="26" alt=""> Buy Me a Coffee</a></h3>
+<h3><a href="https://buymeacoffee.com/lacey49"><img src="./assets/ui/buy-me-a-coffee.svg" width="22" height="22" align="middle" alt=""> Buy Me a Coffee</a></h3>
 
 ---
 
