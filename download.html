@@ -3,29 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Download Forge of Empires Colony Planner v0.98</title>
+  <title>Forge of Empires Colony Planner v0.99</title>
   <meta name="robots" content="noindex,nofollow">
   <style>
     :root{color-scheme:dark}
+    *{box-sizing:border-box}
     body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111820;color:#edf3f8;font:16px system-ui,-apple-system,Segoe UI,sans-serif}
-    main{width:min(520px,calc(100% - 32px));padding:28px;border:1px solid #3b4a5c;border-radius:10px;background:#18212c;text-align:center}
-    h1{margin:0 0 10px;font-size:24px}
-    p{margin:8px 0 20px;color:#b8c5d3;line-height:1.5}
-    button{border:1px solid #6e8db1;border-radius:6px;padding:10px 16px;background:#294c72;color:white;font:inherit;font-weight:700;cursor:pointer}
+    main{width:min(420px,calc(100% - 32px));text-align:center}
+    h1{margin:0;font-size:25px;line-height:1.25}
+    .version{margin:8px 0 24px;color:#b8c5d3;font-size:18px}
+    button{border:1px solid #6e8db1;border-radius:7px;padding:11px 20px;background:#294c72;color:white;font:inherit;font-weight:700;cursor:pointer}
     button:hover{background:#345f8d}
-    small{display:block;margin-top:16px;color:#8293a5}
+    .hint{margin:16px 0 0;color:#8293a5;font-size:14px}
   </style>
 </head>
 <body>
   <main>
-    <h1>Forge of Empires Colony Planner v0.98</h1>
-    <p>The Optimizer Update should start downloading automatically.</p>
-    <button id="downloadBtn" type="button">Download v0.98</button>
-    <small>If nothing happens, click the button above.</small>
+    <h1>Forge of Empires Colony Planner</h1>
+    <p class="version">v0.99</p>
+    <button id="downloadBtn" type="button">Download</button>
+    <p class="hint">Your download should start automatically.</p>
   </main>
   <script>
-    const file="./forge-of-empires-colony-planner-v0.98.html";
-    const filename="forge-of-empires-colony-planner-v0.98.html";
+    const file="./forge-of-empires-colony-planner-v0.99.html";
+    const filename="forge-of-empires-colony-planner-v0.99.html";
     function startDownload(){
       const a=document.createElement("a");
       a.href=file;
