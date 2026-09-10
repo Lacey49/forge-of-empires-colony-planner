@@ -4,8 +4,8 @@
   if (button) button.disabled = true;
 
   const scripts = [
-    './optimizer/optimizer.js?v=9',
-    './optimizer/experimental.js?v=9',
+    './optimizer/optimizer.js?v=10',
+    './optimizer/experimental.js?v=10',
     './presets/current-presets.js?v=1',
     './site/keyboard.js?v=1'
   ];
