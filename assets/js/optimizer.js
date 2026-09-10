@@ -9,6 +9,7 @@
     './optimizer/experimental.js?v=10',
     './optimizer/neighborhood.js?v=1',
     './optimizer/road-network.js?v=2',
+    './optimizer/filler-promotion.js?v=1',
     './presets/current-presets.js?v=2',
     './presets/saab-presets.js?v=1',
     './presets/sav-presets.js?v=1',
