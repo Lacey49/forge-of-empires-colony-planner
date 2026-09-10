@@ -35,6 +35,11 @@
     try {
       for (const src of scripts) await load(src);
       if (typeof optimizerSyncSearchLabels === 'function') optimizerSyncSearchLabels();
+      const version = document.querySelector('.version-label');
+      if (version) {
+        version.textContent = 'v0.99';
+        version.title = 'Forge of Empires Colony Planner v0.99';
+      }
       if (button) button.disabled = false;
     } catch (err) {
       console.error('Optimizer failed to load', err);
