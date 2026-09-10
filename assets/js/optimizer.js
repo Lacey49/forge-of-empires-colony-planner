@@ -13,8 +13,10 @@
     './presets/current-presets.js?v=2',
     './presets/saab-presets.js?v=1',
     './presets/sav-presets.js?v=1',
+    './presets/sav-max-presets.js?v=1',
     './presets/sat-presets.js?v=1',
     './presets/sash-presets.js?v=1',
+    './site/state-consistency.js?v=1',
     './site/viewport.js?v=1',
     './site/keyboard.js?v=2'
   ];
