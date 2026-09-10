@@ -74,7 +74,9 @@ The optimizer can search for a higher-credit residential layout without making y
 - It only offers a result when it actually increases your credit output.
 - Choose how long you want the search to run, then preview the result before applying it.
 
-The optimizer is still being improved, so the built-in presets remain useful layouts and starting points.
+The **Max Credits** search is mostly complete for now. Further optimizer work will focus on edge cases and a separate **Minimize Paths** goal.
+
+The built-in presets remain useful layouts and starting points and may continue to be refreshed as better layouts are found.
 
 ---
 
