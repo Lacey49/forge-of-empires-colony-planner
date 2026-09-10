@@ -7,6 +7,7 @@
     './optimizer/optimizer.js?v=10',
     './optimizer/performance.js?v=1',
     './optimizer/experimental.js?v=10',
+    './optimizer/neighborhood.js?v=1',
     './presets/current-presets.js?v=1',
     './site/keyboard.js?v=1'
   ];
