@@ -10,6 +10,8 @@
     './optimizer/neighborhood.js?v=1',
     './optimizer/road-network.js?v=2',
     './presets/current-presets.js?v=2',
+    './presets/saab-presets.js?v=1',
+    './site/viewport.js?v=1',
     './site/keyboard.js?v=2'
   ];
 
