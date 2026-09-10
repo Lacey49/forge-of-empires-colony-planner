@@ -1,4 +1,4 @@
-/* Colony Optimizer — safe Phase 1 search. */
+/* Colony Optimizer — heuristic colony layout search. */
 const OPT_RULES={SAM:{paths:true},SAAB:{paths:true},SAV:{paths:true},SAJM:{paths:true},SAT:{paths:false},SASH:{paths:false}};
 const OPT_BUDGET={fast:600,normal:3000,deep:15000};
 let optimizerRunning=false,optimizerCancelRequested=false,optimizerPendingResult=null;
@@ -43,11 +43,47 @@ function oxPattern(ctx,hall,orientation,spacing,offset,trunk,family){
   else{for(let c=offset;c<28;c+=spacing)for(let r=0;r<28;r++){if(family==='left'&&r>trunk)continue;if(family==='right'&&r<trunk)continue;add(r,c)}for(let c=0;c<28;c++)add(trunk,c)}
   return roads.size?roads:null;
 }
+function oxBlockPattern(ctx,hall,rowSpacing,rowOffset,colSpacing,colOffset){
+  const roads=new Set(),add=(r,c)=>{const id=optId(r,c);if(r>=0&&r<28&&c>=0&&c<28&&ctx.owned.has(id)&&!hall.set.has(id))roads.add(id)};
+  for(let r=rowOffset;r<28;r+=rowSpacing)for(let c=0;c<28;c++)add(r,c);
+  for(let c=colOffset;c<28;c+=colSpacing)for(let r=0;r<28;r++)add(r,c);
+  return roads.size?roads:null;
+}
+function oxSpacingOptions(size){
+  const out=[size*2+1,size+1];
+  return [...new Set(out.filter(n=>n>1))];
+}
+function oxOffsetOrder(spacing,anchor){
+  const out=[],seen=new Set();
+  const add=n=>{n=((n%spacing)+spacing)%spacing;if(!seen.has(n)){seen.add(n);out.push(n)}};
+  add(anchor-1);add(anchor);add(anchor+1);for(let i=0;i<spacing;i++)add(i);return out;
+}
 function oxPatterns(ctx,hall,def,baseline,mode){
   if(!ctx.rules.paths)return[new Set()];
   const out=[],seen=new Set(),keep=c=>{if(!c?.size)return;const k=[...c].sort((a,b)=>a-b).join(',');if(!seen.has(k)){seen.add(k);out.push(c)}},add=r=>{if(!r?.size)return;const root=oxConnected(r,hall.set);keep(root);if(mode!=='fast'&&root.size<r.size)keep(oxConnectPattern(ctx,hall,r))};
   if(baseline&&baseline.hubTop?.[0]===hall.hub[0]&&baseline.hubTop?.[1]===hall.hub[1])add(oxRoads(baseline));
-  for(const o of ['h','v']){const spacing=o==='h'?def.h+1:def.w+1,axis=o==='h'?hall.hub[1]:hall.hub[0],span=o==='h'?ctx.hall.w:ctx.hall.h,tr=[];for(const t of[axis-1,axis+span,axis,axis+span-1])if(t>=0&&t<28&&!tr.includes(t))tr.push(t);for(let t=0;t<28;t++)if(!tr.includes(t))tr.push(t);const limit=mode==='fast'?6:mode==='normal'?10:28;for(let off=0;off<spacing;off++)for(const t of tr.slice(0,limit)){add(oxPattern(ctx,hall,o,spacing,off,t,'full'));if(mode!=='fast'){add(oxPattern(ctx,hall,o,spacing,off,t,'left'));add(oxPattern(ctx,hall,o,spacing,off,t,'right'))}}}
+
+  // Buildings only need to touch one path. Two building rows can therefore share
+  // the same pair of road lines. For 2x2 homes this creates the familiar 4x4
+  // blocks instead of wasting a road after every single row of buildings.
+  const rowSpacings=oxSpacingOptions(def.h),colSpacings=oxSpacingOptions(def.w);
+  const rowOffsets=oxOffsetOrder(rowSpacings[0],hall.hub[0]),colOffsets=oxOffsetOrder(colSpacings[0],hall.hub[1]);
+  const gridLimit=mode==='fast'?2:mode==='normal'?3:5;
+  for(const ro of rowOffsets.slice(0,gridLimit))for(const co of colOffsets.slice(0,gridLimit))add(oxBlockPattern(ctx,hall,rowSpacings[0],ro,colSpacings[0],co));
+
+  for(const o of ['h','v']){
+    const spacings=o==='h'?rowSpacings:colSpacings,axis=o==='h'?hall.hub[1]:hall.hub[0],span=o==='h'?ctx.hall.w:ctx.hall.h,tr=[];
+    for(const t of[axis-1,axis+span,axis,axis+span-1])if(t>=0&&t<28&&!tr.includes(t))tr.push(t);
+    for(let t=0;t<28;t++)if(!tr.includes(t))tr.push(t);
+    const trunkLimit=mode==='fast'?6:mode==='normal'?10:28;
+    for(const spacing of spacings){
+      const anchor=o==='h'?hall.hub[0]:hall.hub[1],offsets=oxOffsetOrder(spacing,anchor),offsetLimit=mode==='fast'?Math.min(3,spacing):spacing;
+      for(const off of offsets.slice(0,offsetLimit))for(const t of tr.slice(0,trunkLimit)){
+        add(oxPattern(ctx,hall,o,spacing,off,t,'full'));
+        if(mode!=='fast'){add(oxPattern(ctx,hall,o,spacing,off,t,'left'));add(oxPattern(ctx,hall,o,spacing,off,t,'right'))}
+      }
+    }
+  }
   return out;
 }
 function oxPlacements(ctx,def,hall,roads){
@@ -63,12 +99,8 @@ function oxAllowedResidentialDefs(era,primaryKey){
   const index=defs.findIndex(d=>d.key===primaryKey);
   return index<0?[]:defs.slice(0,index+1);
 }
-function oxAllowedResidentialKeys(era,primaryKey){
-  return new Set(oxAllowedResidentialDefs(era,primaryKey).map(d=>d.key));
-}
-function oxUsesOnlyAllowedResidential(state,allowedKeys){
-  return !!state&&Array.isArray(state.buildings)&&state.buildings.every(b=>allowedKeys.has(b.type));
-}
+function oxAllowedResidentialKeys(era,primaryKey){return new Set(oxAllowedResidentialDefs(era,primaryKey).map(d=>d.key))}
+function oxUsesOnlyAllowedResidential(state,allowedKeys){return !!state&&Array.isArray(state.buildings)&&state.buildings.every(b=>allowedKeys.has(b.type))}
 function oxState(ctx,sol){const g=oxBlank(ctx),bs=[];for(const id of sol.hall.ids){const[r,c]=optRC(id);g[r][c]='hub'}for(const id of sol.roads){const[r,c]=optRC(id);g[r][c]='road'}for(const p of sol.placements){const cells=[];for(const id of p.ids){const[r,c]=optRC(id);g[r][c]=p.type;cells.push([r,c])}bs.push({type:p.type,r:p.r,c:p.c,cells})}return{grid:g,buildings:bs,hubTop:[...sol.hall.hub],enabled:[...ctx.enabled],panX,panY,viewZoom}}
 function oxScore(ctx,state,primary){let primaryCount=0,totalResidential=0,credits8h=0,fillerCredits8h=0,roads=0,area=0;for(let r=0;r<28;r++)for(let c=0;c<28;c++)if(state.grid[r][c]==='road')roads++;for(const b of state.buildings){const d=eraBoardBuildingByKey(ctx.era,b.type);if(!d)continue;area+=d.w*d.h;if(d.category==='residential'){totalResidential++;const cr=oxCredits(d);credits8h+=cr;if(b.type===primary)primaryCount++;else fillerCredits8h+=cr}}return{primaryCount,totalResidential,credits8h,fillerCredits8h,roads,unused:ctx.ownedCount-ctx.hall.w*ctx.hall.h-roads-area}}
 function oxBetter(a,b,goal){if(!b)return true;if(goal==='maxPrimary'){if(a.primaryCount!==b.primaryCount)return a.primaryCount>b.primaryCount;if(a.credits8h!==b.credits8h)return a.credits8h>b.credits8h;if(a.fillerCredits8h!==b.fillerCredits8h)return a.fillerCredits8h>b.fillerCredits8h;if(a.roads!==b.roads)return a.roads<b.roads;return a.unused<b.unused}if(a.credits8h!==b.credits8h)return a.credits8h>b.credits8h;if(a.roads!==b.roads)return a.roads<b.roads;return a.totalResidential>b.totalResidential}
@@ -90,7 +122,12 @@ function oxPack(ctx,hall,roads,primary,goal,mode,seed){
   const allowed=oxAllowedResidentialDefs(ctx.era,primary.key);
   const fillers=allowed.filter(d=>d.key!==primary.key).sort((a,b)=>oxCredits(b)/(b.w*b.h)-oxCredits(a)/(a.w*a.h));
   const base=hall.mask|oxMask(roads),pc=oxPlacements(ctx,primary,hall,roads),starts=mode==='fast'?6:mode==='deep'?18:10;let best=null,score=null;
-  for(let s=0;s<starts;s++){const order=s<6?s:6+s;let blocked=base,placed=[];for(const p of oxSort(pc,order,seed+s*7919))if((p.mask&blocked)===0n){placed.push(p);blocked|=p.mask}for(const d of fillers)for(const p of oxSort(oxPlacements(ctx,d,hall,roads),order,seed+s*104729+d.key.length))if((p.mask&blocked)===0n){placed.push(p);blocked|=p.mask}const sol={hall,roads:new Set(roads),placements:placed},st=oxState(ctx,sol),sc=oxScore(ctx,st,ctx.primaryKey);ctx.tested++;if(!best||oxBetter(sc,score,goal)){best=sol;score=sc}}
+  for(let s=0;s<starts;s++){
+    const order=s<6?s:6+s;let blocked=base,placed=[];
+    for(const p of oxSort(pc,order,seed+s*7919))if((p.mask&blocked)===0n){placed.push(p);blocked|=p.mask}
+    for(const d of fillers)for(const p of oxSort(oxPlacements(ctx,d,hall,roads),order,seed+s*104729+d.key.length))if((p.mask&blocked)===0n){placed.push(p);blocked|=p.mask}
+    const sol={hall,roads:new Set(roads),placements:placed},st=oxState(ctx,sol),sc=oxScore(ctx,st,ctx.primaryKey);ctx.tested++;if(!best||oxBetter(sc,score,goal)){best=sol;score=sc}
+  }
   return best?oxFillFreedGaps(ctx,best,primary,fillers):null;
 }
 function oxValid(ctx,state){if(!state||oxKey(state.enabled)!==ctx.enabledKey)return false;const hall=oxHall(ctx,state.hubTop);if(!hall)return false;const used=new Set(hall.ids),roads=oxRoads(state);if(!ctx.rules.paths&&roads.size)return false;for(const id of roads){if(!ctx.owned.has(id)||used.has(id))return false;used.add(id)}const ps=[];for(const b of state.buildings||[]){const d=eraBoardBuildingByKey(ctx.era,b.type);if(!d)return false;const ids=oxRect(b.r,b.c,d.h,d.w);if(ids.some(id=>!ctx.owned.has(id)||used.has(id)))return false;ids.forEach(id=>used.add(id));ps.push({type:b.type,ids})}if(ctx.rules.paths&&(oxConnected(roads,hall.set).size!==roads.size||!oxAccess(ctx,ps,roads)))return false;return true}
@@ -99,7 +136,7 @@ function oxProgress(ctx,label){const el=$('optimizerProgress'),s=ctx.bestScore,d
 async function oxYield(ctx,force){if(optimizerCancelRequested||performance.now()>=ctx.deadline)return false;const now=performance.now();if(force||now-ctx.lastYield>12){if(force||now-ctx.lastProgress>100)oxProgress(ctx,'Searching');await new Promise(r=>setTimeout(r,0));ctx.lastYield=performance.now()}return !optimizerCancelRequested&&performance.now()<ctx.deadline}
 async function optimizeColonyV2(era,goal,primaryKey,mode){const ctx=oxCtx(era);ctx.goal=goal;ctx.primaryKey=primaryKey;ctx.started=performance.now();ctx.lastYield=ctx.started;ctx.deadline=ctx.started+(OPT_BUDGET[mode]||3000);const primary=eraBoardBuildingByKey(era,primaryKey);if(!primary)throw new Error('Unknown optimizer building');const base=oxBaseline(ctx,primaryKey,goal);ctx.bestState=base.state;ctx.bestScore=base.score;const hubs=oxHubs(ctx,[base.state.hubTop,hubTop,ctx.cfg.defaultHub]);for(let hi=0;hi<hubs.length;hi++){if(!(await oxYield(ctx)))break;const hall=oxHall(ctx,hubs[hi]);for(const roads of oxPatterns(ctx,hall,primary,base.state,mode)){if(!(await oxYield(ctx)))break;const sol=oxPack(ctx,hall,roads,primary,goal,mode,oxHash((hi+1)*65537+ctx.tested));if(!sol)continue;const st=oxState(ctx,sol),sc=oxScore(ctx,st,primaryKey);if(oxValid(ctx,st)&&oxUsesOnlyAllowedResidential(st,oxAllowedResidentialKeys(era,primaryKey))&&oxBetter(sc,ctx.bestScore,goal)){ctx.bestState=st;ctx.bestScore=sc;oxProgress(ctx,'Improved')}}}await oxYield(ctx,true);return{state:ctx.bestState,score:ctx.bestScore,cancelled:optimizerCancelRequested,tested:ctx.tested}}
 
-function optimizerPopulatePrimary(){const s=$('optimizerPrimary');if(!s)return;s.innerHTML='';const defs=ERA_DATA[selectedEra]?.residential||[],counts=new Map();for(const b of buildings)counts.set(b.type,(counts.get(b.type)||0)+1);let pref=defs[0]?.key,best=-1;for(const d of defs){const n=counts.get(d.key)||0;if(n>best){best=n;pref=d.key}const o=document.createElement('option');o.value=d.key;o.textContent=d.name+' ('+d.sizeText+')';s.appendChild(o)}if(pref)s.value=pref}
+function optimizerPopulatePrimary(){const s=$('optimizerPrimary');if(!s)return;s.innerHTML='';const defs=ERA_DATA[selectedEra]?.residential||[],counts=new Map();for(const b of buildings)counts.set(b.type,(counts.get(d.key)||0)+1);let pref=defs[0]?.key,best=-1;for(const d of defs){const n=counts.get(d.key)||0;if(n>best){best=n;pref=d.key}const o=document.createElement('option');o.value=d.key;o.textContent=d.name+' ('+d.sizeText+')';s.appendChild(o)}if(pref)s.value=pref}
 function optimizerSyncGoalUi(){$('optimizerPrimaryRow').hidden=false}
 function openOptimizerDialog(){if(!isEditableColonyEra(selectedEra)||optimizerRunning)return;closePresetPopover();optimizerPendingResult=null;optimizerCancelRequested=false;optimizerPopulatePrimary();optimizerSyncGoalUi();$('optimizerProgress').innerHTML='<strong>Ready</strong><span>Your current layout and matching presets are used as starting points.</span>';$('optimizerRunBtn').textContent='Optimize';$('optimizerRunBtn').disabled=false;$('optimizerCancelBtn').textContent='Cancel';$('optimizerDialog').showModal()}
 function closeOptimizerDialog(){optimizerCancelRequested=true;if(!optimizerRunning)$('optimizerDialog')?.close()}
