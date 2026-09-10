@@ -1,6 +1,6 @@
 /* Colony Optimizer — heuristic colony layout search. */
 const OPT_RULES={SAM:{paths:true},SAAB:{paths:true},SAV:{paths:true},SAJM:{paths:true},SAT:{paths:false},SASH:{paths:false}};
-const OPT_BUDGET={fast:600,normal:3000,deep:15000};
+const OPT_BUDGET={fast:600,normal:3000,deep:60000};
 let optimizerRunning=false,optimizerCancelRequested=false,optimizerPendingResult=null;
 
 function oxIdBit(id){return 1n<<BigInt(id)}
@@ -72,6 +72,19 @@ function oxBlockPattern(ctx,hall,rowSpacing,rowOffset,colSpacing,colOffset){
   for(let c=colOffset;c<28;c+=colSpacing)for(let r=0;r<28;r++)add(r,c);
   return roads.size?roads:null;
 }
+function oxHallSplitPattern(ctx,hall,rowSpacing,colSpacing,kind='grid'){
+  const roads=new Set(),add=(r,c)=>{const id=optId(r,c);if(oxOwnedAt(ctx,r,c)&&!hall.set.has(id))roads.add(id)};
+  const [hr,hc]=hall.hub,hh=ctx.hall.h,hw=ctx.hall.w;
+  const addRow=r=>{for(let c=0;c<28;c++)add(r,c)},addCol=c=>{for(let r=0;r<28;r++)add(r,c)};
+  const rows=()=>{for(let r=hr-1;r>=0;r-=rowSpacing)addRow(r);for(let r=hr+hh;r<28;r+=rowSpacing)addRow(r)};
+  const cols=()=>{for(let c=hc-1;c>=0;c-=colSpacing)addCol(c);for(let c=hc+hw;c<28;c+=colSpacing)addCol(c)};
+  if(kind==='grid'){rows();cols()}
+  else if(kind==='h-left'){rows();addCol(hc-1)}
+  else if(kind==='h-right'){rows();addCol(hc+hw)}
+  else if(kind==='v-top'){cols();addRow(hr-1)}
+  else if(kind==='v-bottom'){cols();addRow(hr+hh)}
+  return roads.size?roads:null;
+}
 function oxSpacingOptions(size){
   const out=[size*2+1,size+1];
   return [...new Set(out.filter(n=>n>1))];
@@ -87,12 +100,16 @@ function oxPatterns(ctx,hall,def,baseline,mode){
   if(baseline&&baseline.hubTop?.[0]===hall.hub[0]&&baseline.hubTop?.[1]===hall.hub[1])add(oxRoads(baseline));
 
   // Buildings only need to touch one path. Two building rows can therefore share
-  // the same pair of road lines. For 2x2 homes this creates the familiar 4x4
-  // blocks instead of wasting a road after every single row of buildings.
+  // the same pair of road lines. Hall-split patterns also restart those bands on
+  // each side of the Town Hall instead of wasting a strip because the Hall broke
+  // the global road rhythm.
   const rowSpacings=oxSpacingOptions(def.h),colSpacings=oxSpacingOptions(def.w);
-  const rowOffsets=oxOffsetOrder(rowSpacings[0],hall.hub[0]),colOffsets=oxOffsetOrder(colSpacings[0],hall.hub[1]);
+  const wideRow=rowSpacings[0],wideCol=colSpacings[0];
+  for(const kind of ['grid','h-left','h-right','v-top','v-bottom'])add(oxHallSplitPattern(ctx,hall,wideRow,wideCol,kind));
+
+  const rowOffsets=oxOffsetOrder(wideRow,hall.hub[0]),colOffsets=oxOffsetOrder(wideCol,hall.hub[1]);
   const gridLimit=mode==='fast'?2:mode==='normal'?3:5;
-  for(const ro of rowOffsets.slice(0,gridLimit))for(const co of colOffsets.slice(0,gridLimit))add(oxBlockPattern(ctx,hall,rowSpacings[0],ro,colSpacings[0],co));
+  for(const ro of rowOffsets.slice(0,gridLimit))for(const co of colOffsets.slice(0,gridLimit))add(oxBlockPattern(ctx,hall,wideRow,ro,wideCol,co));
 
   for(const o of ['h','v']){
     const spacings=o==='h'?rowSpacings:colSpacings,axis=o==='h'?hall.hub[1]:hall.hub[0],span=o==='h'?ctx.hall.w:ctx.hall.h,tr=[];
@@ -144,7 +161,7 @@ function oxFillFreedGaps(ctx,sol,primary,fillers){
 function oxPack(ctx,hall,roads,primary,goal,mode,seed){
   const allowed=oxAllowedResidentialDefs(ctx.era,primary.key);
   const fillers=allowed.filter(d=>d.key!==primary.key).sort((a,b)=>oxCredits(b)/(b.w*b.h)-oxCredits(a)/(a.w*a.h));
-  const base=hall.mask|oxMask(roads),pc=oxPlacements(ctx,primary,hall,roads),starts=mode==='fast'?6:mode==='deep'?18:10;let best=null,score=null;
+  const base=hall.mask|oxMask(roads),pc=oxPlacements(ctx,primary,hall,roads),starts=mode==='fast'?6:mode==='deep'?22:10;let best=null,score=null;
   for(let s=0;s<starts;s++){
     const order=s<6?s:6+s;let blocked=base,placed=[];
     for(const p of oxSort(pc,order,seed+s*7919))if((p.mask&blocked)===0n){placed.push(p);blocked|=p.mask}
@@ -184,11 +201,11 @@ async function optimizeColonyV2(era,goal,primaryKey,mode){
       for(const roads of patterns){if(!(await oxYield(ctx)))break;trySolution(oxPack(ctx,hall,roads,primary,goal,'fast',oxHash((hi+1)*65537+ctx.tested)),hubs[hi])}
     }
   }else{
-    // First spread a cheap search across many Town Hall positions. The previous
-    // search could spend most of Deep mode around the current Hall before trying
-    // genuinely different placements.
-    const scoutUntil=Math.min(ctx.deadline-250,ctx.started+(mode==='deep'?4300:900));
-    const scoutMax=mode==='deep'?72:32,patternsPerHall=mode==='deep'?5:3;
+    // Deep mode is intentionally generous while the optimizer is being tested.
+    // Scout many Hall positions first, then spend the bulk of the time refining
+    // the best ones instead of getting stuck around the current Hall.
+    const scoutUntil=Math.min(ctx.deadline-1000,ctx.started+(mode==='deep'?12000:900));
+    const scoutMax=mode==='deep'?180:32,patternsPerHall=mode==='deep'?8:3;
     for(let hi=0;hi<hubs.length&&hi<scoutMax&&performance.now()<scoutUntil;hi++){
       if(!(await oxYield(ctx)))break;
       const hall=oxHall(ctx,hubs[hi]),patterns=oxPatterns(ctx,hall,primary,base.state,'fast').slice(0,patternsPerHall);
@@ -199,7 +216,7 @@ async function optimizeColonyV2(era,goal,primaryKey,mode){
     }
 
     const ranked=oxSortHallLeaders(leaders,goal),refine=[],seen=new Set(),addHub=h=>{if(!h)return;const k=h.join(',');if(!seen.has(k)&&oxHall(ctx,h)){seen.add(k);refine.push([...h])}};
-    addHub(ctx.bestState?.hubTop);for(const x of ranked.slice(0,mode==='deep'?10:6))addHub(x.hub);addHub(base.state.hubTop);addHub(hubTop);addHub(ctx.cfg.defaultHub);
+    addHub(ctx.bestState?.hubTop);for(const x of ranked.slice(0,mode==='deep'?20:6))addHub(x.hub);addHub(base.state.hubTop);addHub(hubTop);addHub(ctx.cfg.defaultHub);
     const jobs=refine.map((h,i)=>{const hall=oxHall(ctx,h);return{h,hall,patterns:oxPatterns(ctx,hall,primary,base.state,mode),i:0,seed:i+1}});
     let active=true;
     while(active&&await oxYield(ctx)){
@@ -216,7 +233,8 @@ async function optimizeColonyV2(era,goal,primaryKey,mode){
 
 function optimizerPopulatePrimary(){const s=$('optimizerPrimary');if(!s)return;s.innerHTML='';const defs=ERA_DATA[selectedEra]?.residential||[],counts=new Map();for(const b of buildings)counts.set(b.type,(counts.get(b.type)||0)+1);let pref=defs[0]?.key,best=-1;for(const d of defs){const n=counts.get(d.key)||0;if(n>best){best=n;pref=d.key}const o=document.createElement('option');o.value=d.key;o.textContent=d.name+' ('+d.sizeText+')';s.appendChild(o)}if(pref)s.value=pref}
 function optimizerSyncGoalUi(){$('optimizerPrimaryRow').hidden=false}
-function openOptimizerDialog(){if(!isEditableColonyEra(selectedEra)||optimizerRunning)return;closePresetPopover();optimizerPendingResult=null;optimizerCancelRequested=false;optimizerPopulatePrimary();optimizerSyncGoalUi();$('optimizerProgress').innerHTML='<strong>Ready</strong><span>Your current layout and matching presets are used as starting points.</span>';$('optimizerRunBtn').textContent='Optimize';$('optimizerRunBtn').disabled=false;$('optimizerCancelBtn').textContent='Cancel';$('optimizerDialog').showModal()}
+function optimizerSyncSearchLabels(){const s=$('optimizerSearch');if(!s)return;for(const o of s.options){if(o.value==='deep')o.textContent='Deep · ~60s';else if(o.value==='normal')o.textContent='Normal · ~3s';else if(o.value==='fast')o.textContent='Fast · <1s'}}
+function openOptimizerDialog(){if(!isEditableColonyEra(selectedEra)||optimizerRunning)return;closePresetPopover();optimizerPendingResult=null;optimizerCancelRequested=false;optimizerPopulatePrimary();optimizerSyncGoalUi();optimizerSyncSearchLabels();$('optimizerProgress').innerHTML='<strong>Ready</strong><span>Your current layout and matching presets are used as starting points.</span>';$('optimizerRunBtn').textContent='Optimize';$('optimizerRunBtn').disabled=false;$('optimizerCancelBtn').textContent='Cancel';$('optimizerDialog').showModal()}
 function closeOptimizerDialog(){optimizerCancelRequested=true;if(!optimizerRunning)$('optimizerDialog')?.close()}
 async function runOptimizerDialog(){if(optimizerPendingResult){snapshot();movingItem=null;clearRoadChain();setMode(null,false);activeLayoutMode='free';activePresetId=null;preset='none';applyColonyState(optimizerPendingResult.state,{preserveCamera:true});updateLayoutModeButtons();persistColonyState(selectedEra);optimizerPendingResult=null;$('optimizerDialog').close();notifyToast('Optimizer result applied','Undo is available with Ctrl+Z.','success',3600);return}if(optimizerRunning)return;const era=selectedEra,goal=$('optimizerGoal').value,primary=$('optimizerPrimary').value,mode=$('optimizerSearch').value;if(!primary)return;optimizerRunning=true;optimizerCancelRequested=false;$('optimizerRunBtn').disabled=true;$('optimizerRunBtn').textContent='Searching…';$('optimizerCancelBtn').textContent='Cancel search';$('optimizerDialog').querySelectorAll('select').forEach(x=>x.disabled=true);try{const result=await optimizeColonyV2(era,goal,primary,mode);if(selectedEra!==era)return;const ctx=oxCtx(era),current=currentColonyState(),allowedKeys=oxAllowedResidentialKeys(era,primary),cur=oxValid(ctx,current)&&oxUsesOnlyAllowedResidential(current,allowedKeys)?oxScore(ctx,current,primary):null,sc=oxScore(ctx,result.state,primary),better=!cur||(goal==='maxCredits'?sc.credits8h>cur.credits8h:oxBetter(sc,cur,goal)),d=eraBoardBuildingByKey(era,primary),best=goal==='maxPrimary'?(sc.primaryCount+' '+d.name+(sc.primaryCount===1?'':'s')):(Math.round(sc.credits8h/2).toLocaleString()+' credits / 4h');if(result.cancelled){$('optimizerProgress').innerHTML='<strong>Cancelled</strong><span>Your layout was left unchanged.</span>';$('optimizerRunBtn').textContent='Optimize'}else if(better){optimizerPendingResult={state:result.state};$('optimizerProgress').innerHTML='<strong>Best found: '+best+'</strong><span>'+sc.roads+' paths · '+sc.unused+' unused tiles · '+result.tested.toLocaleString()+' layouts tested</span><span>Best found, not a proven maximum.</span>';$('optimizerRunBtn').textContent='Apply result'}else{$('optimizerProgress').innerHTML='<strong>No higher-credit layout found</strong><span>Best found: '+best+'. Your layout was not changed.</span><span>'+result.tested.toLocaleString()+' layouts tested.</span>';$('optimizerRunBtn').textContent='Run again'}$('optimizerRunBtn').disabled=false}catch(err){console.error('Optimizer failed',err);$('optimizerProgress').innerHTML='<strong>Optimizer error</strong><span>Your layout was left unchanged.</span>';$('optimizerRunBtn').textContent='Try again';$('optimizerRunBtn').disabled=false}finally{optimizerRunning=false;$('optimizerCancelBtn').textContent='Close';$('optimizerDialog').querySelectorAll('select').forEach(x=>x.disabled=false)}}
 
