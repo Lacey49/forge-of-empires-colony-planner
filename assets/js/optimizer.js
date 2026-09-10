@@ -18,15 +18,34 @@ function oxHall(ctx,hub){if(!hub)return null;const ids=oxRect(hub[0],hub[1],ctx.
 function oxRoads(state){const s=new Set();for(let r=0;r<28;r++)for(let c=0;c<28;c++)if(state?.grid?.[r]?.[c]==='road')s.add(optId(r,c));return s}
 function oxConnected(roads,hallSet){const seen=new Set(),q=[];for(const id of roads)if(optNeighborIds(id).some(n=>hallSet.has(n))){seen.add(id);q.push(id)}for(let i=0;i<q.length;i++)for(const n of optNeighborIds(q[i]))if(roads.has(n)&&!seen.has(n)){seen.add(n);q.push(n)}return seen}
 function oxHubs(ctx,seeds){const out=[],seen=new Set(),add=h=>{if(!h)return;const k=h.join(',');if(!seen.has(k)&&oxHall(ctx,h)){seen.add(k);out.push([...h])}};seeds.forEach(add);const rest=[];for(let r=0;r<=28-ctx.hall.h;r++)for(let c=0;c<=28-ctx.hall.w;c++){const h=[r,c],k=h.join(',');if(seen.has(k)||!oxHall(ctx,h))continue;const edge=Math.min(r,c,28-r-ctx.hall.h,28-c-ctx.hall.w);rest.push({h,n:edge})}rest.sort((a,b)=>a.n-b.n||a.h[0]-b.h[0]||a.h[1]-b.h[1]);return out.concat(rest.map(x=>x.h))}
+function oxRoadTree(ctx,hall){
+  if(hall.roadTree)return hall.roadTree;
+  const parent=new Map(),dist=new Map(),q=[];
+  for(const id of hall.ids)for(const n of optNeighborIds(id))if(ctx.owned.has(n)&&!hall.set.has(n)&&!dist.has(n)){dist.set(n,1);parent.set(n,null);q.push(n)}
+  for(let i=0;i<q.length;i++){const id=q[i],d=dist.get(id);for(const n of optNeighborIds(id))if(ctx.owned.has(n)&&!hall.set.has(n)&&!dist.has(n)){dist.set(n,d+1);parent.set(n,id);q.push(n)}}
+  hall.roadTree={parent,dist};return hall.roadTree;
+}
+function oxRoadComponents(roads){
+  const left=new Set(roads),out=[];
+  while(left.size){const first=left.values().next().value,comp=new Set([first]),q=[first];left.delete(first);for(let i=0;i<q.length;i++)for(const n of optNeighborIds(q[i]))if(left.has(n)){left.delete(n);comp.add(n);q.push(n)}out.push(comp)}
+  return out;
+}
+function oxConnectPattern(ctx,hall,roads){
+  if(!roads?.size)return null;
+  const out=new Set(roads),tree=oxRoadTree(ctx,hall),components=oxRoadComponents(out).map(comp=>{let pick=null,best=Infinity;for(const id of comp){const d=tree.dist.get(id);if(d!==undefined&&d<best){best=d;pick=id}}return{comp,pick,best}}).sort((a,b)=>a.best-b.best);
+  let connected=oxConnected(out,hall.set);
+  for(const item of components){if([...item.comp].some(id=>connected.has(id)))continue;if(item.pick==null)continue;let id=item.pick,guard=0;while(id!=null&&guard++<784){out.add(id);if(connected.has(id))break;id=tree.parent.get(id)??null}connected=oxConnected(out,hall.set)}
+  connected=oxConnected(out,hall.set);return connected.size===out.size?out:(connected.size?connected:null);
+}
 function oxPattern(ctx,hall,orientation,spacing,offset,trunk,family){
   const roads=new Set(),add=(r,c)=>{const id=optId(r,c);if(r>=0&&r<28&&c>=0&&c<28&&ctx.owned.has(id)&&!hall.set.has(id))roads.add(id)};
   if(orientation==='h'){for(let r=offset;r<28;r+=spacing)for(let c=0;c<28;c++){if(family==='left'&&c>trunk)continue;if(family==='right'&&c<trunk)continue;add(r,c)}for(let r=0;r<28;r++)add(r,trunk)}
   else{for(let c=offset;c<28;c+=spacing)for(let r=0;r<28;r++){if(family==='left'&&r>trunk)continue;if(family==='right'&&r<trunk)continue;add(r,c)}for(let c=0;c<28;c++)add(trunk,c)}
-  const connected=oxConnected(roads,hall.set);return connected.size?connected:null;
+  return roads.size?roads:null;
 }
 function oxPatterns(ctx,hall,def,baseline,mode){
   if(!ctx.rules.paths)return[new Set()];
-  const out=[],seen=new Set(),add=r=>{if(!r?.size)return;const c=oxConnected(r,hall.set),k=[...c].sort((a,b)=>a-b).join(',');if(c.size&&!seen.has(k)){seen.add(k);out.push(c)}};
+  const out=[],seen=new Set(),keep=c=>{if(!c?.size)return;const k=[...c].sort((a,b)=>a-b).join(',');if(!seen.has(k)){seen.add(k);out.push(c)}},add=r=>{if(!r?.size)return;const root=oxConnected(r,hall.set);keep(root);if(mode!=='fast'&&root.size<r.size)keep(oxConnectPattern(ctx,hall,r))};
   if(baseline&&baseline.hubTop?.[0]===hall.hub[0]&&baseline.hubTop?.[1]===hall.hub[1])add(oxRoads(baseline));
   for(const o of ['h','v']){const spacing=o==='h'?def.h+1:def.w+1,axis=o==='h'?hall.hub[1]:hall.hub[0],span=o==='h'?ctx.hall.w:ctx.hall.h,tr=[];for(const t of[axis-1,axis+span,axis,axis+span-1])if(t>=0&&t<28&&!tr.includes(t))tr.push(t);for(let t=0;t<28;t++)if(!tr.includes(t))tr.push(t);const limit=mode==='fast'?6:mode==='normal'?10:28;for(let off=0;off<spacing;off++)for(const t of tr.slice(0,limit)){add(oxPattern(ctx,hall,o,spacing,off,t,'full'));if(mode!=='fast'){add(oxPattern(ctx,hall,o,spacing,off,t,'left'));add(oxPattern(ctx,hall,o,spacing,off,t,'right'))}}}
   return out;
@@ -55,12 +74,24 @@ function oxScore(ctx,state,primary){let primaryCount=0,totalResidential=0,credit
 function oxBetter(a,b,goal){if(!b)return true;if(goal==='maxPrimary'){if(a.primaryCount!==b.primaryCount)return a.primaryCount>b.primaryCount;if(a.credits8h!==b.credits8h)return a.credits8h>b.credits8h;if(a.fillerCredits8h!==b.fillerCredits8h)return a.fillerCredits8h>b.fillerCredits8h;if(a.roads!==b.roads)return a.roads<b.roads;return a.unused<b.unused}if(a.credits8h!==b.credits8h)return a.credits8h>b.credits8h;if(a.roads!==b.roads)return a.roads<b.roads;return a.totalResidential>b.totalResidential}
 function oxAccess(ctx,placements,roads){if(!ctx.rules.paths)return true;for(const p of placements){const d=eraBoardBuildingByKey(ctx.era,p.type);if(d?.requiresPath!==false&&!p.ids.some(id=>optNeighborIds(id).some(n=>roads.has(n))))return false}return true}
 function oxPrune(ctx,sol){if(!ctx.rules.paths)return sol;const roads=new Set(sol.roads);let changed=true;while(changed){changed=false;for(const id of[...roads]){const test=new Set(roads);test.delete(id);if(!oxAccess(ctx,sol.placements,test))continue;if(test.size&&oxConnected(test,sol.hall.set).size!==test.size)continue;roads.delete(id);changed=true}}return{...sol,roads}}
+function oxPlacementMask(sol){let blocked=sol.hall.mask|oxMask(sol.roads);for(const p of sol.placements)blocked|=p.mask;return blocked}
+function oxFillFreedGaps(ctx,sol,primary,fillers){
+  let work=oxPrune(ctx,sol),changed=false;
+  for(let round=0;round<3;round++){
+    let blocked=oxPlacementMask(work),added=0;
+    for(const d of[primary,...fillers])for(const p of oxPlacements(ctx,d,work.hall,work.roads))if((p.mask&blocked)===0n){work.placements.push(p);blocked|=p.mask;added++;changed=true}
+    if(!added)break;
+    work=oxPrune(ctx,work);
+  }
+  if(changed)ctx.tested++;
+  return work;
+}
 function oxPack(ctx,hall,roads,primary,goal,mode,seed){
   const allowed=oxAllowedResidentialDefs(ctx.era,primary.key);
   const fillers=allowed.filter(d=>d.key!==primary.key).sort((a,b)=>oxCredits(b)/(b.w*b.h)-oxCredits(a)/(a.w*a.h));
   const base=hall.mask|oxMask(roads),pc=oxPlacements(ctx,primary,hall,roads),starts=mode==='fast'?6:mode==='deep'?18:10;let best=null,score=null;
   for(let s=0;s<starts;s++){const order=s<6?s:6+s;let blocked=base,placed=[];for(const p of oxSort(pc,order,seed+s*7919))if((p.mask&blocked)===0n){placed.push(p);blocked|=p.mask}for(const d of fillers)for(const p of oxSort(oxPlacements(ctx,d,hall,roads),order,seed+s*104729+d.key.length))if((p.mask&blocked)===0n){placed.push(p);blocked|=p.mask}const sol={hall,roads:new Set(roads),placements:placed},st=oxState(ctx,sol),sc=oxScore(ctx,st,ctx.primaryKey);ctx.tested++;if(!best||oxBetter(sc,score,goal)){best=sol;score=sc}}
-  return best?oxPrune(ctx,best):null;
+  return best?oxFillFreedGaps(ctx,best,primary,fillers):null;
 }
 function oxValid(ctx,state){if(!state||oxKey(state.enabled)!==ctx.enabledKey)return false;const hall=oxHall(ctx,state.hubTop);if(!hall)return false;const used=new Set(hall.ids),roads=oxRoads(state);if(!ctx.rules.paths&&roads.size)return false;for(const id of roads){if(!ctx.owned.has(id)||used.has(id))return false;used.add(id)}const ps=[];for(const b of state.buildings||[]){const d=eraBoardBuildingByKey(ctx.era,b.type);if(!d)return false;const ids=oxRect(b.r,b.c,d.h,d.w);if(ids.some(id=>!ctx.owned.has(id)||used.has(id)))return false;ids.forEach(id=>used.add(id));ps.push({type:b.type,ids})}if(ctx.rules.paths&&(oxConnected(roads,hall.set).size!==roads.size||!oxAccess(ctx,ps,roads)))return false;return true}
 function oxBaseline(ctx,primary,goal){const allowedKeys=oxAllowedResidentialKeys(ctx.era,primary),states=[currentColonyState()];try{for(const p of getPresetCatalog())if(p?.state&&oxKey(p.state.enabled)===ctx.enabledKey)states.push(p.state)}catch{}let best=null,score=null;for(const s of states)if(oxValid(ctx,s)&&oxUsesOnlyAllowedResidential(s,allowedKeys)){const sc=oxScore(ctx,s,primary);if(!best||oxBetter(sc,score,goal)){best=cloneState(s);score=sc}}if(!best){const h=oxHubs(ctx,[hubTop,ctx.cfg.defaultHub])[0],sol={hall:oxHall(ctx,h),roads:new Set(),placements:[]};best=oxState(ctx,sol);score=oxScore(ctx,best,primary)}return{state:best,score}}
