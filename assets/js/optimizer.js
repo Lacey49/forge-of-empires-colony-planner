@@ -8,9 +8,9 @@
     './optimizer/performance.js?v=1',
     './optimizer/experimental.js?v=10',
     './optimizer/neighborhood.js?v=1',
-    './optimizer/road-network.js?v=1',
+    './optimizer/road-network.js?v=2',
     './presets/current-presets.js?v=1',
-    './site/keyboard.js?v=1'
+    './site/keyboard.js?v=2'
   ];
 
   const load = src => new Promise((resolve, reject) => {
@@ -25,6 +25,7 @@
   (async () => {
     try {
       for (const src of scripts) await load(src);
+      if (typeof optimizerSyncSearchLabels === 'function') optimizerSyncSearchLabels();
       if (button) button.disabled = false;
     } catch (err) {
       console.error('Optimizer failed to load', err);
