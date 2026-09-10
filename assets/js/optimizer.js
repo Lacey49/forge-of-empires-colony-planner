@@ -9,7 +9,7 @@
     './optimizer/experimental.js?v=10',
     './optimizer/neighborhood.js?v=1',
     './optimizer/road-network.js?v=2',
-    './presets/current-presets.js?v=1',
+    './presets/current-presets.js?v=2',
     './site/keyboard.js?v=2'
   ];
 
