@@ -24,6 +24,7 @@
     './presets/sat-presets.js?v=2',
     './presets/sash-presets.js?v=1',
     './site/state-consistency.js?v=2',
+    './site/clear-all-reset.js?v=1',
     './site/viewport.js?v=1',
     './site/keyboard.js?v=2',
     './optimizer/single-search.js?v=2',
