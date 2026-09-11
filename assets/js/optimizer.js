@@ -19,7 +19,8 @@
     './site/state-consistency.js?v=2',
     './site/viewport.js?v=1',
     './site/keyboard.js?v=2',
-    './optimizer/single-search.js?v=1'
+    './optimizer/single-search.js?v=1',
+    './site/release-hardening.js?v=1'
   ];
 
   const load = src => new Promise((resolve, reject) => {
