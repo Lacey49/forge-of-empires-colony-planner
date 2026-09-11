@@ -1,7 +1,12 @@
 /* Compatibility loader. Optimizer code now lives in /optimizer. */
 (() => {
   const button = document.getElementById('optimizeBtn');
+  const version = document.querySelector('.version-label');
   if (button) button.disabled = true;
+  if (version) {
+    version.textContent = 'v0.99';
+    version.title = 'Forge of Empires Colony Planner v0.99';
+  }
 
   const scripts = [
     './optimizer/optimizer.js?v=10',
@@ -20,7 +25,8 @@
     './site/viewport.js?v=1',
     './site/keyboard.js?v=2',
     './optimizer/single-search.js?v=1',
-    './site/release-hardening.js?v=1'
+    './site/storage-recovery.js?v=1',
+    './site/release-hardening.js?v=2'
   ];
 
   const load = src => new Promise((resolve, reject) => {
@@ -36,14 +42,17 @@
     try {
       for (const src of scripts) await load(src);
       if (typeof optimizerSyncSearchLabels === 'function') optimizerSyncSearchLabels();
-      const version = document.querySelector('.version-label');
-      if (version) {
-        version.textContent = 'v0.99';
-        version.title = 'Forge of Empires Colony Planner v0.99';
-      }
       if (button) button.disabled = false;
     } catch (err) {
       console.error('Optimizer failed to load', err);
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Optimizer unavailable';
+        button.title = 'Refresh the page to retry';
+      }
+      if (typeof notifyToast === 'function') {
+        notifyToast('Optimizer unavailable','Refresh the page to retry.','error',6000);
+      }
     }
   })();
 })();
