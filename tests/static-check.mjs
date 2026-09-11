@@ -138,6 +138,96 @@ for (let i = 0; i < inlineScripts.length; i++) {
 }
 notes.push(`${inlineScripts.length} inline JavaScript blocks parsed`);
 
+function testSatGeometryAndPresets() {
+  const satConfig = {baseChunks:[], expansions:[], defaultHub:[0,0]};
+  const geometryContext = {
+    window:{},
+    COLONY_CONFIGS:{SAT:satConfig},
+    PENDING_MAX_FOOTPRINTS:{SAT:[]}
+  };
+
+  try {
+    vm.runInNewContext(read('site/sat-geometry.js'), geometryContext, {filename:'site/sat-geometry.js'});
+  } catch (error) {
+    failures.push(`SAT geometry runtime check failed: ${error.message}`);
+    return;
+  }
+
+  check(satConfig.baseChunks.length === 18, `SAT should have 18 starting plots, found ${satConfig.baseChunks.length}`);
+  check(satConfig.expansions.length === 23, `SAT should have 23 expansions, found ${satConfig.expansions.length}`);
+
+  const plotKeys = new Set([
+    ...satConfig.baseChunks.map(([br,bc]) => `${br},${bc}`),
+    ...satConfig.expansions.map(({br,bc}) => `${br},${bc}`)
+  ]);
+  check(plotKeys.size === 41, `SAT should have 41 unique plots, found ${plotKeys.size}`);
+  check(
+    satConfig.defaultHub[0] === 8 && satConfig.defaultHub[1] === 4,
+    `SAT default Town Hall should start at 8,4, found ${satConfig.defaultHub.join(',')}`
+  );
+
+  const baseSet = new Set(satConfig.baseChunks.map(([br,bc]) => `${br},${bc}`));
+  const expansionByChunk = new Map(satConfig.expansions.map(exp => [`${exp.br},${exp.bc}`,exp]));
+  const colonyConfigCellState = (_era,r,c,enabledSet) => {
+    if (r < 0 || r >= 28 || c < 0 || c >= 28) return 'out';
+    const key = `${Math.floor(r/4)},${Math.floor(c/4)}`;
+    if (baseSet.has(key)) return 'empty';
+    const exp = expansionByChunk.get(key);
+    if (!exp) return 'out';
+    return enabledSet.has(exp.id) ? 'empty' : 'future';
+  };
+
+  const defs = {
+    igloo:{key:'igloo',name:'Igloo',w:3,h:3},
+    screenedDomicile:{key:'screenedDomicile',name:'Screened Domicile',w:4,h:4}
+  };
+  const presetContext = {
+    window:{},
+    selectedEra:'SAT',
+    COLONY_CONFIGS:geometryContext.COLONY_CONFIGS,
+    ERA_DATA:{SAT:{townHall:{w:5,h:5}}},
+    colonyConfigCellState,
+    eraBoardBuildingByKey:(_era,key) => defs[key] || null,
+    getPresetCatalog:() => [
+      {id:'builtin:sat-igloos',kind:'Built-in'},
+      {id:'builtin:sat-screened-domiciles',kind:'Built-in'},
+      {id:'custom:test',kind:'Saved',state:{}}
+    ]
+  };
+
+  try {
+    vm.runInNewContext(read('presets/sat-presets.js'), presetContext, {filename:'presets/sat-presets.js'});
+    const catalog = presetContext.getPresetCatalog();
+    const builtins = catalog.filter(item => String(item?.id || '').startsWith('builtin:sat-'));
+    check(builtins.length === 3, `SAT should expose 3 corrected built-in presets, found ${builtins.length}`);
+
+    const expected = new Map([
+      ['builtin:sat-igloos',{igloo:25,screenedDomicile:0,expansions:0}],
+      ['builtin:sat-screened-domiciles',{igloo:3,screenedDomicile:14,expansions:0}],
+      ['builtin:sat-screened-domiciles-all',{igloo:3,screenedDomicile:37,expansions:23}]
+    ]);
+
+    for (const preset of builtins) {
+      const want = expected.get(preset.id);
+      check(Boolean(want), `Unexpected SAT preset ${preset.id}`);
+      if (!want) continue;
+      const counts = {igloo:0,screenedDomicile:0};
+      for (const building of preset.state?.buildings || []) {
+        if (building.type in counts) counts[building.type]++;
+      }
+      check(counts.igloo === want.igloo, `${preset.id}: expected ${want.igloo} Igloos, found ${counts.igloo}`);
+      check(counts.screenedDomicile === want.screenedDomicile, `${preset.id}: expected ${want.screenedDomicile} Screened Domiciles, found ${counts.screenedDomicile}`);
+      check((preset.state?.enabled || []).length === want.expansions, `${preset.id}: expected ${want.expansions} expansions`);
+    }
+  } catch (error) {
+    failures.push(`SAT preset runtime check failed: ${error.message}`);
+  }
+
+  notes.push('SAT geometry: 18 starting plots, 23 expansions, and corrected presets checked');
+}
+
+testSatGeometryAndPresets();
+
 check(!fs.existsSync(path.join(repo, 'download.html')), 'Obsolete standalone download page still exists');
 const standaloneFiles = fs.readdirSync(repo).filter(name => /^forge-of-empires-colony-planner-v.*\.html$/i.test(name));
 check(standaloneFiles.length === 0, `Obsolete standalone planner files remain: ${standaloneFiles.join(', ')}`);
