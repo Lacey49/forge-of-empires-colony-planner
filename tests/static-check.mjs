@@ -100,7 +100,9 @@ if (eraLiteral) {
 }
 
 const loader = read('assets/js/optimizer.js');
-const moduleReferences = [...loader.matchAll(/'(.+?\.js\?v=\d+)'/g)].map(match => match[1]);
+const moduleReferences = [...loader.matchAll(/["'](.+?\.js(?:\?v=\d+)?)["']/g)]
+  .map(match => match[1])
+  .filter(reference => reference.startsWith('./'));
 for (const reference of moduleReferences) {
   const clean = reference.split('?')[0];
   check(fs.existsSync(path.resolve(repo, clean)), `Optimizer loader target is missing: ${clean}`);
@@ -121,6 +123,20 @@ for (const script of scripts) {
   }
 }
 notes.push(`${scripts.length} JavaScript files parsed`);
+
+const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+  .filter(match => !/\bsrc\s*=/.test(match[1]))
+  .filter(match => !/type\s*=\s*["']application\/ld\+json["']/i.test(match[1]))
+  .map(match => match[2])
+  .filter(source => source.trim());
+for (let i = 0; i < inlineScripts.length; i++) {
+  try {
+    new vm.Script(inlineScripts[i], {filename:`index.html inline script ${i + 1}`});
+  } catch (error) {
+    failures.push(`index.html inline script ${i + 1}: ${error.message}`);
+  }
+}
+notes.push(`${inlineScripts.length} inline JavaScript blocks parsed`);
 
 check(!fs.existsSync(path.join(repo, 'download.html')), 'Obsolete standalone download page still exists');
 const standaloneFiles = fs.readdirSync(repo).filter(name => /^forge-of-empires-colony-planner-v.*\.html$/i.test(name));
