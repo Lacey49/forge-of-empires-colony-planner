@@ -1,7 +1,7 @@
-/* v1.0 hardening: simpler optimizer choices, safer apply flow, mobile dialog sizing. */
+/* Pre-v1.0 hardening: simpler optimizer choices, safer apply flow, mobile dialog sizing. */
 (() => {
-  if (window.__FOE_RELEASE_HARDENING_V1__) return;
-  window.__FOE_RELEASE_HARDENING_V1__ = true;
+  if (window.__FOE_RELEASE_HARDENING_V2__) return;
+  window.__FOE_RELEASE_HARDENING_V2__ = true;
 
   const CORE_RESIDENTIAL = {
     SAM: ['dropPod','simpleShelter'],
@@ -54,12 +54,12 @@
     return counts;
   }
 
-  function formatBuildingList(items) {
+  function formatBuildingLines(items) {
     return items.map(({type,count}) => {
       const def = eraBoardBuildingByKey(selectedEra,type);
       const name = def?.name || type;
-      return `${count} ${name}${count === 1 ? '' : 's'}`;
-    }).join(', ');
+      return `${count}× ${name}`;
+    }).join('\n');
   }
 
   function optimizerApplyDiff(nextState) {
@@ -91,19 +91,44 @@
       if (optimizerPendingResult?.state) {
         const diff = optimizerApplyDiff(optimizerPendingResult.state);
         if (diff.nonResidentialRemoved.length) {
-          const removedText = formatBuildingList(diff.nonResidentialRemoved);
-          const addedText = diff.added.length ? formatBuildingList(diff.added) : 'no buildings';
+          const parts = [`Remove\n${formatBuildingLines(diff.nonResidentialRemoved)}`];
+          if (diff.added.length) parts.push(`Add\n${formatBuildingLines(diff.added)}`);
           const ok = await showConfirmDialog({
             title:'Apply optimizer result?',
-            message:`This result will remove ${removedText}. It will add ${addedText}. The credit optimizer rebuilds the colony as a residential layout. Undo is available until you reload the page.`,
+            message:parts.join('\n\n'),
             confirmText:'Apply result',
             cancelText:'Keep current layout'
           });
           if (!ok) return;
         }
+        try { window.foeSavePreOptimizerCheckpoint?.(); }
+        catch (err) { console.warn('Could not save optimizer checkpoint',err); }
       }
       return previousRunOptimizerDialog();
     };
+  }
+
+  const appDialog = document.getElementById('appDialog');
+  if (appDialog) appDialog.setAttribute('aria-labelledby','appDialogTitle');
+  const appDialogInput = document.getElementById('appDialogInput');
+  if (appDialogInput && !appDialogInput.getAttribute('aria-label')) appDialogInput.setAttribute('aria-label','Name');
+
+  const optimizerDialog = document.getElementById('optimizerDialog');
+  const optimizerTitle = optimizerDialog?.querySelector('.dialog-title');
+  if (optimizerDialog && optimizerTitle) {
+    if (!optimizerTitle.id) optimizerTitle.id = 'optimizerDialogTitle';
+    optimizerDialog.setAttribute('aria-labelledby',optimizerTitle.id);
+  }
+
+  const homeTitle = document.querySelector('.home-title');
+  if (homeTitle && homeTitle.tagName !== 'H1') {
+    const heading = document.createElement('h1');
+    heading.className = homeTitle.className;
+    heading.innerHTML = homeTitle.innerHTML;
+    for (const attr of homeTitle.attributes) {
+      if (attr.name !== 'class') heading.setAttribute(attr.name,attr.value);
+    }
+    homeTitle.replaceWith(heading);
   }
 
   const style = document.createElement('style');
@@ -126,6 +151,7 @@
       width: 100%;
       max-width: 100%;
     }
+    #appDialogMessage { white-space: pre-line; }
     @media (max-width: 480px) {
       .app-dialog button,
       #optimizerDialog button,
