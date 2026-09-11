@@ -124,7 +124,8 @@ storage = storage_path.read_text(encoding='utf-8')
 storage = storage.replace('__FOE_STORAGE_RECOVERY_V2__', '__FOE_STORAGE_RECOVERY_V3__')
 
 start = storage.find('  function settingsActionRow')
-end = storage.find('  try {', start)
+end_marker = "  try {\n    const raw = localStorage.getItem(STORAGE_KEY);"
+end = storage.find(end_marker, start)
 if start < 0 or end < 0:
     raise SystemExit('Could not find dynamic settings UI block')
 
