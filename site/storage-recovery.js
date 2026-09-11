@@ -1,7 +1,7 @@
 /* Local save hardening: backups, import/export, and visible storage failures. */
 (() => {
-  if (window.__FOE_STORAGE_RECOVERY_V3__) return;
-  window.__FOE_STORAGE_RECOVERY_V3__ = true;
+  if (window.__FOE_STORAGE_RECOVERY_V4__) return;
+  window.__FOE_STORAGE_RECOVERY_V4__ = true;
   if (typeof STORAGE_KEY !== 'string' || typeof saveWorkspace !== 'function') return;
 
   const PREVIOUS_KEY = `${STORAGE_KEY}-previous-good`;
@@ -38,6 +38,13 @@
     document.getElementById('storageFailureBanner')?.remove();
   }
 
+  function refreshRestoreButtons() {
+    const previousBtn = document.getElementById('restorePreviousPlannerSave');
+    const optimizerBtn = document.getElementById('restorePreOptimizerSave');
+    if (previousBtn) previousBtn.disabled = !localStorage.getItem(PREVIOUS_KEY);
+    if (optimizerBtn) optimizerBtn.disabled = !localStorage.getItem(PRE_OPTIMIZER_KEY);
+  }
+
   saveWorkspace = function() {
     try {
       const oldRaw = localStorage.getItem(STORAGE_KEY);
@@ -47,6 +54,7 @@
         } catch {}
       }
       localStorage.setItem(STORAGE_KEY,JSON.stringify(workspace));
+      refreshRestoreButtons();
       clearStorageFailure();
       return true;
     } catch (err) {
@@ -67,7 +75,7 @@
         workspace:JSON.parse(JSON.stringify(workspace))
       };
       localStorage.setItem(PRE_OPTIMIZER_KEY,JSON.stringify(payload));
-      updateRestoreButtons();
+      refreshRestoreButtons();
       return true;
     } catch (err) {
       console.error('Optimizer checkpoint failed',err);
@@ -148,11 +156,9 @@
       }
     });
 
-    previousBtn.disabled = !localStorage.getItem(PREVIOUS_KEY);
     previousBtn.addEventListener('click',() => restoreRaw(localStorage.getItem(PREVIOUS_KEY),'Restore previous save?'));
-
-    optimizerBtn.disabled = !localStorage.getItem(PRE_OPTIMIZER_KEY);
     optimizerBtn.addEventListener('click',() => restoreRaw(localStorage.getItem(PRE_OPTIMIZER_KEY),'Restore before optimizer?'));
+    refreshRestoreButtons();
   }
 
   try {
@@ -162,4 +168,6 @@
     console.error('Saved planner data is damaged',err);
     showStorageFailure('Saved planner data is damaged. Open Settings to recover it.');
   }
+
+  wireSettingsUi();
 })();
