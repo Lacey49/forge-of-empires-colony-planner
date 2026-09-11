@@ -1,7 +1,7 @@
 /* Pre-v1.0 hardening: simpler optimizer choices, safer apply flow, mobile dialog sizing. */
 (() => {
-  if (window.__FOE_RELEASE_HARDENING_V2__) return;
-  window.__FOE_RELEASE_HARDENING_V2__ = true;
+  if (window.__FOE_RELEASE_HARDENING_V3__) return;
+  window.__FOE_RELEASE_HARDENING_V3__ = true;
 
   const CORE_RESIDENTIAL = {
     SAM: ['dropPod','simpleShelter'],
@@ -134,6 +134,12 @@
   const style = document.createElement('style');
   style.id = 'release-hardening-dialog-fixes';
   style.textContent = `
+    .settings-reset-zone {
+      margin-bottom: 10px;
+    }
+    .settings-recovery-group {
+      margin-top: 0;
+    }
     .app-dialog {
       width: min(390px, calc(100vw - 24px));
       max-width: none;
@@ -150,6 +156,8 @@
       box-sizing: border-box;
       width: 100%;
       max-width: 100%;
+      max-height: calc(100dvh - 24px);
+      overflow: auto;
     }
     #appDialogMessage { white-space: pre-line; }
     @media (max-width: 480px) {
