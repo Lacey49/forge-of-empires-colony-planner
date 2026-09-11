@@ -9,6 +9,7 @@
   }
 
   const scripts = [
+    './site/storage-recovery.js?v=3',
     './optimizer/optimizer.js?v=10',
     './optimizer/performance.js?v=1',
     './optimizer/experimental.js?v=10',
@@ -25,7 +26,6 @@
     './site/viewport.js?v=1',
     './site/keyboard.js?v=2',
     './optimizer/single-search.js?v=1',
-    './site/storage-recovery.js?v=2',
     './site/release-hardening.js?v=2',
     './site/accessibility.js?v=1'
   ];
