@@ -1,7 +1,7 @@
 /* v0.99 optimizer UI: one full search with an adaptive time budget. */
 (() => {
-  if (window.__FOE_SINGLE_OPTIMIZER_SEARCH_V1__) return;
-  window.__FOE_SINGLE_OPTIMIZER_SEARCH_V1__ = true;
+  if (window.__FOE_SINGLE_OPTIMIZER_SEARCH_V2__) return;
+  window.__FOE_SINGLE_OPTIMIZER_SEARCH_V2__ = true;
   if (typeof optimizeColonyV2 !== 'function') return;
 
   const previousOptimizeColonyV2 = optimizeColonyV2;
@@ -28,11 +28,12 @@
   }
 
   function formatSeconds(seconds) {
-    if (seconds < 60) return `About ${seconds} seconds`;
-    const minutes = Math.floor(seconds / 60);
-    const rest = seconds % 60;
-    if (!rest) return `About ${minutes} minute${minutes === 1 ? '' : 's'}`;
-    return `About ${minutes} min ${rest} sec`;
+    if (seconds <= 25) return 'Usually under 30 sec';
+    if (seconds <= 45) return 'Usually 30–60 sec';
+    if (seconds <= 75) return 'Usually 1–1½ min';
+    if (seconds <= 105) return 'Usually 1–2 min';
+    if (seconds <= 135) return 'Usually 2–2½ min';
+    return 'Usually 2–3 min';
   }
 
   function installSingleSearchUi() {
@@ -46,7 +47,7 @@
     const row = select.closest('.optimizer-field');
     if (!row) return;
     const label = row.querySelector('span');
-    if (label) label.textContent = 'Estimated time';
+    if (label) label.textContent = 'Typical time';
 
     let value = document.getElementById('optimizerTimeEstimate');
     if (!value) {
