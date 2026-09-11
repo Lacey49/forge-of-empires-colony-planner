@@ -10,6 +10,7 @@
 
   const scripts = [
     './site/storage-recovery.js?v=6',
+    './site/sat-geometry.js?v=1',
     './optimizer/optimizer.js?v=10',
     './optimizer/performance.js?v=1',
     './optimizer/experimental.js?v=10',
@@ -20,7 +21,7 @@
     './presets/saab-presets.js?v=1',
     './presets/sav-presets.js?v=1',
     './presets/sav-max-presets.js?v=1',
-    './presets/sat-presets.js?v=1',
+    './presets/sat-presets.js?v=2',
     './presets/sash-presets.js?v=1',
     './site/state-consistency.js?v=2',
     './site/viewport.js?v=1',
