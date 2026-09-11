@@ -124,51 +124,20 @@
     }
   }
 
-  function settingsActionRow({title,description,buttonId,buttonText}) {
-    return `
-      <div class="settings-recovery-row">
-        <div class="settings-control-copy">
-          <b>${title}</b>
-          <small>${description}</small>
-        </div>
-        <button id="${buttonId}" class="settings-recovery-btn" type="button">${buttonText}</button>
-      </div>
-    `;
-  }
-
-  function updateRestoreButtons() {
+  function wireSettingsUi() {
+    const fileInput = document.getElementById('plannerBackupFile');
+    const downloadBtn = document.getElementById('downloadPlannerBackup');
+    const importBtn = document.getElementById('importPlannerBackup');
     const previousBtn = document.getElementById('restorePreviousPlannerSave');
     const optimizerBtn = document.getElementById('restorePreOptimizerSave');
-    if (previousBtn) previousBtn.disabled = !localStorage.getItem(PREVIOUS_KEY);
-    if (optimizerBtn) optimizerBtn.disabled = !localStorage.getItem(PRE_OPTIMIZER_KEY);
-  }
+    if (!fileInput || !downloadBtn || !importBtn || !previousBtn || !optimizerBtn) return;
+    const group = document.getElementById('backupRecoveryGroup');
+    if (group?.dataset.wired === '1') return;
+    if (group) group.dataset.wired = '1';
 
-  function installSettingsUi() {
-    const panel = document.querySelector('#settingsScreen .settings-page-panel');
-    if (!panel || document.getElementById('backupRecoveryGroup')) return;
-
-    const group = document.createElement('div');
-    group.id = 'backupRecoveryGroup';
-    group.className = 'settings-group settings-recovery-group';
-    group.innerHTML = `
-      <div class="settings-control-copy settings-recovery-heading">
-        <b>Backup & recovery</b>
-        <small>Save a copy of your planner or recover an earlier layout.</small>
-      </div>
-      <div class="settings-recovery-list">
-        ${settingsActionRow({title:'Download backup',description:'Save all planner layouts and presets as a JSON file.',buttonId:'downloadPlannerBackup',buttonText:'Download'})}
-        ${settingsActionRow({title:'Import backup',description:'Replace your planner data with a backup file.',buttonId:'importPlannerBackup',buttonText:'Import'})}
-        ${settingsActionRow({title:'Previous save',description:'Restore the last saved planner state from this browser.',buttonId:'restorePreviousPlannerSave',buttonText:'Restore'})}
-        ${settingsActionRow({title:'Before optimizer',description:'Restore the layout saved immediately before the last optimizer apply.',buttonId:'restorePreOptimizerSave',buttonText:'Restore'})}
-      </div>
-      <input id="plannerBackupFile" type="file" accept="application/json,.json" hidden>
-    `;
-    panel.appendChild(group);
-
-    const fileInput = document.getElementById('plannerBackupFile');
-    document.getElementById('downloadPlannerBackup')?.addEventListener('click',downloadBackup);
-    document.getElementById('importPlannerBackup')?.addEventListener('click',() => fileInput?.click());
-    fileInput?.addEventListener('change',async() => {
+    downloadBtn.addEventListener('click',downloadBackup);
+    importBtn.addEventListener('click',() => fileInput.click());
+    fileInput.addEventListener('change',async() => {
       const file = fileInput.files?.[0];
       fileInput.value = '';
       if (!file) return;
@@ -179,80 +148,12 @@
       }
     });
 
-    document.getElementById('restorePreviousPlannerSave')?.addEventListener('click',() =>
-      restoreRaw(localStorage.getItem(PREVIOUS_KEY),'Restore previous save?')
-    );
-    document.getElementById('restorePreOptimizerSave')?.addEventListener('click',() =>
-      restoreRaw(localStorage.getItem(PRE_OPTIMIZER_KEY),'Restore before optimizer?')
-    );
-    updateRestoreButtons();
+    previousBtn.disabled = !localStorage.getItem(PREVIOUS_KEY);
+    previousBtn.addEventListener('click',() => restoreRaw(localStorage.getItem(PREVIOUS_KEY),'Restore previous save?'));
+
+    optimizerBtn.disabled = !localStorage.getItem(PRE_OPTIMIZER_KEY);
+    optimizerBtn.addEventListener('click',() => restoreRaw(localStorage.getItem(PRE_OPTIMIZER_KEY),'Restore before optimizer?'));
   }
-
-  const style = document.createElement('style');
-  style.id = 'storage-recovery-settings-style';
-  style.textContent = `
-    .settings-recovery-group {
-      padding-bottom: 0;
-    }
-    .settings-recovery-heading {
-      margin-bottom: 2px;
-    }
-    .settings-recovery-list {
-      margin-top: 8px;
-    }
-    .settings-recovery-row {
-      min-height: 46px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 8px 0;
-      border-top: 1px solid var(--theme-soft-border);
-      box-sizing: border-box;
-    }
-    .settings-recovery-row .settings-control-copy {
-      padding-right: 8px;
-    }
-    .settings-recovery-btn {
-      flex: 0 0 auto;
-      min-width: 88px;
-      min-height: 31px;
-      padding: 5px 10px;
-      border: 1px solid var(--theme-border);
-      border-radius: 4px;
-      background: var(--theme-panel);
-      color: var(--theme-title-text);
-      font-size: 10px;
-      font-weight: 800;
-      line-height: 1.1;
-      cursor: pointer;
-      box-sizing: border-box;
-    }
-    .settings-recovery-btn:hover:not(:disabled) {
-      border-color: var(--theme-accent);
-      background: color-mix(in srgb,var(--theme-panel) 72%,var(--theme-accent-soft) 28%);
-    }
-    .settings-recovery-btn:disabled {
-      opacity: .42;
-      cursor: default;
-    }
-    @media (max-width: 560px) {
-      .settings-recovery-row {
-        gap: 10px;
-      }
-      .settings-recovery-row .settings-control-copy {
-        padding-right: 0;
-      }
-      .settings-recovery-btn {
-        min-width: 78px;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-
-  // Install immediately when this module loads. The loader puts this module first,
-  // so Settings no longer visibly grows after the optimizer modules finish loading.
-  installSettingsUi();
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
