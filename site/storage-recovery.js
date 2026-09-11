@@ -1,7 +1,7 @@
 /* Local save hardening: backups, import/export, and visible storage failures. */
 (() => {
-  if (window.__FOE_STORAGE_RECOVERY_V2__) return;
-  window.__FOE_STORAGE_RECOVERY_V2__ = true;
+  if (window.__FOE_STORAGE_RECOVERY_V3__) return;
+  window.__FOE_STORAGE_RECOVERY_V3__ = true;
   if (typeof STORAGE_KEY !== 'string' || typeof saveWorkspace !== 'function') return;
 
   const PREVIOUS_KEY = `${STORAGE_KEY}-previous-good`;
@@ -67,6 +67,7 @@
         workspace:JSON.parse(JSON.stringify(workspace))
       };
       localStorage.setItem(PRE_OPTIMIZER_KEY,JSON.stringify(payload));
+      updateRestoreButtons();
       return true;
     } catch (err) {
       console.error('Optimizer checkpoint failed',err);
@@ -135,6 +136,13 @@
     `;
   }
 
+  function updateRestoreButtons() {
+    const previousBtn = document.getElementById('restorePreviousPlannerSave');
+    const optimizerBtn = document.getElementById('restorePreOptimizerSave');
+    if (previousBtn) previousBtn.disabled = !localStorage.getItem(PREVIOUS_KEY);
+    if (optimizerBtn) optimizerBtn.disabled = !localStorage.getItem(PRE_OPTIMIZER_KEY);
+  }
+
   function installSettingsUi() {
     const panel = document.querySelector('#settingsScreen .settings-page-panel');
     if (!panel || document.getElementById('backupRecoveryGroup')) return;
@@ -171,41 +179,43 @@
       }
     });
 
-    const previousBtn = document.getElementById('restorePreviousPlannerSave');
-    const optimizerBtn = document.getElementById('restorePreOptimizerSave');
-    if (previousBtn) {
-      previousBtn.disabled = !localStorage.getItem(PREVIOUS_KEY);
-      previousBtn.addEventListener('click',() => restoreRaw(localStorage.getItem(PREVIOUS_KEY),'Restore previous save?'));
-    }
-    if (optimizerBtn) {
-      optimizerBtn.disabled = !localStorage.getItem(PRE_OPTIMIZER_KEY);
-      optimizerBtn.addEventListener('click',() => restoreRaw(localStorage.getItem(PRE_OPTIMIZER_KEY),'Restore before optimizer?'));
-    }
+    document.getElementById('restorePreviousPlannerSave')?.addEventListener('click',() =>
+      restoreRaw(localStorage.getItem(PREVIOUS_KEY),'Restore previous save?')
+    );
+    document.getElementById('restorePreOptimizerSave')?.addEventListener('click',() =>
+      restoreRaw(localStorage.getItem(PRE_OPTIMIZER_KEY),'Restore before optimizer?')
+    );
+    updateRestoreButtons();
   }
 
   const style = document.createElement('style');
   style.id = 'storage-recovery-settings-style';
   style.textContent = `
-    .settings-recovery-heading { margin-bottom: 8px; }
+    .settings-recovery-group {
+      padding-bottom: 0;
+    }
+    .settings-recovery-heading {
+      margin-bottom: 2px;
+    }
     .settings-recovery-list {
-      border: 1px solid var(--theme-soft-border);
-      border-radius: 4px;
-      overflow: hidden;
-      background: var(--theme-panel2);
+      margin-top: 8px;
     }
     .settings-recovery-row {
-      min-height: 48px;
+      min-height: 46px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 8px 10px;
+      padding: 8px 0;
       border-top: 1px solid var(--theme-soft-border);
+      box-sizing: border-box;
     }
-    .settings-recovery-row:first-child { border-top: 0; }
+    .settings-recovery-row .settings-control-copy {
+      padding-right: 8px;
+    }
     .settings-recovery-btn {
       flex: 0 0 auto;
-      min-width: 78px;
+      min-width: 88px;
       min-height: 31px;
       padding: 5px 10px;
       border: 1px solid var(--theme-border);
@@ -214,7 +224,9 @@
       color: var(--theme-title-text);
       font-size: 10px;
       font-weight: 800;
+      line-height: 1.1;
       cursor: pointer;
+      box-sizing: border-box;
     }
     .settings-recovery-btn:hover:not(:disabled) {
       border-color: var(--theme-accent);
@@ -225,11 +237,22 @@
       cursor: default;
     }
     @media (max-width: 560px) {
-      .settings-recovery-row { align-items: flex-start; gap: 10px; }
-      .settings-recovery-btn { min-width: 72px; }
+      .settings-recovery-row {
+        gap: 10px;
+      }
+      .settings-recovery-row .settings-control-copy {
+        padding-right: 0;
+      }
+      .settings-recovery-btn {
+        min-width: 78px;
+      }
     }
   `;
   document.head.appendChild(style);
+
+  // Install immediately when this module loads. The loader puts this module first,
+  // so Settings no longer visibly grows after the optimizer modules finish loading.
+  installSettingsUi();
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -238,6 +261,4 @@
     console.error('Saved planner data is damaged',err);
     showStorageFailure('Saved planner data is damaged. Open Settings to recover it.');
   }
-
-  installSettingsUi();
 })();
