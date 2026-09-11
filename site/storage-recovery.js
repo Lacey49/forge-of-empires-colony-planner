@@ -1,7 +1,7 @@
 /* Local save hardening: backups, import/export, and visible storage failures. */
 (() => {
-  if (window.__FOE_STORAGE_RECOVERY_V4__) return;
-  window.__FOE_STORAGE_RECOVERY_V4__ = true;
+  if (window.__FOE_STORAGE_RECOVERY_V5__) return;
+  window.__FOE_STORAGE_RECOVERY_V5__ = true;
   if (typeof STORAGE_KEY !== 'string' || typeof saveWorkspace !== 'function') return;
 
   const PREVIOUS_KEY = `${STORAGE_KEY}-previous-good`;
@@ -38,22 +38,28 @@
     document.getElementById('storageFailureBanner')?.remove();
   }
 
+  function storageItemExists(key) {
+    try { return !!localStorage.getItem(key); }
+    catch { return false; }
+  }
+
   function refreshRestoreButtons() {
     const previousBtn = document.getElementById('restorePreviousPlannerSave');
     const optimizerBtn = document.getElementById('restorePreOptimizerSave');
-    if (previousBtn) previousBtn.disabled = !localStorage.getItem(PREVIOUS_KEY);
-    if (optimizerBtn) optimizerBtn.disabled = !localStorage.getItem(PRE_OPTIMIZER_KEY);
+    if (previousBtn) previousBtn.disabled = !storageItemExists(PREVIOUS_KEY);
+    if (optimizerBtn) optimizerBtn.disabled = !storageItemExists(PRE_OPTIMIZER_KEY);
   }
 
   saveWorkspace = function() {
     try {
       const oldRaw = localStorage.getItem(STORAGE_KEY);
-      if (oldRaw) {
+      const newRaw = JSON.stringify(workspace);
+      if (oldRaw && oldRaw !== newRaw) {
         try {
           if (isWorkspace(JSON.parse(oldRaw))) localStorage.setItem(PREVIOUS_KEY,oldRaw);
         } catch {}
       }
-      localStorage.setItem(STORAGE_KEY,JSON.stringify(workspace));
+      localStorage.setItem(STORAGE_KEY,newRaw);
       refreshRestoreButtons();
       clearStorageFailure();
       return true;
@@ -124,6 +130,12 @@
     if (!ok) return;
 
     try {
+      const currentRaw = localStorage.getItem(STORAGE_KEY);
+      if (currentRaw) {
+        try {
+          if (isWorkspace(JSON.parse(currentRaw))) localStorage.setItem(PREVIOUS_KEY,currentRaw);
+        } catch {}
+      }
       localStorage.setItem(STORAGE_KEY,JSON.stringify(next));
       location.reload();
     } catch (err) {
@@ -156,8 +168,18 @@
       }
     });
 
-    previousBtn.addEventListener('click',() => restoreRaw(localStorage.getItem(PREVIOUS_KEY),'Restore previous save?'));
-    optimizerBtn.addEventListener('click',() => restoreRaw(localStorage.getItem(PRE_OPTIMIZER_KEY),'Restore before optimizer?'));
+    previousBtn.addEventListener('click',() => {
+      let raw = null;
+      try { raw = localStorage.getItem(PREVIOUS_KEY); }
+      catch {}
+      restoreRaw(raw,'Restore previous save?');
+    });
+    optimizerBtn.addEventListener('click',() => {
+      let raw = null;
+      try { raw = localStorage.getItem(PRE_OPTIMIZER_KEY); }
+      catch {}
+      restoreRaw(raw,'Restore before optimizer?');
+    });
     refreshRestoreButtons();
   }
 
