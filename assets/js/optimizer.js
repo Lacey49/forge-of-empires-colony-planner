@@ -25,8 +25,9 @@
     './site/viewport.js?v=1',
     './site/keyboard.js?v=2',
     './optimizer/single-search.js?v=1',
-    './site/storage-recovery.js?v=1',
-    './site/release-hardening.js?v=2'
+    './site/storage-recovery.js?v=2',
+    './site/release-hardening.js?v=2',
+    './site/accessibility.js?v=1'
   ];
 
   const load = src => new Promise((resolve, reject) => {
