@@ -41,11 +41,7 @@ The planner currently supports:
 
 **Current website build:** `v0.99 — Optimizer 2.0`
 
-The website is the easiest way to use the planner. Your colonies and settings are saved locally in your browser, so you can come back later and continue where you left off.
-
-### [Download v0.99 standalone HTML](https://lacey49.github.io/forge-of-empires-colony-planner/download.html)
-
-The standalone version is one HTML file you can keep on your computer and open in a browser.
+The planner runs as a website and saves your colonies and settings locally in your browser, so you can come back later and continue where you left off.
 
 ---
 
@@ -68,12 +64,12 @@ The standalone version is one HTML file you can keep on your computer and open i
 
 The optimizer searches for a higher-credit residential layout without making you rebuild the colony by hand.
 
-- Pick the residential building you have unlocked and want to optimize around.
-- Earlier residential buildings can be used only to fill space that the selected building cannot use efficiently.
+- Pick one of the two recommended residential buildings for the era.
+- Earlier residential buildings can still be used as filler when they help use awkward leftover space.
 - The optimizer can move the Town Hall and rebuild path layouts when that helps.
 - It uses your current layout and matching built-in presets as starting points.
 - It only offers a result when it actually increases your credit output.
-- There is now one full search instead of Fast, Normal, and Deep choices.
+- There is one full search instead of Fast, Normal, and Deep choices.
 - The planner shows an estimated search time automatically based on your selected expansions and whether the colony needs paths.
 - SAT and SASH searches are faster because their colony buildings do not require paths.
 
