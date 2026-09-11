@@ -91,7 +91,7 @@
       if (optimizerPendingResult?.state) {
         const diff = optimizerApplyDiff(optimizerPendingResult.state);
         if (diff.nonResidentialRemoved.length) {
-          const parts = [`Remove\n${formatBuildingLines(diff.nonResidentialRemoved)}`];
+          const parts = [`Remove\n${formatBuildingLines(diff.removed)}`];
           if (diff.added.length) parts.push(`Add\n${formatBuildingLines(diff.added)}`);
           const ok = await showConfirmDialog({
             title:'Apply optimizer result?',
