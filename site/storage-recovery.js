@@ -1,7 +1,7 @@
 /* Local save hardening: backups, import/export, and visible storage failures. */
 (() => {
-  if (window.__FOE_STORAGE_RECOVERY_V1__) return;
-  window.__FOE_STORAGE_RECOVERY_V1__ = true;
+  if (window.__FOE_STORAGE_RECOVERY_V2__) return;
+  window.__FOE_STORAGE_RECOVERY_V2__ = true;
   if (typeof STORAGE_KEY !== 'string' || typeof saveWorkspace !== 'function') return;
 
   const PREVIOUS_KEY = `${STORAGE_KEY}-previous-good`;
@@ -123,20 +123,35 @@
     }
   }
 
+  function settingsActionRow({title,description,buttonId,buttonText}) {
+    return `
+      <div class="settings-recovery-row">
+        <div class="settings-control-copy">
+          <b>${title}</b>
+          <small>${description}</small>
+        </div>
+        <button id="${buttonId}" class="settings-recovery-btn" type="button">${buttonText}</button>
+      </div>
+    `;
+  }
+
   function installSettingsUi() {
     const panel = document.querySelector('#settingsScreen .settings-page-panel');
     if (!panel || document.getElementById('backupRecoveryGroup')) return;
 
     const group = document.createElement('div');
     group.id = 'backupRecoveryGroup';
-    group.className = 'settings-group';
+    group.className = 'settings-group settings-recovery-group';
     group.innerHTML = `
-      <div style="font-weight:800;margin-bottom:5px">Backup & recovery</div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap">
-        <button id="downloadPlannerBackup" class="btn" type="button">Download backup</button>
-        <button id="importPlannerBackup" class="btn" type="button">Import backup</button>
-        <button id="restorePreviousPlannerSave" class="btn" type="button">Restore previous save</button>
-        <button id="restorePreOptimizerSave" class="btn" type="button">Restore before optimize</button>
+      <div class="settings-control-copy settings-recovery-heading">
+        <b>Backup & recovery</b>
+        <small>Save a copy of your planner or recover an earlier layout.</small>
+      </div>
+      <div class="settings-recovery-list">
+        ${settingsActionRow({title:'Download backup',description:'Save all planner layouts and presets as a JSON file.',buttonId:'downloadPlannerBackup',buttonText:'Download'})}
+        ${settingsActionRow({title:'Import backup',description:'Replace your planner data with a backup file.',buttonId:'importPlannerBackup',buttonText:'Import'})}
+        ${settingsActionRow({title:'Previous save',description:'Restore the last saved planner state from this browser.',buttonId:'restorePreviousPlannerSave',buttonText:'Restore'})}
+        ${settingsActionRow({title:'Before optimizer',description:'Restore the layout saved immediately before the last optimizer apply.',buttonId:'restorePreOptimizerSave',buttonText:'Restore'})}
       </div>
       <input id="plannerBackupFile" type="file" accept="application/json,.json" hidden>
     `;
@@ -167,6 +182,54 @@
       optimizerBtn.addEventListener('click',() => restoreRaw(localStorage.getItem(PRE_OPTIMIZER_KEY),'Restore before optimizer?'));
     }
   }
+
+  const style = document.createElement('style');
+  style.id = 'storage-recovery-settings-style';
+  style.textContent = `
+    .settings-recovery-heading { margin-bottom: 8px; }
+    .settings-recovery-list {
+      border: 1px solid var(--theme-soft-border);
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--theme-panel2);
+    }
+    .settings-recovery-row {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px 10px;
+      border-top: 1px solid var(--theme-soft-border);
+    }
+    .settings-recovery-row:first-child { border-top: 0; }
+    .settings-recovery-btn {
+      flex: 0 0 auto;
+      min-width: 78px;
+      min-height: 31px;
+      padding: 5px 10px;
+      border: 1px solid var(--theme-border);
+      border-radius: 4px;
+      background: var(--theme-panel);
+      color: var(--theme-title-text);
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .settings-recovery-btn:hover:not(:disabled) {
+      border-color: var(--theme-accent);
+      background: color-mix(in srgb,var(--theme-panel) 72%,var(--theme-accent-soft) 28%);
+    }
+    .settings-recovery-btn:disabled {
+      opacity: .42;
+      cursor: default;
+    }
+    @media (max-width: 560px) {
+      .settings-recovery-row { align-items: flex-start; gap: 10px; }
+      .settings-recovery-btn { min-width: 72px; }
+    }
+  `;
+  document.head.appendChild(style);
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
