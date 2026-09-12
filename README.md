@@ -15,7 +15,7 @@ It covers Mars, Asteroid Belt, Venus, Jupiter Moon, Titan, and Space Hub. The pl
 3. Choose a building, then click an empty spot to place it. Buildings keep their in-game orientation.
 4. Use **Check** to find buildings that need a connected path. Titan and Space Hub don't need paths.
 
-**Presets** lets you try a ready-made layout. Your **Free Build** layout is saved separately, so you can switch back to it. To keep a layout as another preset, click **Save preset**.
+**Presets** lets you try a ready-made layout. Your **Free Build** layout is saved separately, so you can switch back to it. To keep a layout as another preset, click **Save**.
 
 ## Controls
 
@@ -29,8 +29,6 @@ It covers Mars, Asteroid Belt, Venus, Jupiter Moon, Titan, and Space Hub. The pl
 | Move around the map                     | Drag, or use the arrow keys                                           |
 | Zoom                                    | Mouse wheel                                                           |
 | Use the grid with a keyboard            | Tab to the grid, move with arrows, and press Enter to place or select |
-
-You can change the Move and Undo shortcuts in Settings. When the grid has keyboard focus, arrows move between tiles instead of moving the map.
 
 ## What Optimize does
 
@@ -50,7 +48,7 @@ Your layouts are saved in this browser on this device. Clearing browser data or 
 
 Open **Settings → Backups → Download** to save a copy of your layouts and presets. **Import** loads that file again. You can also restore the previous save or the save from before applying an optimizer result. Backups don't include your theme or keyboard settings.
 
-## What's changed in v0.100
+## What's changed in v0.1
 
 This update fixes save recovery, Undo across eras, and several optimizer dialog bugs. It also removes unused code and puts the files into folders that are easier to navigate.
 
@@ -62,4 +60,6 @@ This update fixes save recovery, Undo across eras, and several optimizer dialog 
 
 If you'd like to support the project, there's a [Buy Me a Coffee page](https://buymeacoffee.com/lacey49). The planner is free either way.
 
-This is a fan-made tool and isn't affiliated with InnoGames. Building images belong to their respective owners.
+##
+
+This is a fan-made tool and isn't affiliated with InnoGames. 
