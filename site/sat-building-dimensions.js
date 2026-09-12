@@ -1,9 +1,9 @@
 /* Correct non-rotatable Space Age Titan colony building orientations. */
 (() => {
-  if (window.__FOE_SAT_BUILDING_DIMENSIONS_V4__) return;
-  window.__FOE_SAT_BUILDING_DIMENSIONS_V4__ = true;
+  if (window.__FOE_SAT_BUILDING_DIMENSIONS_V5__) return;
+  window.__FOE_SAT_BUILDING_DIMENSIONS_V5__ = true;
 
-  if (!ERA_DATA?.SAT?.goods || !ERA_DATA?.SAT?.residential) return;
+  if (!ERA_DATA?.SAT?.goods || !ERA_DATA?.SAT?.residential || !ERA_DATA?.SAT?.lifeSupport) return;
 
   // Titan colony buildings do not connect to roads. Keep the per-building
   // metadata aligned with the era-level no-path rule used by the planner.
@@ -15,18 +15,23 @@
     def.requiresPath = false;
   }
 
-  // These are the fixed in-game grid orientations for non-rotatable SAT
-  // buildings, verified from the red placement outlines in the Titan colony.
+  // Fixed in-game grid orientations verified from the red placement outlines
+  // in the Titan colony. w/h are the single authoritative board footprint.
   const corrected = {
     heatedResidence:            {w:4, h:3, sizeText:'4×3'},
     matterCompressionReactor:   {w:4, h:6, sizeText:'4×6'},
-    moleculeDrill:               {w:6, h:4, sizeText:'6×4'},
-    experimentalTestSite:        {w:5, h:4, sizeText:'5×4'},
-    purificationFacility:        {w:4, h:5, sizeText:'4×5'},
-    chemicalCleaningPlant:       {w:3, h:6, sizeText:'3×6'}
+    moleculeDrill:              {w:6, h:4, sizeText:'6×4'},
+    experimentalTestSite:       {w:5, h:4, sizeText:'5×4'},
+    purificationFacility:       {w:4, h:5, sizeText:'4×5'},
+    chemicalCleaningPlant:      {w:3, h:6, sizeText:'3×6'},
+    hotChocolateBar:            {w:4, h:3, sizeText:'4×3'}
   };
 
-  const editableDefs = [...ERA_DATA.SAT.residential,...ERA_DATA.SAT.goods];
+  const editableDefs = [
+    ...ERA_DATA.SAT.residential,
+    ...ERA_DATA.SAT.goods,
+    ...ERA_DATA.SAT.lifeSupport
+  ];
   const previous = Object.fromEntries(
     editableDefs
       .filter(def => corrected[def.key])
