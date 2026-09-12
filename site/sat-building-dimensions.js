@@ -1,9 +1,19 @@
 /* Correct non-rotatable Space Age Titan colony building orientations. */
 (() => {
-  if (window.__FOE_SAT_BUILDING_DIMENSIONS_V2__) return;
-  window.__FOE_SAT_BUILDING_DIMENSIONS_V2__ = true;
+  if (window.__FOE_SAT_BUILDING_DIMENSIONS_V3__) return;
+  window.__FOE_SAT_BUILDING_DIMENSIONS_V3__ = true;
 
   if (!ERA_DATA?.SAT?.goods) return;
+
+  // Titan colony buildings do not connect to roads. Keep the per-building
+  // metadata aligned with the era-level no-path rule used by the planner.
+  for (const def of [
+    ...ERA_DATA.SAT.residential,
+    ...ERA_DATA.SAT.goods,
+    ...ERA_DATA.SAT.lifeSupport
+  ]) {
+    def.requiresPath = false;
+  }
 
   // The wiki lists the nominal footprints, while the in-game Titan colony
   // renders these five non-rotatable goods buildings in the opposite grid
