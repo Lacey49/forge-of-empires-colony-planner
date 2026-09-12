@@ -1,9 +1,9 @@
 /* Correct non-rotatable Space Age Titan colony building orientations. */
 (() => {
-  if (window.__FOE_SAT_BUILDING_DIMENSIONS_V3__) return;
-  window.__FOE_SAT_BUILDING_DIMENSIONS_V3__ = true;
+  if (window.__FOE_SAT_BUILDING_DIMENSIONS_V4__) return;
+  window.__FOE_SAT_BUILDING_DIMENSIONS_V4__ = true;
 
-  if (!ERA_DATA?.SAT?.goods) return;
+  if (!ERA_DATA?.SAT?.goods || !ERA_DATA?.SAT?.residential) return;
 
   // Titan colony buildings do not connect to roads. Keep the per-building
   // metadata aligned with the era-level no-path rule used by the planner.
@@ -15,24 +15,25 @@
     def.requiresPath = false;
   }
 
-  // The wiki lists the nominal footprints, while the in-game Titan colony
-  // renders these five non-rotatable goods buildings in the opposite grid
-  // orientation from the planner's original width/height interpretation.
+  // These are the fixed in-game grid orientations for non-rotatable SAT
+  // buildings, verified from the red placement outlines in the Titan colony.
   const corrected = {
-    matterCompressionReactor: {w:4, h:6, sizeText:'4×6'},
-    moleculeDrill:             {w:6, h:4, sizeText:'6×4'},
-    experimentalTestSite:      {w:5, h:4, sizeText:'5×4'},
-    purificationFacility:      {w:4, h:5, sizeText:'4×5'},
-    chemicalCleaningPlant:     {w:3, h:6, sizeText:'3×6'}
+    heatedResidence:            {w:4, h:3, sizeText:'4×3'},
+    matterCompressionReactor:   {w:4, h:6, sizeText:'4×6'},
+    moleculeDrill:               {w:6, h:4, sizeText:'6×4'},
+    experimentalTestSite:        {w:5, h:4, sizeText:'5×4'},
+    purificationFacility:        {w:4, h:5, sizeText:'4×5'},
+    chemicalCleaningPlant:       {w:3, h:6, sizeText:'3×6'}
   };
 
+  const editableDefs = [...ERA_DATA.SAT.residential,...ERA_DATA.SAT.goods];
   const previous = Object.fromEntries(
-    ERA_DATA.SAT.goods
+    editableDefs
       .filter(def => corrected[def.key])
       .map(def => [def.key, {w:def.w, h:def.h}])
   );
 
-  for (const def of ERA_DATA.SAT.goods) {
+  for (const def of editableDefs) {
     const next = corrected[def.key];
     if (!next) continue;
     def.w = next.w;
