@@ -1,7 +1,7 @@
 /* Correct non-rotatable Space Age Titan colony building orientations. */
 (() => {
-  if (window.__FOE_SAT_BUILDING_DIMENSIONS_V1__) return;
-  window.__FOE_SAT_BUILDING_DIMENSIONS_V1__ = true;
+  if (window.__FOE_SAT_BUILDING_DIMENSIONS_V2__) return;
+  window.__FOE_SAT_BUILDING_DIMENSIONS_V2__ = true;
 
   if (!ERA_DATA?.SAT?.goods) return;
 
@@ -38,6 +38,23 @@
     return cells;
   }
 
+  function cellSet(cells) {
+    return new Set((cells || []).map(([r,c]) => `${r},${c}`));
+  }
+
+  function matchesFootprint(building,dims) {
+    if (
+      !dims ||
+      !Number.isInteger(building?.r) ||
+      !Number.isInteger(building?.c) ||
+      !Array.isArray(building?.cells)
+    ) return false;
+
+    const expected=cellsFor(building.r,building.c,dims.w,dims.h);
+    const actual=cellSet(building.cells);
+    return actual.size===expected.length && expected.every(([r,c]) => actual.has(`${r},${c}`));
+  }
+
   function migrateState(state) {
     if (
       !state ||
@@ -46,18 +63,22 @@
       !Array.isArray(state.buildings)
     ) return false;
 
-    const targets = state.buildings.filter(building => corrected[building?.type]);
+    // Only touch layouts that still use the original footprint. Corrected
+    // layouts are deliberately ignored, making this migration safe on reload.
+    const targets = state.buildings.filter(building =>
+      corrected[building?.type] &&
+      matchesFootprint(building,previous[building.type]) &&
+      !matchesFootprint(building,corrected[building.type])
+    );
     if (!targets.length) return false;
 
     const enabledSet = new Set(Array.isArray(state.enabled) ? state.enabled : []);
     const nextGrid = state.grid.map(row => Array.isArray(row) ? [...row] : row);
-    const targetSet = new Set(targets);
 
     // Remove the old footprints first so nearby corrected buildings can be
     // repacked without treating each other's obsolete orientation as occupied.
     for (const building of targets) {
       const old = previous[building.type];
-      if (!old || !Number.isInteger(building.r) || !Number.isInteger(building.c)) continue;
       for (const [r,c] of cellsFor(building.r,building.c,old.w,old.h)) {
         if (r<0 || r>=28 || c<0 || c>=28) continue;
         if (nextGrid[r]?.[c] === building.type) {
@@ -71,8 +92,6 @@
     for (const building of targets) {
       const old = previous[building.type];
       const next = corrected[building.type];
-      if (!old || !next || !Number.isInteger(building.r) || !Number.isInteger(building.c)) return false;
-
       const oldCenterR = building.r + (old.h - 1) / 2;
       const oldCenterC = building.c + (old.w - 1) / 2;
       let best=null;
