@@ -1,0 +1,18 @@
+{
+  "name": "forge-of-empires-colony-planner",
+  "version": "0.100.0",
+  "private": true,
+  "description": "Plan your Forge of Empires Space Age colonies before moving anything in game.",
+  "scripts": {
+    "test": "node tests/static-check.mjs && node tests/dimension-unification-check.mjs && node tests/code-check.mjs && node tests/browser-check.mjs",
+    "test:static": "node tests/static-check.mjs && node tests/dimension-unification-check.mjs && node tests/code-check.mjs",
+    "test:browser": "node tests/browser-check.mjs",
+    "format": "prettier --write app data optimizer presets styles tests index.html README.md docs"
+  },
+  "devDependencies": {
+    "acorn": "^8.15.0",
+    "eslint": "^9.39.5",
+    "playwright": "^1.58.0",
+    "prettier": "^3.8.0"
+  }
+}

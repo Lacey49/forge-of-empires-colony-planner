@@ -1,18 +1,18 @@
 /* Performance helpers for the colony optimizer. Keeps the same pruning rules,
    but avoids rescanning every building's road access for every road tile. */
 (() => {
-  if (typeof oxPrune !== 'function') return;
+  if (typeof oxPrune !== "function") return;
 
-  oxPrune = function(ctx, sol) {
+  oxPrune = function (ctx, sol) {
     if (!ctx.rules.paths) return sol;
 
     const roads = new Set(sol.roads);
     const accessCounts = [];
     const roadUsers = new Map();
 
-    for (let i=0; i<sol.placements.length; i++) {
+    for (let i = 0; i < sol.placements.length; i++) {
       const p = sol.placements[i];
-      const d = eraBoardBuildingByKey(ctx.era,p.type);
+      const d = eraBoardBuildingByKey(ctx.era, p.type);
       if (d?.requiresPath === false) {
         accessCounts[i] = Infinity;
         continue;
@@ -24,7 +24,7 @@
       }
       accessCounts[i] = adjacent.size;
       for (const id of adjacent) {
-        if (!roadUsers.has(id)) roadUsers.set(id,[]);
+        if (!roadUsers.has(id)) roadUsers.set(id, []);
         roadUsers.get(id).push(i);
       }
     }
@@ -57,8 +57,13 @@
 
           // Removing a non-Hall leaf cannot disconnect the remaining road graph.
           // Everything else keeps the exact connectivity check used before.
-          const connectivityIsObviouslySafe = roadDegree === 0 || (roadDegree === 1 && !touchesHall);
-          if (!connectivityIsObviouslySafe && oxConnected(test,sol.hall.set).size !== test.size) continue;
+          const connectivityIsObviouslySafe =
+            roadDegree === 0 || (roadDegree === 1 && !touchesHall);
+          if (
+            !connectivityIsObviouslySafe &&
+            oxConnected(test, sol.hall.set).size !== test.size
+          )
+            continue;
         }
 
         roads.delete(id);
@@ -67,6 +72,6 @@
       }
     }
 
-    return {...sol,roads};
+    return { ...sol, roads };
   };
 })();

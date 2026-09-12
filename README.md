@@ -1,108 +1,65 @@
-<div align="center">
-
 # Forge of Empires Colony Planner
 
-[![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen)](https://lacey49.github.io/forge-of-empires-colony-planner/)
-[![Website Build](https://img.shields.io/badge/Website-v0.99-success)](https://lacey49.github.io/forge-of-empires-colony-planner/)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-yellow)](https://buymeacoffee.com/lacey49)
+[Open the planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
 
-### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
+I made this because moving a whole colony around in game just to find out one building won't fit gets old pretty fast.
 
-</div>
+Pick your era, add the expansions you own, and try a layout. You can place buildings yourself, start from a built-in preset, or use **Optimize** to look for a layout that earns more credits.
 
----
+It covers Mars, Asteroid Belt, Venus, Jupiter Moon, Titan, and Space Hub. The planner saves in your browser. It doesn't connect to your game or move anything in it.
 
-## What is it?
+## Getting started
 
-I made this to make planning Space Age colonies in Forge of Empires much easier.
+1. Click your era at the top.
+2. Turn on the expansions you own. You can click them on the map or use the expansion controls.
+3. Choose a building, then click an empty spot to place it. Buildings keep their in-game orientation.
+4. Use **Check** to find buildings that need a connected path. Titan and Space Hub don't need paths.
 
-You can build a colony by hand, load one of the built-in presets, or let the optimizer search for a higher-credit layout using the buildings and expansions you choose.
-
-**v0.99 is the Optimizer 2.0 update.** It improves packing, Town Hall placement, filler-building use, path handling, and the built-in layouts found during optimizer testing.
-
-Instead of rebuilding a colony over and over in-game just to see if something fits, you can work it out in the planner first.
-
-The planner currently supports:
-
-| Era | Colony |
-|---|---|
-| **SAM** | Space Age Mars |
-| **SAAB** | Space Age Asteroid Belt |
-| **SAV** | Space Age Venus |
-| **SAJM** | Space Age Jupiter Moon |
-| **SAT** | Space Age Titan |
-| **SASH** | Space Age Space Hub |
-
----
-
-## Use the Planner
-
-### [Open Forge of Empires Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
-
-**Current website build:** `v0.99 — Optimizer 2.0`
-
-The planner runs as a website and saves your colonies and settings locally in your browser, so you can come back later and continue where you left off.
-
----
+**Presets** lets you try a ready-made layout. Your **Free Build** layout is saved separately, so you can switch back to it. To keep a layout as another preset, click **Save preset**.
 
 ## Controls
 
-| Action | Control |
-|---|---|
-| Place building | Select one and left-click |
-| Select buildings | `1` through `9` |
-| Move | `M` |
-| Delete buildings and paths | Right click, or `Delete` then left-click |
-| Undo | `Ctrl + Z` |
-| Pan | Drag or Arrow Keys |
-| Zoom | Mouse Wheel |
-| Optimize layout | Click **Optimize** |
+| What you want to do                     | How                                                                   |
+| --------------------------------------- | --------------------------------------------------------------------- |
+| Place a building                        | Pick it from the menu, then click the map                             |
+| Pick from the current building category | Press `1` through `9`                                                 |
+| Move a building or the Town Hall        | Press `M`, then pick it up and place it                               |
+| Delete a building or path               | Right-click it, or press `Delete` to turn delete mode on              |
+| Undo                                    | `Ctrl + Z`                                                            |
+| Move around the map                     | Drag, or use the arrow keys                                           |
+| Zoom                                    | Mouse wheel                                                           |
+| Use the grid with a keyboard            | Tab to the grid, move with arrows, and press Enter to place or select |
 
----
+You can change the Move and Undo shortcuts in Settings. When the grid has keyboard focus, arrows move between tiles instead of moving the map.
 
-## v0.99 — Optimizer 2.0
+## What Optimize does
 
-The optimizer searches for a higher-credit residential layout without making you rebuild the colony by hand.
+Choose the main residential building you want to use. The search tries different Town Hall positions, building placements, and paths. It can tuck smaller, earlier homes into leftover space.
 
-- Pick one of the two recommended residential buildings for the era.
-- Earlier residential buildings can still be used as filler when they help use awkward leftover space.
-- The optimizer can move the Town Hall and rebuild path layouts when that helps.
-- It uses your current layout and matching built-in presets as starting points.
-- It only offers a result when it actually increases your credit output.
-- There is one full search instead of Fast, Normal, and Deep choices.
-- The planner shows an estimated search time automatically based on your selected expansions and whether the colony needs paths.
-- SAT and SASH searches are faster because their colony buildings do not require paths.
+The result has to earn more credits than your current layout before you can apply it. You get to see the result first. If it would remove goods or life support buildings, the planner lists those changes and asks before applying them.
 
-The **Max Credits** optimizer is mostly complete for now. Future optimizer work will focus on specific edge cases and a separate **Minimize Paths** goal.
+The search is aimed at residential credit output. It doesn't balance goods production, spare colonists, or life support for you. The credit comparison uses the buildings' base output over the same time period.
 
-The built-in presets are also being refreshed with stronger layouts found during Optimizer 2.0 testing.
+It usually takes longer with more expansions or with paths to connect. The time shown is an estimate. You can cancel a search, and applying a result can be undone.
 
----
+It finds good layouts, but it can't promise the best possible one. Colony Tetris still has hands.
 
-## Current status
+## Keep a backup
 
-The planner is usable, but I'm still working on it.
+Your layouts are saved in this browser on this device. Clearing browser data or switching browsers won't carry them over.
 
-Some layouts and features may change as I improve them.
+Open **Settings → Backups → Download** to save a copy of your layouts and presets. **Import** loads that file again. You can also restore the previous save or the save from before applying an optimizer result. Backups don't include your theme or keyboard settings.
 
-**All six supported Space Age colony layouts are available and have been checked for the current planner build.**
+## What's changed in v0.100
 
-If you find something broken or have a layout that could be improved, please open an Issue.
+This update fixes save recovery, Undo across eras, and several optimizer dialog bugs. It also removes unused code and puts the files into folders that are easier to navigate.
 
-### [Report a bug or suggestion](https://github.com/Lacey49/forge-of-empires-colony-planner/issues)
+[Read the changes](docs/changes.md) · [Find your way around the code](docs/working-on-the-planner.md)
 
----
+## Found something broken?
 
-## Buy Me a Coffee
+[Open an issue](https://github.com/Lacey49/forge-of-empires-colony-planner/issues). Tell me which era you were using and what you clicked. A screenshot or a backup file helps, especially for layout problems.
 
-If the planner has been useful and you want to support it:
+If you'd like to support the project, there's a [Buy Me a Coffee page](https://buymeacoffee.com/lacey49). The planner is free either way.
 
-<h3><a href="https://buymeacoffee.com/lacey49"><img src="./assets/ui/buy-me-a-coffee.svg" width="28" height="28" align="middle" alt="">Buy Me a Coffee</a></h3>
-
----
-
-<div align="center">
-
-This is a fan-made tool and isn't affiliated with InnoGames.
-
-</div>
+This is a fan-made tool and isn't affiliated with InnoGames. Building images belong to their respective owners.
