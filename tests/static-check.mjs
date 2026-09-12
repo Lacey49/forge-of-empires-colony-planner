@@ -64,8 +64,10 @@ check(missingReferences.length === 0, `index.html has missing static references:
 notes.push(`${new Set(references).size} static references checked`);
 
 const eraLiteral = extractConst(html, 'ERA_DATA');
+let parsedEras = null;
 if (eraLiteral) {
   const eras = JSON.parse(eraLiteral);
+  parsedEras = eras;
   let definitionCount = 0;
   for (const [era, data] of Object.entries(eras)) {
     const keys = new Set();
@@ -226,7 +228,56 @@ function testSatGeometryAndPresets() {
   notes.push('SAT geometry: 18 starting plots, 23 expansions, and corrected presets checked');
 }
 
+function testSatBuildingOrientations() {
+  if (!parsedEras?.SAT) {
+    failures.push('SAT building orientation check could not load ERA_DATA');
+    return;
+  }
+
+  const context = {
+    window:{},
+    ERA_DATA:JSON.parse(JSON.stringify(parsedEras)),
+    workspace:{eras:{SAT:null}},
+    selectedEra:'SAM',
+    colonyConfigCellState:() => 'empty',
+    applyColonyState:() => true,
+    renderBuildMenu:() => {},
+    render:() => {},
+    saveWorkspace:() => {}
+  };
+
+  try {
+    vm.runInNewContext(read('site/sat-building-dimensions.js'), context, {filename:'site/sat-building-dimensions.js'});
+  } catch (error) {
+    failures.push(`SAT building orientation runtime check failed: ${error.message}`);
+    return;
+  }
+
+  const expected = new Map([
+    ['matterCompressionReactor',[4,6]],
+    ['moleculeDrill',[6,4]],
+    ['experimentalTestSite',[5,4]],
+    ['purificationFacility',[4,5]],
+    ['chemicalCleaningPlant',[3,6]]
+  ]);
+
+  for (const def of context.ERA_DATA.SAT.goods) {
+    const want = expected.get(def.key);
+    if (!want) continue;
+    check(def.w === want[0] && def.h === want[1], `${def.name}: expected planner orientation ${want[0]}×${want[1]}, found ${def.w}×${def.h}`);
+    check(def.sizeText === `${want[0]}×${want[1]}`, `${def.name}: size label should be ${want[0]}×${want[1]}`);
+    check(def.requiresPath === false, `${def.name}: SAT goods must not require a path`);
+  }
+
+  for (const def of context.ERA_DATA.SAT.residential) {
+    check(def.requiresPath === false, `${def.name}: SAT residential buildings must not require a path`);
+  }
+
+  notes.push('SAT goods orientations and no-path metadata checked');
+}
+
 testSatGeometryAndPresets();
+testSatBuildingOrientations();
 
 check(!fs.existsSync(path.join(repo, 'download.html')), 'Obsolete standalone download page still exists');
 const standaloneFiles = fs.readdirSync(repo).filter(name => /^forge-of-empires-colony-planner-v.*\.html$/i.test(name));
