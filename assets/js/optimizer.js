@@ -11,7 +11,7 @@
   const scripts = [
     './site/storage-recovery.js?v=6',
     './site/sat-geometry.js?v=1',
-    './site/sat-building-dimensions.js?v=3',
+    './site/sat-building-dimensions.js?v=4',
     './optimizer/optimizer.js?v=10',
     './optimizer/performance.js?v=1',
     './optimizer/experimental.js?v=10',
