@@ -12,7 +12,7 @@
     './site/storage-recovery.js?v=6',
     './site/dimension-unification.js?v=1',
     './site/sat-geometry.js?v=1',
-    './site/sat-building-dimensions.js?v=4',
+    './site/sat-building-dimensions.js?v=5',
     './optimizer/optimizer.js?v=10',
     './optimizer/performance.js?v=1',
     './optimizer/experimental.js?v=10',
