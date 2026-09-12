@@ -89,7 +89,8 @@ const expected=new Map([
   ['moleculeDrill',[6,4]],
   ['experimentalTestSite',[5,4]],
   ['purificationFacility',[4,5]],
-  ['chemicalCleaningPlant',[3,6]]
+  ['chemicalCleaningPlant',[3,6]],
+  ['hotChocolateBar',[4,3]]
 ]);
 
 for(const [key,[w,h]] of expected){
