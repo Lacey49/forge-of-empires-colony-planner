@@ -20,5 +20,5 @@ jobs:
       - name: Run static release checker
         run: node tests/static-check.mjs
 
-      - name: Verify SAT board orientations
-        run: node tests/sat-board-orientation-check.mjs
+      - name: Verify unified building dimensions
+        run: node tests/dimension-unification-check.mjs
