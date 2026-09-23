@@ -1183,7 +1183,12 @@ function optimizerSyncSearchLabels() {
   }
 }
 function openOptimizerDialog() {
-  if (!isEditableColonyEra(selectedEra) || optimizerRunning) return;
+  if (
+    !isEditableColonyEra(selectedEra) ||
+    !eraSupportsOptimizer(selectedEra) ||
+    optimizerRunning
+  )
+    return;
   closePresetPopover();
   optimizerPendingResult = null;
   optimizerCancelRequested = false;
@@ -1202,6 +1207,11 @@ function closeOptimizerDialog() {
   if (!optimizerRunning) $("optimizerDialog")?.close();
 }
 async function runOptimizerDialog() {
+  if (!eraSupportsOptimizer(selectedEra)) {
+    optimizerPendingResult = null;
+    closeOptimizerDialog();
+    return;
+  }
   if (optimizerPendingResult) {
     if (
       optimizerPendingResult.era !== selectedEra ||
