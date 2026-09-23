@@ -1200,7 +1200,11 @@ function makeSatPresetState(kind) {
 }
 
 function makeSashPresetState(kind) {
-  const enabledSet = new Set();
+  const enabled =
+    kind === "officersAll"
+      ? COLONY_CONFIGS.SASH.expansions.map((exp) => exp.id)
+      : [];
+  const enabledSet = new Set(enabled);
   const g = Array.from({ length: 28 }, (_, r) =>
     Array.from({ length: 28 }, (_, c) =>
       colonyConfigCellState("SASH", r, c, enabledSet),
@@ -1211,7 +1215,7 @@ function makeSashPresetState(kind) {
     grid: g,
     buildings: [],
     hubTop: [...COLONY_CONFIGS.SASH.defaultHub],
-    enabled: [],
+    enabled: [...enabled],
     panX,
     panY,
     viewZoom,
@@ -1256,6 +1260,17 @@ function makeSashPresetState(kind) {
       addBuilding("officersQuarters", r, c);
     }
     for (const [r, c] of SASH_OFFICER_PRESET_FILLERS) {
+      addBuilding("simpleCrewQuarters", r, c);
+    }
+    return state;
+  }
+
+  if (kind === "officersAll") {
+    addHub(SASH_OFFICER_ALL_PRESET_HUB);
+    for (const [r, c] of SASH_OFFICER_ALL_PRESET_BUILDINGS) {
+      addBuilding("officersQuarters", r, c);
+    }
+    for (const [r, c] of SASH_OFFICER_ALL_PRESET_FILLERS) {
       addBuilding("simpleCrewQuarters", r, c);
     }
     return state;
@@ -1353,15 +1368,21 @@ function getPresetCatalog() {
     result.push(
       {
         id: "builtin:sash-simple-crew",
-        name: "Simple Crew Quarters (54)",
+        name: "Simple Crew Quarters (41)",
         kind: "Built-in",
         state: makeSashPresetState("simpleCrew"),
       },
       {
         id: "builtin:sash-officers",
-        name: "Officers Quarters (21)",
+        name: "Officers Quarters (14)",
         kind: "Built-in",
         state: makeSashPresetState("officers"),
+      },
+      {
+        id: "builtin:sash-officers-all",
+        name: "Officers Quarters (37)",
+        kind: "Built-in",
+        state: makeSashPresetState("officersAll"),
       },
     );
   }
