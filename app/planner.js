@@ -1385,13 +1385,13 @@ function getPresetCatalog() {
     result.push(
       {
         id: "builtin:sash-simple-crew",
-        name: "Simple Crew Quarters (23) + 12 FloraShip Expresses",
+        name: "FloraShip Express (12)",
         kind: "Built-in",
         state: makeSashPresetState("simpleCrew"),
       },
       {
         id: "builtin:sash-simple-crew-cosmic",
-        name: "Simple Crew Quarters (26) + 7 CosmicClean Expresses",
+        name: "CosmicClean Express (7)",
         kind: "Built-in",
         state: makeSashPresetState("simpleCrewCosmic"),
       },
