@@ -227,28 +227,36 @@ function sashKnownStartingFallback(ctx) {
 
   const crewDef = eraBoardBuildingByKey("SASH", SASH_GREEN_RULE.crewKey);
   const floraDef = eraBoardBuildingByKey("SASH", SASH_GREEN_RULE.supportKey);
-  const hall = oxHall(ctx, [0, 4]);
+  const hall = oxHall(ctx, [6, 4]);
   if (!crewDef || !floraDef || !hall) return null;
 
+  // Verified exact packing for the no-expansion footprint.
   const flora = [
-    [0, 9],
-    [0, 12],
-    [0, 15],
-    [3, 9],
+    [0, 6],
+    [0, 17],
+    [3, 4],
+    [3, 7],
     [3, 12],
     [3, 15],
-    [5, 4],
-    [6, 9],
-    [6, 12],
-    [8, 0],
-    [8, 3],
-    [8, 6],
+    [7, 9],
+    [14, 1],
+    [14, 4],
+    [14, 7],
+    [17, 0],
+    [17, 9],
   ];
   const crew = [
-    [0, 18],
-    [3, 18],
-    [5, 7],
-    [9, 10],
+    [0, 4],
+    [0, 9],
+    [0, 11],
+    [0, 13],
+    [0, 15],
+    [4, 10],
+    [4, 18],
+    [6, 12],
+    [6, 14],
+    [8, 0],
+    [8, 2],
     [9, 12],
     [9, 14],
     [11, 0],
@@ -256,18 +264,11 @@ function sashKnownStartingFallback(ctx) {
     [11, 4],
     [11, 6],
     [11, 8],
-    [12, 10],
-    [14, 0],
-    [14, 2],
-    [14, 4],
-    [14, 6],
-    [14, 8],
-    [15, 10],
-    [17, 0],
-    [17, 2],
-    [17, 4],
-    [17, 6],
-    [17, 8],
+    [11, 10],
+    [14, 10],
+    [17, 3],
+    [17, 5],
+    [17, 7],
   ];
 
   const makePlacement = (def, r, c) => {
