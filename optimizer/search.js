@@ -5,7 +5,7 @@ const OPT_RULES = {
   SAV: { paths: true },
   SAJM: { paths: true },
   SAT: { paths: false },
-  SASH: { paths: false },
+  SASH: { paths: false, greenLifeSupport: true },
 };
 const OPT_BUDGET = { fast: 600, normal: 3000, deep: 90000 };
 let optimizerRunning = false,
@@ -997,6 +997,13 @@ async function optimizeColonyV2(era, goal, primaryKey, mode) {
   ctx.deadline = ctx.started + (OPT_BUDGET[mode] || 3000);
   const primary = eraBoardBuildingByKey(era, primaryKey);
   if (!primary) throw new Error("Unknown optimizer building");
+
+  if (era === "SASH" && ctx.rules.greenLifeSupport) {
+    if (typeof optimizeSashGreen !== "function")
+      throw new Error("SASH Life Support optimizer failed to load");
+    return optimizeSashGreen(ctx, primaryKey);
+  }
+
   const allowedKeys = oxAllowedResidentialKeys(era, primaryKey),
     base = oxBaseline(ctx, primaryKey, goal);
   ctx.bestState = base.state;
@@ -1152,7 +1159,12 @@ function optimizerPopulatePrimary() {
   const s = $("optimizerPrimary");
   if (!s) return;
   s.innerHTML = "";
-  const defs = ERA_DATA[selectedEra]?.residential || [],
+  const defs =
+      selectedEra === "SASH"
+        ? (ERA_DATA.SASH?.residential || []).filter(
+            (def) => def.key === SASH_GREEN_RULE.crewKey,
+          )
+        : ERA_DATA[selectedEra]?.residential || [],
     counts = new Map();
   for (const b of buildings) counts.set(b.type, (counts.get(b.type) || 0) + 1);
   let pref = defs[0]?.key,
@@ -1171,7 +1183,7 @@ function optimizerPopulatePrimary() {
   if (pref) s.value = pref;
 }
 function optimizerSyncGoalUi() {
-  $("optimizerPrimaryRow").hidden = false;
+  $("optimizerPrimaryRow").hidden = selectedEra === "SASH";
 }
 function optimizerSyncSearchLabels() {
   const s = $("optimizerSearch");
@@ -1196,7 +1208,9 @@ function openOptimizerDialog() {
   optimizerSyncGoalUi();
   optimizerSyncSearchLabels();
   $("optimizerProgress").innerHTML =
-    "<strong>Ready</strong><span>Try rearranging your homes to earn more credits. Nothing changes until you apply a result.</span>";
+    selectedEra === "SASH"
+      ? "<strong>Ready</strong><span>Maximize Simple Crew Quarters while keeping Life Support at 125%+.</span>"
+      : "<strong>Ready</strong><span>Try rearranging your homes to earn more credits. Nothing changes until you apply a result.</span>";
   $("optimizerRunBtn").textContent = "Optimize";
   $("optimizerRunBtn").disabled = false;
   $("optimizerCancelBtn").textContent = "Cancel";
@@ -1262,7 +1276,10 @@ async function runOptimizerDialog() {
     if (
       !result.cancelled &&
       (!colonyStateMatchesGeometry(result.state, era) ||
-        !oxValid(ctx, result.state))
+        !oxValid(ctx, result.state) ||
+        (era === "SASH" &&
+          (!result.sashGreen?.green ||
+            !sashGreenStateUsesEarlyBuildingsOnly(result.state))))
     ) {
       throw new Error("The search returned an invalid layout");
     }
@@ -1270,40 +1287,97 @@ async function runOptimizerDialog() {
       // Count every existing residence, including later buildings and mixed colonies.
       cur = oxScore(ctx, current, primary),
       sc = oxScore(ctx, result.state, primary),
+      currentSash =
+        era === "SASH" ? sashGreenStats(current) : null,
+      nextSash =
+        era === "SASH" ? result.sashGreen || sashGreenStats(result.state) : null,
+      currentSashComparable =
+        era === "SASH" &&
+        sashGreenStateUsesEarlyBuildingsOnly(current) &&
+        currentSash.green,
       better =
-        !cur ||
-        (goal === "maxCredits"
-          ? sc.credits8h > cur.credits8h
-          : oxBetter(sc, cur, goal)),
+        era === "SASH"
+          ? !currentSashComparable ||
+            sashGreenBetter(
+              {
+                ...nextSash,
+                unused: sc.unused,
+              },
+              {
+                ...currentSash,
+                unused: cur.unused,
+              },
+            )
+          : !cur ||
+            (goal === "maxCredits"
+              ? sc.credits8h > cur.credits8h
+              : oxBetter(sc, cur, goal)),
       d = eraBoardBuildingByKey(era, primary),
       best =
-        goal === "maxPrimary"
-          ? sc.primaryCount + " " + d.name + (sc.primaryCount === 1 ? "" : "s")
-          : Math.round(sc.credits8h / 2).toLocaleString() + " credits / 4h";
+        era === "SASH"
+          ? Math.round(nextSash.credits4h).toLocaleString() + " credits / 4h"
+          : goal === "maxPrimary"
+            ? sc.primaryCount +
+              " " +
+              d.name +
+              (sc.primaryCount === 1 ? "" : "s")
+            : Math.round(sc.credits8h / 2).toLocaleString() + " credits / 4h";
     if (result.cancelled) {
       $("optimizerProgress").innerHTML =
         "<strong>Cancelled</strong><span>Your layout was left unchanged.</span>";
       $("optimizerRunBtn").textContent = "Optimize";
     } else if (better) {
       optimizerPendingResult = { state: result.state, era };
-      $("optimizerProgress").innerHTML =
-        "<strong>Best found: " +
-        best +
-        "</strong><span>" +
-        sc.roads +
-        " paths · " +
-        sc.unused +
-        " unused tiles · " +
-        result.tested.toLocaleString() +
-        " layouts tested</span><span>This is the best layout found in this search. There may still be a better fit.</span>";
+      if (era === "SASH") {
+        const ratio = (nextSash.ratio * 100).toFixed(2);
+        $("optimizerProgress").innerHTML =
+          "<strong>Best found: " +
+          best +
+          "</strong><span>" +
+          nextSash.crew +
+          " Simple Crew · " +
+          nextSash.flora +
+          " FloraShip · " +
+          ratio +
+          "% Life Support · " +
+          sc.unused +
+          " unused</span><span>" +
+          (result.proven
+            ? "Maximum Crew count proven for this footprint."
+            : "Best verified in this search.") +
+          "</span>";
+      } else {
+        $("optimizerProgress").innerHTML =
+          "<strong>Best found: " +
+          best +
+          "</strong><span>" +
+          sc.roads +
+          " paths · " +
+          sc.unused +
+          " unused tiles · " +
+          result.tested.toLocaleString() +
+          " layouts tested</span><span>This is the best layout found in this search. There may still be a better fit.</span>";
+      }
       $("optimizerRunBtn").textContent = "Apply result";
     } else {
-      $("optimizerProgress").innerHTML =
-        "<strong>No higher-credit layout found</strong><span>Best found: " +
-        best +
-        ". Your layout was not changed.</span><span>" +
-        result.tested.toLocaleString() +
-        " layouts tested.</span>";
+      if (era === "SASH") {
+        const ratio = (nextSash.ratio * 100).toFixed(2);
+        $("optimizerProgress").innerHTML =
+          "<strong>Your green layout is already as good as this search found</strong><span>" +
+          nextSash.crew +
+          " Simple Crew · " +
+          nextSash.flora +
+          " FloraShip · " +
+          ratio +
+          "% Life Support</span>";
+      } else {
+        $("optimizerProgress").innerHTML =
+          "<strong>No higher-credit layout found</strong><span>Best found: " +
+          best +
+          ". Your layout was not changed.</span><span>" +
+          result.tested.toLocaleString() +
+          " layouts tested.</span>";
+      }
       $("optimizerRunBtn").textContent = "Run again";
     }
     $("optimizerRunBtn").disabled = false;
