@@ -1013,9 +1013,9 @@ const ERA_DATA = {
   SASH: {
     townHall: {
       name: "Town Hall",
-      sizeText: "7×6",
-      w: 7,
-      h: 6,
+      sizeText: "5×5",
+      w: 5,
+      h: 5,
       sprite: "./assets/buildings/sash/sash-town-hall.webp",
     },
     path: {
@@ -1028,9 +1028,9 @@ const ERA_DATA = {
         key: "simpleCrewQuarters",
         name: "Simple Crew Quarters",
         category: "residential",
-        sizeText: "3×2",
-        h: 2,
-        w: 3,
+        sizeText: "2×3",
+        h: 3,
+        w: 2,
         sprite: "./assets/buildings/sash/sash-simple-crew-quarters.webp",
         colonists: 137,
         creditAmount: 2180,
