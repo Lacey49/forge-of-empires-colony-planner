@@ -480,6 +480,12 @@ function testSashGeometryAndPresets() {
   const simpleLifeSupport = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_SIMPLE_PRESET_LIFE_SUPPORT")})`,
   );
+  const simpleCosmicPreset = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_SIMPLE_COSMIC_PRESET_BUILDINGS")})`,
+  );
+  const simpleCosmicLifeSupport = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_SIMPLE_COSMIC_PRESET_LIFE_SUPPORT")})`,
+  );
   const officerPreset = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PRESET_BUILDINGS")})`,
   );
@@ -496,6 +502,11 @@ function testSashGeometryAndPresets() {
   check(
     simplePreset.length === 23 && simpleLifeSupport.length === 12,
     `SASH starting preset should contain 23 Simple Crew Quarters and 12 FloraShip Expresses, found ${simplePreset.length} + ${simpleLifeSupport.length}`,
+  );
+  check(
+    simpleCosmicPreset.length === 26 &&
+      simpleCosmicLifeSupport.length === 7,
+    `SASH CosmicClean preset should contain 26 Simple Crew Quarters and 7 CosmicClean Expresses, found ${simpleCosmicPreset.length} + ${simpleCosmicLifeSupport.length}`,
   );
   check(
     officerPreset.length === 14 && officerFillers.length === 5,
