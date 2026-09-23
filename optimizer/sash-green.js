@@ -227,49 +227,12 @@ function sashKnownStartingFallback(ctx) {
 
   const crewDef = eraBoardBuildingByKey("SASH", SASH_GREEN_RULE.crewKey);
   const floraDef = eraBoardBuildingByKey("SASH", SASH_GREEN_RULE.supportKey);
-  const hall = oxHall(ctx, [6, 4]);
+  const hall = oxHall(ctx, SASH_SIMPLE_PRESET_HUB);
   if (!crewDef || !floraDef || !hall) return null;
 
-  // Verified exact packing for the no-expansion footprint.
-  const flora = [
-    [0, 6],
-    [0, 17],
-    [3, 4],
-    [3, 7],
-    [3, 12],
-    [3, 15],
-    [7, 9],
-    [14, 1],
-    [14, 4],
-    [14, 7],
-    [17, 0],
-    [17, 9],
-  ];
-  const crew = [
-    [0, 4],
-    [0, 9],
-    [0, 11],
-    [0, 13],
-    [0, 15],
-    [4, 10],
-    [4, 18],
-    [6, 12],
-    [6, 14],
-    [8, 0],
-    [8, 2],
-    [9, 12],
-    [9, 14],
-    [11, 0],
-    [11, 2],
-    [11, 4],
-    [11, 6],
-    [11, 8],
-    [11, 10],
-    [14, 10],
-    [17, 3],
-    [17, 5],
-    [17, 7],
-  ];
+  // Reuse the verified built-in starter preset as the baseline.
+  const flora = SASH_SIMPLE_PRESET_LIFE_SUPPORT;
+  const crew = SASH_SIMPLE_PRESET_BUILDINGS;
 
   const makePlacement = (def, r, c) => {
     const ids = oxRect(r, c, def.h, def.w);
