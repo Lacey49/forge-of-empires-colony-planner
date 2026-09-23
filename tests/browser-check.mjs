@@ -147,6 +147,11 @@ try {
       text,
     };
   });
+  assert.equal(
+    sashSearch.valid,
+    true,
+    `SASH optimizer did not produce a usable result: ${sashSearch.text}`,
+  );
   assert.deepEqual(
     {
       valid: sashSearch.valid,
