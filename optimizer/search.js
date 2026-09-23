@@ -1273,15 +1273,18 @@ async function runOptimizerDialog() {
     const result = await optimizeColonyV2(era, goal, primary, mode);
     if (selectedEra !== era) return;
     const ctx = oxCtx(era);
-    if (
-      !result.cancelled &&
-      (!colonyStateMatchesGeometry(result.state, era) ||
-        !oxValid(ctx, result.state) ||
-        (era === "SASH" &&
-          (!result.sashGreen?.green ||
-            !sashGreenStateUsesEarlyBuildingsOnly(result.state))))
-    ) {
-      throw new Error("The search returned an invalid layout");
+    if (!result.cancelled) {
+      const geometryOk = colonyStateMatchesGeometry(result.state, era);
+      const optimizerValid = oxValid(ctx, result.state);
+      const sashRuleOk =
+        era !== "SASH" ||
+        (result.sashGreen?.green &&
+          sashGreenStateUsesEarlyBuildingsOnly(result.state));
+      if (!geometryOk || !optimizerValid || !sashRuleOk) {
+        throw new Error(
+          `The search returned an invalid layout (geometry=${geometryOk}, optimizer=${optimizerValid}, sashGreen=${sashRuleOk})`,
+        );
+      }
     }
     const current = currentColonyState(),
       // Count every existing residence, including later buildings and mixed colonies.
