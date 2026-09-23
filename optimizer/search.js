@@ -1184,6 +1184,11 @@ function optimizerPopulatePrimary() {
 }
 function optimizerSyncGoalUi() {
   $("optimizerPrimaryRow").hidden = selectedEra === "SASH";
+  const goal = $("optimizerGoal");
+  const maxCredits = goal?.querySelector('option[value="maxCredits"]');
+  if (maxCredits)
+    maxCredits.textContent =
+      selectedEra === "SASH" ? "Max credits + Life Support" : "Max credits";
 }
 function optimizerSyncSearchLabels() {
   const s = $("optimizerSearch");
