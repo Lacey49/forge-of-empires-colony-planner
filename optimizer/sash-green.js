@@ -476,3 +476,27 @@ async function optimizeSashGreen(ctx, primaryKey) {
     proven: false,
   };
 }
+
+
+/*
+ * SASH uses a different optimization problem from the other colonies.
+ * Keep it outside the generic residential/path post-processing chain so those
+ * passes cannot remove Life Support buildings or strip SASH-specific results.
+ * This file is loaded after the generic optimizer passes and before the shared
+ * search-time wrapper.
+ */
+if (typeof optimizeColonyV2 === "function") {
+  const optimizeOtherColony = optimizeColonyV2;
+  optimizeColonyV2 = async function (era, goal, primaryKey, mode) {
+    if (era !== "SASH")
+      return optimizeOtherColony(era, goal, primaryKey, mode);
+
+    const ctx = oxCtx(era);
+    ctx.goal = goal;
+    ctx.primaryKey = primaryKey;
+    ctx.started = performance.now();
+    ctx.lastYield = ctx.started;
+    ctx.deadline = ctx.started + (OPT_BUDGET[mode] || OPT_BUDGET.deep);
+    return optimizeSashGreen(ctx, primaryKey);
+  };
+}
