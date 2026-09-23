@@ -360,8 +360,137 @@ function testSatBuildingOrientations() {
   notes.push("SAT goods orientations and no-path metadata checked");
 }
 
+function testSashGeometryAndPresets() {
+  if (!parsedEras?.SASH) {
+    failures.push("SASH geometry check could not load ERA_DATA");
+    return;
+  }
+
+  const layouts = read("data/layouts.js");
+  const baseLiteral = extractConst(layouts, "SASH_BASE_CHUNKS");
+  const expansionLiteral = extractConst(layouts, "SASH_EXPANSIONS");
+  const maxLiteral = extractConst(layouts, "SASH_MAX_CHUNKS");
+  if (!baseLiteral || !expansionLiteral || !maxLiteral) return;
+
+  const base = vm.runInNewContext(`(${baseLiteral})`);
+  const expansions = vm.runInNewContext(`(${expansionLiteral})`);
+  const max = vm.runInNewContext(`(${maxLiteral})`);
+
+  check(
+    base.length === 18,
+    `SASH should have 18 starting plots, found ${base.length}`,
+  );
+  check(
+    expansions.length === 23,
+    `SASH should have 23 expansions, found ${expansions.length}`,
+  );
+  check(
+    max.length === 41,
+    `SASH should have 41 total plots, found ${max.length}`,
+  );
+
+  const actualBase = new Set(base.map(([br, bc]) => `${br},${bc}`));
+  const actualExpansions = new Set(
+    expansions.map(({ br, bc }) => `${br},${bc}`),
+  );
+  const actualMax = new Set(max.map(([br, bc]) => `${br},${bc}`));
+  const expectedBase = new Set([
+    "0,1", "0,2", "0,3", "0,4",
+    "1,1", "1,2", "1,3", "1,4",
+    "2,0", "2,1", "2,2", "2,3",
+    "3,0", "3,1", "3,2",
+    "4,0", "4,1", "4,2",
+  ]);
+  const expectedExpansions = new Set([
+    "0,5", "1,5",
+    "2,4", "2,5", "2,6",
+    "3,3", "3,4", "3,5", "3,6",
+    "4,3", "4,4", "4,5", "4,6",
+    "5,1", "5,2", "5,3", "5,4", "5,5",
+    "6,1", "6,2", "6,3", "6,4", "6,5",
+  ]);
+
+  check(
+    [...expectedBase].every((key) => actualBase.has(key)) &&
+      actualBase.size === expectedBase.size,
+    "SASH starting-plot shape does not match the verified colony grid",
+  );
+  check(
+    [...expectedExpansions].every((key) => actualExpansions.has(key)) &&
+      actualExpansions.size === expectedExpansions.size,
+    "SASH expansion shape does not match the verified colony grid",
+  );
+  check(
+    actualMax.size === 41 &&
+      [...actualBase, ...actualExpansions].every((key) => actualMax.has(key)),
+    "SASH full footprint does not match starting plots plus expansions",
+  );
+
+  const hall = parsedEras.SASH.townHall;
+  check(
+    hall.w === 5 && hall.h === 5 && hall.sizeText === "5×5",
+    `SASH Town Hall should be 5×5, found ${hall.w}×${hall.h}`,
+  );
+
+  const simpleCrew = parsedEras.SASH.residential.find(
+    (def) => def.key === "simpleCrewQuarters",
+  );
+  check(Boolean(simpleCrew), "Missing SASH Simple Crew Quarters");
+  if (simpleCrew) {
+    check(
+      simpleCrew.w === 2 &&
+        simpleCrew.h === 3 &&
+        simpleCrew.sizeText === "2×3",
+      `Simple Crew Quarters should be 2×3, found ${simpleCrew.w}×${simpleCrew.h}`,
+    );
+  }
+
+  const simplePreset = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_SIMPLE_PRESET_BUILDINGS")})`,
+  );
+  const officerPreset = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PRESET_BUILDINGS")})`,
+  );
+  const officerFillers = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PRESET_FILLERS")})`,
+  );
+  const officerAll = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_ALL_PRESET_BUILDINGS")})`,
+  );
+  const officerAllFillers = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_ALL_PRESET_FILLERS")})`,
+  );
+
+  check(
+    simplePreset.length === 41,
+    `SASH starting Simple Crew preset should contain 41 quarters, found ${simplePreset.length}`,
+  );
+  check(
+    officerPreset.length === 14 && officerFillers.length === 5,
+    "SASH starting Officers preset should contain 14 Officers Quarters and 5 Simple Crew fillers",
+  );
+  check(
+    officerAll.length === 37 && officerAllFillers.length === 5,
+    "SASH all-expansion Officers preset should contain 37 Officers Quarters and 5 Simple Crew fillers",
+  );
+
+  check(
+    !fs.existsSync(path.join(repo, "presets/sash-presets.js")),
+    "Obsolete SASH preset override still exists",
+  );
+  check(
+    !html.includes("presets/sash-presets.js"),
+    "index.html still loads the obsolete SASH preset override",
+  );
+
+  notes.push(
+    "SASH geometry: 18 starting plots, 23 expansions, 5×5 Town Hall, and 2×3 Simple Crew Quarters checked",
+  );
+}
+
 testSatGeometryAndPresets();
 testSatBuildingOrientations();
+testSashGeometryAndPresets();
 
 check(
   !fs.existsSync(path.join(repo, "download.html")),
