@@ -352,7 +352,7 @@ const ERA_RULES = {
   SAV: { townHall: { w: 5, h: 5 } },
   SAJM: { townHall: { w: 5, h: 5 } },
   SAT: { townHall: { w: 5, h: 5 } },
-  SASH: { townHall: { w: 5, h: 5 }, optimizer: false },
+  SASH: { townHall: { w: 5, h: 5 }, optimizer: "greenLifeSupport" },
 };
 
 const GOODS_PRODUCTS = {
