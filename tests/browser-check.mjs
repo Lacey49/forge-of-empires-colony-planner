@@ -111,7 +111,13 @@ try {
     openOptimizerDialog();
     const sashDialogOpen = $("optimizerDialog").open;
     const buildingRowHidden = $("optimizerPrimaryRow").hidden;
+    const buildingRowLabel =
+      $("optimizerPrimaryRow").querySelector("span")?.textContent;
     const sashGoalLabel = $("optimizerGoal").selectedOptions[0]?.textContent;
+    const sashPairs = [...$("optimizerPrimary").options].map((option) => ({
+      value: option.value,
+      label: option.textContent,
+    }));
     closeOptimizerDialog();
 
     showEditableColonyUi("SAT");
@@ -120,19 +126,69 @@ try {
       sashVisible,
       sashDialogOpen,
       buildingRowHidden,
+      buildingRowLabel,
       satGoalLabel,
       sashGoalLabel,
+      sashPairs,
     };
   });
   assert.deepEqual(optimizerAvailability, {
     satVisible: true,
     sashVisible: true,
     sashDialogOpen: true,
-    buildingRowHidden: true,
+    buildingRowHidden: false,
+    buildingRowLabel: "Buildings",
     satGoalLabel: "Max credits",
     sashGoalLabel: "Max credits + Life Support",
+    sashPairs: [
+      {
+        value: "scq-fse",
+        label: "Simple Crew Quarters + FloraShip Express",
+      },
+      {
+        value: "scq-cce",
+        label: "Simple Crew Quarters + CosmicClean Express",
+      },
+      {
+        value: "oq-cce",
+        label: "Officers Quarters + CosmicClean Express",
+      },
+      {
+        value: "oq-sesp",
+        label: "Officers Quarters + Sit'n'Eat SpacePizza",
+      },
+    ],
   });
-  notes.push("SASH optimizer exposes the green-Life-Support search");
+  notes.push("SASH optimizer exposes all four residential + Life Support pairs");
+
+  const sashPairMath = await page.evaluate(() => {
+    showEditableColonyUi("SASH");
+    const preset = getPresetById("builtin:sash-simple-crew-cosmic");
+    const presetStats = sashPairStats(preset.state, "scq-cce");
+    return {
+      scqFse23: sashMinSupportForResidential("scq-fse", 23),
+      scqCce26: sashMinSupportForResidential("scq-cce", 26),
+      oqCce8: sashMinSupportForResidential("oq-cce", 8),
+      oqSesp9: sashMinSupportForResidential("oq-sesp", 9),
+      cosmicPreset: {
+        residentialCount: presetStats.residentialCount,
+        supportCount: presetStats.supportCount,
+        green: presetStats.green,
+      },
+    };
+  });
+  assert.deepEqual(sashPairMath, {
+    scqFse23: 12,
+    scqCce26: 9,
+    oqCce8: 8,
+    oqSesp9: 5,
+    cosmicPreset: {
+      residentialCount: 26,
+      supportCount: 7,
+      green: false,
+    },
+  });
+  notes.push("SASH pair math and the 26 + 7 CosmicClean preset checked");
 
   const sashSearch = await page.evaluate(async () => {
     showEditableColonyUi("SASH");
