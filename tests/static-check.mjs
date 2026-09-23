@@ -483,6 +483,9 @@ function testSashGeometryAndPresets() {
   const simpleCosmicPreset = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_SIMPLE_COSMIC_PRESET_BUILDINGS")})`,
   );
+  const simpleCosmicFlora = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_SIMPLE_COSMIC_PRESET_FLORA")})`,
+  );
   const simpleCosmicLifeSupport = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_SIMPLE_COSMIC_PRESET_LIFE_SUPPORT")})`,
   );
@@ -505,8 +508,48 @@ function testSashGeometryAndPresets() {
   );
   check(
     simpleCosmicPreset.length === 26 &&
+      simpleCosmicFlora.length === 2 &&
       simpleCosmicLifeSupport.length === 7,
-    `SASH CosmicClean preset should contain 26 Simple Crew Quarters and 7 CosmicClean Expresses, found ${simpleCosmicPreset.length} + ${simpleCosmicLifeSupport.length}`,
+    `SASH CosmicClean preset should contain 26 Simple Crew Quarters, 2 FloraShip Expresses, and 7 CosmicClean Expresses, found ${simpleCosmicPreset.length} + ${simpleCosmicFlora.length} + ${simpleCosmicLifeSupport.length}`,
+  );
+
+  const exactCosmicCrew = [
+    [0, 7],
+    [2, 9],
+    [3, 7],
+    [5, 9],
+    [8, 0], [8, 2], [8, 9], [8, 11],
+    [11, 0], [11, 2], [11, 4], [11, 6], [11, 8], [11, 10],
+    [14, 0], [14, 2], [14, 4], [14, 6], [14, 8], [14, 10],
+    [17, 0], [17, 2], [17, 4], [17, 6], [17, 8], [17, 10],
+  ];
+  const exactCosmicFlora = [[0, 4], [3, 4]];
+  const exactCosmicClean = [
+    [0, 11], [0, 14], [0, 17],
+    [4, 11], [4, 14], [4, 17],
+    [8, 13],
+  ];
+  check(
+    JSON.stringify(simpleCosmicPreset) === JSON.stringify(exactCosmicCrew),
+    "SASH CosmicClean preset Simple Crew coordinates changed from the verified screenshot",
+  );
+  check(
+    JSON.stringify(simpleCosmicFlora) === JSON.stringify(exactCosmicFlora),
+    "SASH CosmicClean preset FloraShip coordinates changed from the verified screenshot",
+  );
+  check(
+    JSON.stringify(simpleCosmicLifeSupport) === JSON.stringify(exactCosmicClean),
+    "SASH CosmicClean preset CosmicClean coordinates changed from the verified screenshot",
+  );
+
+  const plannerSource = read("app/planner.js");
+  check(
+    plannerSource.includes('name: "Simple Crew Quarters (23) + FloraShip Express (12)"'),
+    "Exact first SASH preset title changed",
+  );
+  check(
+    plannerSource.includes('name: "Simple Crew Quarters (26) + CosmicClean Express (7)"'),
+    "Exact second SASH preset title changed",
   );
   check(
     officerPreset.length === 14 && officerFillers.length === 5,
