@@ -736,6 +736,9 @@ const COLONY_CONFIGS = {
 function isEditableColonyEra(era = selectedEra) {
   return !!COLONY_CONFIGS[era];
 }
+function eraSupportsOptimizer(era = selectedEra) {
+  return ERA_RULES?.[era]?.optimizer !== false;
+}
 function activeColonyConfig() {
   return COLONY_CONFIGS[selectedEra] || COLONY_CONFIGS.SAAB;
 }
@@ -3300,7 +3303,7 @@ function showEditableColonyUi(era) {
 
   $("presetsBtn").style.display = "";
   $("freeBuildBtn").style.display = "";
-  $("optimizeBtn").style.display = "";
+  $("optimizeBtn").style.display = eraSupportsOptimizer(era) ? "" : "none";
   $("savePresetBtn").style.display = "";
 
   const expCount = $("compactExpCount");
