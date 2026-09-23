@@ -445,6 +445,35 @@ function testSashGeometryAndPresets() {
     );
   }
 
+  const sashOrientations = new Map([
+    ["simpleCrewQuarters", [2, 3]],
+    ["enhancedCrewQuarters", [3, 4]],
+    ["officersQuarters", [4, 4]],
+    ["crystalCrafter", [5, 4]],
+    ["photonosphereHarvester", [5, 5]],
+    ["aeroFusionPlant", [5, 5]],
+    ["deepSpaceDataConverter", [5, 5]],
+    ["fmmManufacture", [4, 5]],
+    ["floraShipExpress", [3, 3]],
+    ["cosmicCleanExpress", [3, 4]],
+    ["sitEatSpacePizza", [4, 4]],
+  ]);
+  const sashDefs = [
+    ...parsedEras.SASH.residential,
+    ...parsedEras.SASH.goods,
+    ...parsedEras.SASH.lifeSupport,
+  ];
+  for (const def of sashDefs) {
+    const want = sashOrientations.get(def.key);
+    if (!want) continue;
+    check(
+      def.w === want[0] &&
+        def.h === want[1] &&
+        def.sizeText === `${want[0]}×${want[1]}`,
+      `${def.name}: expected SASH planner orientation ${want[0]}×${want[1]}, found ${def.w}×${def.h}`,
+    );
+  }
+
   const simplePreset = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_SIMPLE_PRESET_BUILDINGS")})`,
   );
@@ -484,7 +513,7 @@ function testSashGeometryAndPresets() {
   );
 
   notes.push(
-    "SASH geometry: 18 starting plots, 23 expansions, 5×5 Town Hall, and 2×3 Simple Crew Quarters checked",
+    "SASH geometry and verified building orientations checked",
   );
 }
 
