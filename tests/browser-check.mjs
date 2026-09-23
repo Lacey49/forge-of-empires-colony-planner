@@ -102,22 +102,35 @@ try {
   const optimizerAvailability = await page.evaluate(() => {
     showEditableColonyUi("SAT");
     const satVisible = getComputedStyle($("optimizeBtn")).display !== "none";
+    openOptimizerDialog();
+    const satGoalLabel = $("optimizerGoal").selectedOptions[0]?.textContent;
+    closeOptimizerDialog();
 
     showEditableColonyUi("SASH");
     const sashVisible = getComputedStyle($("optimizeBtn")).display !== "none";
     openOptimizerDialog();
     const sashDialogOpen = $("optimizerDialog").open;
     const buildingRowHidden = $("optimizerPrimaryRow").hidden;
+    const sashGoalLabel = $("optimizerGoal").selectedOptions[0]?.textContent;
     closeOptimizerDialog();
 
     showEditableColonyUi("SAT");
-    return { satVisible, sashVisible, sashDialogOpen, buildingRowHidden };
+    return {
+      satVisible,
+      sashVisible,
+      sashDialogOpen,
+      buildingRowHidden,
+      satGoalLabel,
+      sashGoalLabel,
+    };
   });
   assert.deepEqual(optimizerAvailability, {
     satVisible: true,
     sashVisible: true,
     sashDialogOpen: true,
     buildingRowHidden: true,
+    satGoalLabel: "Max credits",
+    sashGoalLabel: "Max credits + Life Support",
   });
   notes.push("SASH optimizer exposes the green-Life-Support search");
 
