@@ -3731,7 +3731,7 @@ body[data-density="spacious"] .map-wrap {
   }
 }
 
-#board .cell:focus-visible {
+#board.keyboard-navigation .cell:focus-visible {
   outline: 3px solid var(--theme-accent) !important;
   outline-offset: -3px !important;
   z-index: 12 !important;
