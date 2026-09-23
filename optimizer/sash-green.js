@@ -298,7 +298,17 @@ function sashKnownStartingFallback(ctx) {
   )
     return null;
 
-  return { state, stats, solution: sol };
+  return {
+    state,
+    stats: {
+      ...stats,
+      unused:
+        ctx.ownedCount -
+        ctx.hall.w * ctx.hall.h -
+        stats.area,
+    },
+    solution: sol,
+  };
 }
 
 async function optimizeSashGreen(ctx, primaryKey) {
@@ -330,6 +340,11 @@ async function optimizeSashGreen(ctx, primaryKey) {
         },
       };
     }
+  }
+
+  if (best) {
+    ctx.bestState = best.state;
+    ctx.bestScore = oxScore(ctx, best.state, primaryKey);
   }
 
   const hallArea = ctx.hall.w * ctx.hall.h;
