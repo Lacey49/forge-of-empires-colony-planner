@@ -1260,6 +1260,17 @@ function makeSashPresetState(kind) {
     return state;
   }
 
+  if (kind === "simpleCrewCosmic") {
+    addHub(SASH_SIMPLE_COSMIC_PRESET_HUB);
+    for (const [r, c] of SASH_SIMPLE_COSMIC_PRESET_BUILDINGS) {
+      addBuilding("simpleCrewQuarters", r, c);
+    }
+    for (const [r, c] of SASH_SIMPLE_COSMIC_PRESET_LIFE_SUPPORT) {
+      addBuilding("cosmicCleanExpress", r, c);
+    }
+    return state;
+  }
+
   if (kind === "officers") {
     addHub(SASH_OFFICER_PRESET_HUB);
     for (const [r, c] of SASH_OFFICER_PRESET_BUILDINGS) {
@@ -1377,6 +1388,12 @@ function getPresetCatalog() {
         name: "Simple Crew Quarters (23) + 12 FloraShip Expresses",
         kind: "Built-in",
         state: makeSashPresetState("simpleCrew"),
+      },
+      {
+        id: "builtin:sash-simple-crew-cosmic",
+        name: "Simple Crew Quarters (26) + 7 CosmicClean Expresses",
+        kind: "Built-in",
+        state: makeSashPresetState("simpleCrewCosmic"),
       },
       {
         id: "builtin:sash-officers",
