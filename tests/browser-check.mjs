@@ -63,6 +63,10 @@ const failures = [];
 const notes = [];
 const page = await browser.newPage({ viewport: { width: 1365, height: 900 } });
 page.on("pageerror", (e) => failures.push(e.message));
+page.on("console", (message) => {
+  if (message.type() === "error")
+    console.error("Browser console:", message.text());
+});
 page.on("response", (r) => {
   if (r.url().startsWith(base) && r.status() >= 400)
     failures.push(`${r.status()} ${r.url()}`);
