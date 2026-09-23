@@ -100,19 +100,77 @@ try {
     const satVisible = getComputedStyle($("optimizeBtn")).display !== "none";
 
     showEditableColonyUi("SASH");
-    const sashHidden = getComputedStyle($("optimizeBtn")).display === "none";
+    const sashVisible = getComputedStyle($("optimizeBtn")).display !== "none";
     openOptimizerDialog();
     const sashDialogOpen = $("optimizerDialog").open;
+    const buildingRowHidden = $("optimizerPrimaryRow").hidden;
+    closeOptimizerDialog();
 
     showEditableColonyUi("SAT");
-    return { satVisible, sashHidden, sashDialogOpen };
+    return { satVisible, sashVisible, sashDialogOpen, buildingRowHidden };
   });
   assert.deepEqual(optimizerAvailability, {
     satVisible: true,
-    sashHidden: true,
-    sashDialogOpen: false,
+    sashVisible: true,
+    sashDialogOpen: true,
+    buildingRowHidden: true,
   });
-  notes.push("SASH optimizer is disabled until life-support balancing is supported");
+  notes.push("SASH optimizer exposes the green-Life-Support search");
+
+  const sashSearch = await page.evaluate(async () => {
+    showEditableColonyUi("SASH");
+    activateFreeBuild();
+    loadBlank();
+    openOptimizerDialog();
+    await runOptimizerDialog();
+
+    const state = optimizerPendingResult?.state || null;
+    const stats = state ? sashGreenStats(state) : null;
+    const score = state ? oxScore(oxCtx("SASH"), state, "simpleCrewQuarters") : null;
+    const text = $("optimizerProgress").textContent;
+    const valid =
+      !!state &&
+      colonyStateMatchesGeometry(state, "SASH") &&
+      oxValid(oxCtx("SASH"), state) &&
+      sashGreenStateUsesEarlyBuildingsOnly(state);
+
+    closeOptimizerDialog();
+    return {
+      valid,
+      crew: stats?.crew,
+      flora: stats?.flora,
+      colonists: stats?.colonists,
+      lifeSupport: stats?.lifeSupport,
+      credits4h: stats?.credits4h,
+      green: stats?.green,
+      unused: score?.unused,
+      text,
+    };
+  });
+  assert.deepEqual(
+    {
+      valid: sashSearch.valid,
+      crew: sashSearch.crew,
+      flora: sashSearch.flora,
+      colonists: sashSearch.colonists,
+      lifeSupport: sashSearch.lifeSupport,
+      credits4h: sashSearch.credits4h,
+      green: sashSearch.green,
+      unused: sashSearch.unused,
+    },
+    {
+      valid: true,
+      crew: 23,
+      flora: 12,
+      colonists: 3151,
+      lifeSupport: 4032,
+      credits4h: 50140,
+      green: true,
+      unused: 17,
+    },
+  );
+  assert.match(sashSearch.text, /127\.96% Life Support/);
+  notes.push("Starting SASH search returns 23 Crew + 12 Flora at green Life Support");
 
   await page.evaluate(() => {
     showEditableColonyUi("SASH");
