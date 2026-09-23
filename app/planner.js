@@ -1254,6 +1254,9 @@ function makeSashPresetState(kind) {
     for (const [r, c] of SASH_SIMPLE_PRESET_BUILDINGS) {
       addBuilding("simpleCrewQuarters", r, c);
     }
+    for (const [r, c] of SASH_SIMPLE_PRESET_LIFE_SUPPORT) {
+      addBuilding("floraShipExpress", r, c);
+    }
     return state;
   }
 
@@ -1371,7 +1374,7 @@ function getPresetCatalog() {
     result.push(
       {
         id: "builtin:sash-simple-crew",
-        name: "Simple Crew Quarters (41)",
+        name: "Simple Crew Quarters (23) + 12 FloraShip Expresses",
         kind: "Built-in",
         state: makeSashPresetState("simpleCrew"),
       },
