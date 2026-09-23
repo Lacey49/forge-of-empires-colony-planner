@@ -9,7 +9,6 @@
     SAV: ["floatingShelter", "inflatableHome"],
     SAJM: ["aquaPod", "aquaCabin"],
     SAT: ["igloo", "screenedDomicile"],
-    SASH: ["simpleCrewQuarters"],
   };
 
   function optimizerTargetDefs(era) {
@@ -24,13 +23,45 @@
       const select = document.getElementById("optimizerPrimary");
       if (!select) return;
 
-      const defs = optimizerTargetDefs(selectedEra);
       const counts = new Map();
       for (const building of buildings || []) {
         counts.set(building.type, (counts.get(building.type) || 0) + 1);
       }
 
       select.innerHTML = "";
+
+      if (selectedEra === "SASH") {
+        const pairs =
+          typeof SASH_OPTIMIZER_PAIRS !== "undefined"
+            ? SASH_OPTIMIZER_PAIRS
+            : [];
+        let preferred = pairs[0]?.id || null;
+        let bestScore = -1;
+
+        for (const pair of pairs) {
+          const residentialCount = counts.get(pair.residentialKey) || 0;
+          const supportCount = counts.get(pair.supportKey) || 0;
+          const score =
+            (residentialCount > 0 ? 100000 : 0) +
+            (supportCount > 0 ? 10000 : 0) +
+            residentialCount +
+            supportCount;
+          if (score > bestScore) {
+            bestScore = score;
+            preferred = pair.id;
+          }
+
+          const option = document.createElement("option");
+          option.value = pair.id;
+          option.textContent = pair.label;
+          select.appendChild(option);
+        }
+
+        if (preferred) select.value = preferred;
+        return;
+      }
+
+      const defs = optimizerTargetDefs(selectedEra);
       let preferred = defs[0]?.key || null;
       let bestCount = -1;
       for (const def of defs) {
