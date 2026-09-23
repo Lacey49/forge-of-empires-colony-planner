@@ -186,7 +186,10 @@ try {
     setMode(null);
   });
   const firstSashCell = page.locator("#board .cell:not(.out)").first();
-  await firstSashCell.click();
+  await firstSashCell.evaluate((cell) => {
+    cell.focus();
+    cell.click();
+  });
   await page.keyboard.press("m");
   const shortcutFocus = await page.evaluate(() => ({
     keyboardNavigation: $("board").classList.contains("keyboard-navigation"),
