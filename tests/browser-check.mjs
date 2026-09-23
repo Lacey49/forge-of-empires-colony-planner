@@ -94,6 +94,26 @@ try {
   });
   assert.deepEqual(presets.errors, []);
   notes.push(`${presets.count} presets checked across all six eras`);
+
+  const optimizerAvailability = await page.evaluate(() => {
+    showEditableColonyUi("SAT");
+    const satVisible = getComputedStyle($("optimizeBtn")).display !== "none";
+
+    showEditableColonyUi("SASH");
+    const sashHidden = getComputedStyle($("optimizeBtn")).display === "none";
+    openOptimizerDialog();
+    const sashDialogOpen = $("optimizerDialog").open;
+
+    showEditableColonyUi("SAT");
+    return { satVisible, sashHidden, sashDialogOpen };
+  });
+  assert.deepEqual(optimizerAvailability, {
+    satVisible: true,
+    sashHidden: true,
+    sashDialogOpen: false,
+  });
+  notes.push("SASH optimizer is disabled until life-support balancing is supported");
+
   const undo = await page.evaluate(async () => {
     showEditableColonyUi("SAM");
     loadBlank();
