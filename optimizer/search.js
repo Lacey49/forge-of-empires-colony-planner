@@ -1159,12 +1159,22 @@ function optimizerPopulatePrimary() {
   const s = $("optimizerPrimary");
   if (!s) return;
   s.innerHTML = "";
-  const defs =
-      selectedEra === "SASH"
-        ? (ERA_DATA.SASH?.residential || []).filter(
-            (def) => def.key === SASH_GREEN_RULE.crewKey,
-          )
-        : ERA_DATA[selectedEra]?.residential || [],
+
+  if (
+    selectedEra === "SASH" &&
+    typeof SASH_OPTIMIZER_PAIRS !== "undefined"
+  ) {
+    for (const pair of SASH_OPTIMIZER_PAIRS) {
+      const o = document.createElement("option");
+      o.value = pair.id;
+      o.textContent = pair.label;
+      s.appendChild(o);
+    }
+    if (s.options.length) s.selectedIndex = 0;
+    return;
+  }
+
+  const defs = ERA_DATA[selectedEra]?.residential || [],
     counts = new Map();
   for (const b of buildings) counts.set(b.type, (counts.get(b.type) || 0) + 1);
   let pref = defs[0]?.key,
@@ -1183,7 +1193,13 @@ function optimizerPopulatePrimary() {
   if (pref) s.value = pref;
 }
 function optimizerSyncGoalUi() {
-  $("optimizerPrimaryRow").hidden = selectedEra === "SASH";
+  const primaryRow = $("optimizerPrimaryRow");
+  primaryRow.hidden = false;
+  const primaryLabel = primaryRow.querySelector("span");
+  if (primaryLabel)
+    primaryLabel.textContent =
+      selectedEra === "SASH" ? "Buildings" : "Building";
+
   const goal = $("optimizerGoal");
   const maxCredits = goal?.querySelector('option[value="maxCredits"]');
   if (maxCredits)
@@ -1214,7 +1230,7 @@ function openOptimizerDialog() {
   optimizerSyncSearchLabels();
   $("optimizerProgress").innerHTML =
     selectedEra === "SASH"
-      ? "<strong>Ready</strong><span>Maximize Simple Crew Quarters while keeping Life Support at 125%+.</span>"
+      ? "<strong>Ready</strong><span>Maximize credits with the selected buildings while keeping Life Support at 125%+.</span>"
       : "<strong>Ready</strong><span>Try rearranging your homes to earn more credits. Nothing changes until you apply a result.</span>";
   $("optimizerRunBtn").textContent = "Optimize";
   $("optimizerRunBtn").disabled = false;
@@ -1278,30 +1294,38 @@ async function runOptimizerDialog() {
     const result = await optimizeColonyV2(era, goal, primary, mode);
     if (selectedEra !== era) return;
     const ctx = oxCtx(era);
+    const sashPair = era === "SASH" ? sashPairFromId(primary) : null;
+    const scorePrimary =
+      era === "SASH" ? sashPair.residentialKey : primary;
+
     if (!result.cancelled) {
       const geometryOk = colonyStateMatchesGeometry(result.state, era);
       const optimizerValid = oxValid(ctx, result.state);
       const sashRuleOk =
         era !== "SASH" ||
         (result.sashGreen?.green &&
-          sashGreenStateUsesEarlyBuildingsOnly(result.state));
+          result.sashPairId === sashPair.id &&
+          sashGreenStateUsesPair(result.state, sashPair));
       if (!geometryOk || !optimizerValid || !sashRuleOk) {
         throw new Error(
           `The search returned an invalid layout (geometry=${geometryOk}, optimizer=${optimizerValid}, sashGreen=${sashRuleOk})`,
         );
       }
     }
+
     const current = currentColonyState(),
       // Count every existing residence, including later buildings and mixed colonies.
-      cur = oxScore(ctx, current, primary),
-      sc = oxScore(ctx, result.state, primary),
+      cur = oxScore(ctx, current, scorePrimary),
+      sc = oxScore(ctx, result.state, scorePrimary),
       currentSash =
-        era === "SASH" ? sashGreenStats(current) : null,
+        era === "SASH" ? sashPairStats(current, sashPair) : null,
       nextSash =
-        era === "SASH" ? result.sashGreen || sashGreenStats(result.state) : null,
+        era === "SASH"
+          ? result.sashGreen || sashPairStats(result.state, sashPair)
+          : null,
       currentSashComparable =
         era === "SASH" &&
-        sashGreenStateUsesEarlyBuildingsOnly(current) &&
+        sashGreenStateUsesPair(current, sashPair) &&
         currentSash.green,
       better =
         era === "SASH"
@@ -1320,7 +1344,10 @@ async function runOptimizerDialog() {
             (goal === "maxCredits"
               ? sc.credits8h > cur.credits8h
               : oxBetter(sc, cur, goal)),
-      d = eraBoardBuildingByKey(era, primary),
+      d =
+        era === "SASH"
+          ? eraBoardBuildingByKey(era, sashPair.residentialKey)
+          : eraBoardBuildingByKey(era, primary),
       best =
         era === "SASH"
           ? Math.round(nextSash.credits4h).toLocaleString() + " credits / 4h"
@@ -1342,16 +1369,20 @@ async function runOptimizerDialog() {
           "<strong>Best found: " +
           best +
           "</strong><span>" +
-          nextSash.crew +
-          " Simple Crew · " +
-          nextSash.flora +
-          " FloraShip · " +
+          nextSash.residentialCount +
+          " " +
+          nextSash.residentialName +
+          " · " +
+          nextSash.supportCount +
+          " " +
+          nextSash.supportName +
+          " · " +
           ratio +
           "% Life Support · " +
           sc.unused +
           " unused</span><span>" +
           (result.proven
-            ? "Maximum Crew count proven for this footprint."
+            ? "Maximum credit-producing building count proven for this footprint."
             : "Best verified in this search.") +
           "</span>";
       } else {
@@ -1372,10 +1403,14 @@ async function runOptimizerDialog() {
         const ratio = (nextSash.ratio * 100).toFixed(2);
         $("optimizerProgress").innerHTML =
           "<strong>Your green layout is already as good as this search found</strong><span>" +
-          nextSash.crew +
-          " Simple Crew · " +
-          nextSash.flora +
-          " FloraShip · " +
+          nextSash.residentialCount +
+          " " +
+          nextSash.residentialName +
+          " · " +
+          nextSash.supportCount +
+          " " +
+          nextSash.supportName +
+          " · " +
           ratio +
           "% Life Support</span>";
       } else {
@@ -1418,5 +1453,5 @@ $("optimizerPrimary").addEventListener("change", () => {
   optimizerPendingResult = null;
   $("optimizerRunBtn").textContent = "Optimize";
   $("optimizerProgress").innerHTML =
-    "<strong>Ready</strong><span>Search again with this building.</span>";
+    "<strong>Ready</strong><span>Search again with this building choice.</span>";
 });
