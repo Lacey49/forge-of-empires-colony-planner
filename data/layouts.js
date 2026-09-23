@@ -1750,45 +1750,50 @@ const SASH_SIMPLE_PRESET_LIFE_SUPPORT = [
   [17, 9],
 ];
 
-const SASH_SIMPLE_COSMIC_PRESET_HUB = [0, 4];
+const SASH_SIMPLE_COSMIC_PRESET_HUB = [6, 4];
 
 const SASH_SIMPLE_COSMIC_PRESET_BUILDINGS = [
-  [0, 18],
-  [3, 18],
-  [5, 7],
+  [0, 7],
+  [2, 9],
+  [3, 7],
+  [5, 9],
   [8, 0],
   [8, 2],
-  [8, 7],
   [8, 9],
   [8, 11],
-  [8, 13],
-  [9, 4],
   [11, 0],
   [11, 2],
+  [11, 4],
   [11, 6],
   [11, 8],
   [11, 10],
-  [12, 4],
   [14, 0],
   [14, 2],
+  [14, 4],
   [14, 6],
   [14, 8],
   [14, 10],
-  [15, 4],
   [17, 0],
   [17, 2],
+  [17, 4],
   [17, 6],
   [17, 8],
+  [17, 10],
 ];
 
 const SASH_SIMPLE_COSMIC_PRESET_LIFE_SUPPORT = [
-  [0, 9],
-  [0, 12],
-  [0, 15],
-  [4, 9],
-  [4, 12],
-  [4, 15],
-  [5, 4],
+  [0, 11],
+  [0, 14],
+  [0, 17],
+  [4, 11],
+  [4, 14],
+  [4, 17],
+  [8, 13],
+];
+
+const SASH_SIMPLE_COSMIC_PRESET_FLORA = [
+  [0, 4],
+  [3, 4],
 ];
 
 const SASH_OFFICER_PRESET_HUB = [0, 11];
