@@ -99,6 +99,47 @@ try {
   assert.deepEqual(presets.errors, []);
   notes.push(`${presets.count} presets checked across all six eras`);
 
+  const exactSashPresets = await page.evaluate(() => {
+    showEditableColonyUi("SASH");
+    const catalog = getPresetCatalog();
+    const first = catalog.find((item) => item.id === "builtin:sash-simple-crew");
+    const second = catalog.find(
+      (item) => item.id === "builtin:sash-simple-crew-cosmic",
+    );
+    const countTypes = (state) => {
+      const counts = {};
+      for (const building of state?.buildings || [])
+        counts[building.type] = (counts[building.type] || 0) + 1;
+      return counts;
+    };
+    return {
+      firstTitle: first?.name,
+      secondTitle: second?.name,
+      firstCounts: countTypes(first?.state),
+      secondCounts: countTypes(second?.state),
+      secondHub: second?.state?.hubTop,
+    };
+  });
+  assert.equal(
+    exactSashPresets.firstTitle,
+    "Simple Crew Quarters (23) + FloraShip Express (12)",
+  );
+  assert.equal(
+    exactSashPresets.secondTitle,
+    "Simple Crew Quarters (26) + CosmicClean Express (7)",
+  );
+  assert.deepEqual(exactSashPresets.firstCounts, {
+    simpleCrewQuarters: 23,
+    floraShipExpress: 12,
+  });
+  assert.deepEqual(exactSashPresets.secondCounts, {
+    simpleCrewQuarters: 26,
+    floraShipExpress: 2,
+    cosmicCleanExpress: 7,
+  });
+  assert.deepEqual(exactSashPresets.secondHub, [6, 4]);
+  notes.push("Exact SASH preset names and mixed Life Support counts checked");
+
   const optimizerAvailability = await page.evaluate(() => {
     showEditableColonyUi("SAT");
     const satVisible = getComputedStyle($("optimizeBtn")).display !== "none";
