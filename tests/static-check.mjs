@@ -477,6 +477,9 @@ function testSashGeometryAndPresets() {
   const simplePreset = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_SIMPLE_PRESET_BUILDINGS")})`,
   );
+  const simpleLifeSupport = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_SIMPLE_PRESET_LIFE_SUPPORT")})`,
+  );
   const officerPreset = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PRESET_BUILDINGS")})`,
   );
@@ -491,8 +494,8 @@ function testSashGeometryAndPresets() {
   );
 
   check(
-    simplePreset.length === 41,
-    `SASH starting Simple Crew preset should contain 41 quarters, found ${simplePreset.length}`,
+    simplePreset.length === 23 && simpleLifeSupport.length === 12,
+    `SASH starting preset should contain 23 Simple Crew Quarters and 12 FloraShip Expresses, found ${simplePreset.length} + ${simpleLifeSupport.length}`,
   );
   check(
     officerPreset.length === 14 && officerFillers.length === 5,
