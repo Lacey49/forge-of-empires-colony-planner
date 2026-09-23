@@ -114,6 +114,30 @@ try {
   });
   notes.push("SASH optimizer is disabled until life-support balancing is supported");
 
+  await page.evaluate(() => {
+    showEditableColonyUi("SASH");
+    setMode(null);
+  });
+  const firstSashCell = page.locator("#board .cell:not(.out)").first();
+  await firstSashCell.click();
+  await page.keyboard.press("m");
+  const shortcutFocus = await page.evaluate(() => ({
+    keyboardNavigation: $("board").classList.contains("keyboard-navigation"),
+    focusedCell: document.activeElement?.classList?.contains("cell") || false,
+    outlineStyle: document.activeElement?.classList?.contains("cell")
+      ? getComputedStyle(document.activeElement).outlineStyle
+      : "none",
+  }));
+  assert.equal(shortcutFocus.keyboardNavigation, false);
+  assert.equal(shortcutFocus.outlineStyle, "none");
+
+  await page.keyboard.press("ArrowRight");
+  assert.equal(
+    await page.evaluate(() => $("board").classList.contains("keyboard-navigation")),
+    true,
+  );
+  notes.push("Move shortcut does not expose a stray grid focus box");
+
   const undo = await page.evaluate(async () => {
     showEditableColonyUi("SAM");
     loadBlank();
