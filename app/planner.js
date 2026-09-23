@@ -1265,6 +1265,9 @@ function makeSashPresetState(kind) {
     for (const [r, c] of SASH_SIMPLE_COSMIC_PRESET_BUILDINGS) {
       addBuilding("simpleCrewQuarters", r, c);
     }
+    for (const [r, c] of SASH_SIMPLE_COSMIC_PRESET_FLORA) {
+      addBuilding("floraShipExpress", r, c);
+    }
     for (const [r, c] of SASH_SIMPLE_COSMIC_PRESET_LIFE_SUPPORT) {
       addBuilding("cosmicCleanExpress", r, c);
     }
@@ -1385,13 +1388,13 @@ function getPresetCatalog() {
     result.push(
       {
         id: "builtin:sash-simple-crew",
-        name: "FloraShip Express (12)",
+        name: "Simple Crew Quarters (23) + FloraShip Express (12)",
         kind: "Built-in",
         state: makeSashPresetState("simpleCrew"),
       },
       {
         id: "builtin:sash-simple-crew-cosmic",
-        name: "CosmicClean Express (7)",
+        name: "Simple Crew Quarters (26) + CosmicClean Express (7)",
         kind: "Built-in",
         state: makeSashPresetState("simpleCrewCosmic"),
       },
