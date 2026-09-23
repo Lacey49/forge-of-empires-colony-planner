@@ -480,6 +480,9 @@ function testSashGeometryAndPresets() {
   const simpleLifeSupport = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_SIMPLE_PRESET_LIFE_SUPPORT")})`,
   );
+  const simpleCosmicHub = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_SIMPLE_COSMIC_PRESET_HUB")})`,
+  );
   const simpleCosmicPreset = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_SIMPLE_COSMIC_PRESET_BUILDINGS")})`,
   );
@@ -529,6 +532,10 @@ function testSashGeometryAndPresets() {
     [4, 11], [4, 14], [4, 17],
     [8, 13],
   ];
+  check(
+    JSON.stringify(simpleCosmicHub) === JSON.stringify([6, 4]),
+    "SASH CosmicClean preset Town Hall moved from the verified screenshot",
+  );
   check(
     JSON.stringify(simpleCosmicPreset) === JSON.stringify(exactCosmicCrew),
     "SASH CosmicClean preset Simple Crew coordinates changed from the verified screenshot",
