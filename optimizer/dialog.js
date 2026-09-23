@@ -9,7 +9,7 @@
     SAV: ["floatingShelter", "inflatableHome"],
     SAJM: ["aquaPod", "aquaCabin"],
     SAT: ["igloo", "screenedDomicile"],
-    SASH: ["simpleCrewQuarters", "officersQuarters"],
+    SASH: ["simpleCrewQuarters"],
   };
 
   function optimizerTargetDefs(era) {
