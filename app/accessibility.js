@@ -9,6 +9,33 @@
 
   let focusPos = { r: 0, c: 0 };
 
+  function setKeyboardNavigation(active) {
+    board.classList.toggle("keyboard-navigation", !!active);
+  }
+
+  window.addEventListener(
+    "keydown",
+    (e) => {
+      if (
+        e.key === "Tab" ||
+        ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter", " "].includes(
+          e.key,
+        )
+      ) {
+        setKeyboardNavigation(true);
+      }
+    },
+    true,
+  );
+
+  board.addEventListener(
+    "pointerdown",
+    () => {
+      setKeyboardNavigation(false);
+    },
+    true,
+  );
+
   function cellAt(r, c) {
     return board.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
   }
