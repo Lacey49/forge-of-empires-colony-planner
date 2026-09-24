@@ -509,6 +509,30 @@ function testSashGeometryAndPresets() {
     simplePreset.length === 23 && simpleLifeSupport.length === 12,
     `SASH starting preset should contain 23 Simple Crew Quarters and 12 FloraShip Expresses, found ${simplePreset.length} + ${simpleLifeSupport.length}`,
   );
+
+  const exactSimpleCrew = [
+    [5, 16], [5, 18],
+    [6, 12], [6, 14],
+    [8, 0], [8, 2],
+    [9, 12], [9, 14],
+    [11, 0], [11, 2], [11, 4],
+    [14, 0], [14, 2], [14, 4], [14, 6], [14, 8], [14, 10],
+    [17, 0], [17, 2], [17, 4], [17, 6], [17, 8], [17, 10],
+  ];
+  const exactSimpleFlora = [
+    [0, 4], [0, 7], [0, 10], [0, 13], [0, 16],
+    [3, 4], [3, 7], [3, 10], [3, 13],
+    [8, 9],
+    [11, 6], [11, 9],
+  ];
+  check(
+    JSON.stringify(simplePreset) === JSON.stringify(exactSimpleCrew),
+    "SASH FloraShip preset Simple Crew coordinates changed from the verified screenshot",
+  );
+  check(
+    JSON.stringify(simpleLifeSupport) === JSON.stringify(exactSimpleFlora),
+    "SASH FloraShip preset Life Support coordinates changed from the verified screenshot",
+  );
   check(
     simpleCosmicPreset.length === 26 &&
       simpleCosmicFlora.length === 2 &&
