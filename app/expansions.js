@@ -91,6 +91,8 @@
   }
 
   function sanitizeAfterLandChange() {
+    const buildingCountBefore = buildings.length;
+    const hallBefore = [...hubTop];
     const kept = [];
     for (const building of buildings) {
       const cells = cellsForBuildingRecord(building);
@@ -133,6 +135,25 @@
     renderExpGrid();
     render();
     persistColonyState(selectedEra);
+
+    const removed = buildingCountBefore - buildings.length;
+    const hallMoved = hallBefore.some(
+      (value, index) => value !== hubTop[index],
+    );
+    if (removed || hallMoved) {
+      const details = [];
+      if (removed)
+        details.push(
+          `${removed} building${removed === 1 ? " was" : "s were"} removed`,
+        );
+      if (hallMoved) details.push("the Town Hall moved");
+      notifyToast(
+        "Expansion removed",
+        `${details.join(" and ")} because that land is no longer selected. Use Undo to get the layout back.`,
+        "error",
+        5000,
+      );
+    }
   }
 
   toggleExpansion = function (id) {
