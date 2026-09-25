@@ -15,11 +15,8 @@ function eraBuildingByKey(era, key) {
 }
 
 // Width runs across the board. Height runs down it. Buildings do not rotate.
-function boardBuildingDef(def) {
-  return def || null;
-}
 function eraBoardBuildingByKey(era, key) {
-  return boardBuildingDef(eraBuildingByKey(era, key));
+  return eraBuildingByKey(era, key);
 }
 
 const PATHLESS_ERAS = new Set(["SAT", "SASH"]);
@@ -38,22 +35,6 @@ for (const [era, map] of Object.entries(GOODS_PRODUCTS)) {
     if (def) def.product = product;
   }
 }
-
-const BUILDINGS = {
-  hub: {
-    key: "hub",
-    name: "Town Hall",
-    category: "townHall",
-    w: ERA_DATA.SAAB.townHall.w,
-    h: ERA_DATA.SAAB.townHall.h,
-    sizeText: ERA_DATA.SAAB.townHall.sizeText,
-    sprite: ERA_DATA.SAAB.townHall.sprite,
-    requiresPath: false,
-  },
-  ...Object.fromEntries(
-    eraBuildingList("SAAB").map((b) => [b.key, boardBuildingDef(b)]),
-  ),
-};
 
 let selectedEra = "SAM";
 
@@ -768,10 +749,7 @@ function activeBuildingDef(type) {
       requiresPath: false,
     };
   }
-  return (
-    eraBoardBuildingByKey(selectedEra, type) ||
-    (selectedEra === "SAAB" ? BUILDINGS[type] : null)
-  );
+  return eraBoardBuildingByKey(selectedEra, type);
 }
 
 function baseOwnedCell(r, c) {
@@ -2288,17 +2266,11 @@ function toggleExpansion(id) {
   snapshot();
   if (enabledExpansions.has(id)) enabledExpansions.delete(id);
   else enabledExpansions.add(id);
-  refreshLandPreservingLayout();
-  renderExpGrid();
-  render();
 }
 function setExpansionCount(n) {
   snapshot();
   enabledExpansions.clear();
   for (const e of activeExpansions().slice(0, n)) enabledExpansions.add(e.id);
-  refreshLandPreservingLayout();
-  renderExpGrid();
-  render();
 }
 function makeSummaryRow({
   name,
@@ -3296,9 +3268,6 @@ if (mapWrap) {
     updateBuyHover(null);
   });
 }
-
-const SAAB_TOWNHALL_SRC = $("townHallImg").src;
-const SAAB_TOWNHALL_ALT = $("townHallImg").alt;
 
 function showEditableColonyUi(era) {
   closePresetPopover();

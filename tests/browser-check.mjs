@@ -239,20 +239,20 @@ try {
     await runOptimizerDialog();
 
     const state = optimizerPendingResult?.state || null;
-    const stats = state ? sashGreenStats(state) : null;
+    const stats = state ? sashPairStats(state, "scq-fse") : null;
     const score = state ? oxScore(oxCtx("SASH"), state, "simpleCrewQuarters") : null;
     const text = $("optimizerProgress").textContent;
     const valid =
       !!state &&
       colonyStateMatchesGeometry(state, "SASH") &&
       oxValid(oxCtx("SASH"), state) &&
-      sashGreenStateUsesEarlyBuildingsOnly(state);
+      sashGreenStateUsesPair(state, "scq-fse");
 
     closeOptimizerDialog();
     return {
       valid,
-      crew: stats?.crew,
-      flora: stats?.flora,
+      crew: stats?.residentialCount,
+      flora: stats?.supportCount,
       colonists: stats?.colonists,
       lifeSupport: stats?.lifeSupport,
       credits4h: stats?.credits4h,

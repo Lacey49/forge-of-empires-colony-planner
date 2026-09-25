@@ -27,12 +27,6 @@ const SASH_OPTIMIZER_PAIRS = Object.freeze([
   }),
 ]);
 
-// Kept as a compatibility alias for older code paths while SASH uses pair IDs.
-const SASH_GREEN_RULE = Object.freeze({
-  crewKey: "simpleCrewQuarters",
-  supportKey: "floraShipExpress",
-});
-
 function sashPairFromId(value) {
   if (!value) return SASH_OPTIMIZER_PAIRS[0];
   if (value === "simpleCrewQuarters") return SASH_OPTIMIZER_PAIRS[0];
@@ -57,10 +51,6 @@ function sashMinSupportForResidential(pairOrId, residentialCount) {
     (5 * Number(residential.colonists || 0) * Math.max(0, residentialCount)) /
       (4 * Number(support.lifeSupport)),
   );
-}
-
-function sashMinFloraForCrew(crewCount) {
-  return sashMinSupportForResidential("scq-fse", crewCount);
 }
 
 function sashPairStats(state, pairOrId) {
@@ -107,9 +97,6 @@ function sashPairStats(state, pairOrId) {
     supportName: supportDef?.name || pair.supportKey,
     residentialCount,
     supportCount,
-    // Compatibility aliases for the original SCQ + Flora implementation.
-    crew: residentialCount,
-    flora: supportCount,
     colonists,
     lifeSupport,
     ratio,
@@ -117,10 +104,6 @@ function sashPairStats(state, pairOrId) {
     credits4h,
     area,
   };
-}
-
-function sashGreenStats(state, pairOrId = "scq-fse") {
-  return sashPairStats(state, pairOrId);
 }
 
 function sashGreenStateUsesPair(state, pairOrId) {
@@ -133,19 +116,15 @@ function sashGreenStateUsesPair(state, pairOrId) {
   );
 }
 
-function sashGreenStateUsesEarlyBuildingsOnly(state) {
-  return sashGreenStateUsesPair(state, "scq-fse");
-}
-
 function sashGreenBetter(a, b) {
   if (!b) return true;
-  const aResidential = a.residentialCount ?? a.crew ?? 0;
-  const bResidential = b.residentialCount ?? b.crew ?? 0;
+  const aResidential = a.residentialCount ?? 0;
+  const bResidential = b.residentialCount ?? 0;
   if (aResidential !== bResidential)
     return aResidential > bResidential;
 
-  const aSupport = a.supportCount ?? a.flora ?? 0;
-  const bSupport = b.supportCount ?? b.flora ?? 0;
+  const aSupport = a.supportCount ?? 0;
+  const bSupport = b.supportCount ?? 0;
   if (aSupport !== bSupport) return aSupport < bSupport;
 
   return (a.unused ?? Infinity) < (b.unused ?? Infinity);
