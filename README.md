@@ -65,9 +65,9 @@ Move and Undo can be rebound in Settings.
 
 ## How Optimize works
 
-Pick the residential building you want to focus on and start the search. The optimizer tries different Town Hall positions, homes, filler buildings, and paths. It only offers a result if it finds more credit output than your current layout.
+Pick the homes you want to focus on and start the search. The optimizer tries different Town Hall positions, homes, filler buildings, and paths where the colony needs them. It only offers a result if it finds an improvement over your current layout.
 
-It does not balance goods, population, or life support. If a result removes one of those buildings, the planner warns you before applying it. It finds good layouts, not guaranteed perfect ones. Colony Tetris still has hands.
+For Space Hub, you also choose a Life Support building and the search aims to keep support at 125% or higher. In other eras it does not balance goods, population, or life support. If a result removes one of those buildings, the planner warns you before applying it. It finds good layouts, not guaranteed perfect ones. Colony Tetris still has hands.
 
 ## Backups and saved layouts
 
