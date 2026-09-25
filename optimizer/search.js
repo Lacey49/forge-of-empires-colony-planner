@@ -504,7 +504,7 @@ function oxCredits(def) {
     : 0;
 }
 function oxAllowedResidentialDefs(era, primaryKey) {
-  const defs = (ERA_DATA[era]?.residential || []).map(boardBuildingDef);
+  const defs = ERA_DATA[era]?.residential || [];
   const index = defs.findIndex((d) => d.key === primaryKey);
   return index < 0 ? [] : defs.slice(0, index + 1);
 }

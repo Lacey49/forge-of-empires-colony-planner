@@ -62,7 +62,6 @@ const context = {
   window: {},
   ERA_DATA,
   eraBuildingByKey,
-  boardBuildingDef: (def) => def || null,
   eraBoardBuildingByKey: (era, key) => {
     const def = eraBuildingByKey(era, key);
     return def || null;

@@ -5,8 +5,7 @@
 
   if (
     typeof toggleExpansion !== "function" ||
-    typeof setExpansionCount !== "function" ||
-    typeof loadPresetItem !== "function"
+    typeof setExpansionCount !== "function"
   )
     return;
 
