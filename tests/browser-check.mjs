@@ -226,10 +226,51 @@ try {
     cosmicPreset: {
       residentialCount: 26,
       supportCount: 7,
-      green: false,
+      green: true,
     },
   });
   notes.push("SASH pair math and the 26 + 7 CosmicClean preset checked");
+
+  const sashEarlierFillers = await page.evaluate(() => {
+    showEditableColonyUi("SASH");
+    activateFreeBuild();
+    loadBlank();
+
+    const ctx = oxCtx("SASH");
+    const pair = sashPairFromId("oq-cce");
+    const seed = sashKnownStartingFallback(ctx, pair);
+    if (!seed) return { valid: false, reason: "missing OQ + Cosmic seed" };
+
+    const before = sashPairStats(seed.state, pair);
+    const filled = sashFillPreviousBuildings(ctx, seed.state, pair);
+    const after = filled.stats;
+    return {
+      valid:
+        filled.changed &&
+        after.green &&
+        sashGreenStateUsesPair(filled.state, pair) &&
+        oxValid(ctx, filled.state),
+      beforeCredits: before.credits4h,
+      afterCredits: after.credits4h,
+      simpleCrew: after.counts.simpleCrewQuarters || 0,
+      flora: after.counts.floraShipExpress || 0,
+      officers: after.counts.officersQuarters || 0,
+      cosmic: after.counts.cosmicCleanExpress || 0,
+    };
+  });
+  assert.equal(sashEarlierFillers.valid, true);
+  assert.ok(sashEarlierFillers.afterCredits > sashEarlierFillers.beforeCredits);
+  assert.ok(
+    sashEarlierFillers.simpleCrew > 0,
+    "OQ + Cosmic optimization should use Simple Crew Quarters as earlier filler",
+  );
+  assert.ok(
+    sashEarlierFillers.flora > 0,
+    "OQ + Cosmic optimization should use FloraShip Express as earlier filler",
+  );
+  notes.push(
+    "SASH OQ + Cosmic search reuses earlier Simple Crew and FloraShip fillers",
+  );
 
   const sashSearch = await page.evaluate(async () => {
     showEditableColonyUi("SASH");
