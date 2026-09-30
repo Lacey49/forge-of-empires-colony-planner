@@ -27,6 +27,51 @@ const SASH_OPTIMIZER_PAIRS = Object.freeze([
   }),
 ]);
 
+const SASH_CORE_RESIDENTIAL_KEYS = Object.freeze([
+  "simpleCrewQuarters",
+  "officersQuarters",
+]);
+const SASH_SUPPORT_KEYS = Object.freeze([
+  "floraShipExpress",
+  "cosmicCleanExpress",
+  "sitEatSpacePizza",
+]);
+
+function sashAllowedKeys(pairOrId) {
+  const pair =
+    typeof pairOrId === "string" ? sashPairFromId(pairOrId) : pairOrId;
+  const residentialIndex = Math.max(
+    0,
+    SASH_CORE_RESIDENTIAL_KEYS.indexOf(pair.residentialKey),
+  );
+  const supportIndex = Math.max(
+    0,
+    SASH_SUPPORT_KEYS.indexOf(pair.supportKey),
+  );
+  return {
+    residential: SASH_CORE_RESIDENTIAL_KEYS.slice(0, residentialIndex + 1),
+    support: SASH_SUPPORT_KEYS.slice(0, supportIndex + 1),
+  };
+}
+
+function sashAllowedDefs(pairOrId) {
+  const allowed = sashAllowedKeys(pairOrId);
+  return {
+    residential: allowed.residential
+      .map((key) => eraBoardBuildingByKey("SASH", key))
+      .filter(Boolean),
+    support: allowed.support
+      .map((key) => eraBoardBuildingByKey("SASH", key))
+      .filter(Boolean),
+  };
+}
+
+function sashCredit4h(def) {
+  return def?.creditAmount && def?.creditHours
+    ? Number(def.creditAmount) * (4 / Number(def.creditHours))
+    : 0;
+}
+
 function sashPairFromId(value) {
   if (!value) return SASH_OPTIMIZER_PAIRS[0];
   if (value === "simpleCrewQuarters") return SASH_OPTIMIZER_PAIRS[0];
@@ -64,27 +109,32 @@ function sashPairStats(state, pairOrId) {
 
   let residentialCount = 0,
     supportCount = 0,
+    totalResidentialCount = 0,
+    totalSupportCount = 0,
     colonists = 0,
     lifeSupport = 0,
     credits4h = 0,
-    area = 0;
+    area = 0,
+    supportArea = 0;
+  const counts = {};
 
   for (const building of state?.buildings || []) {
     const def = eraBoardBuildingByKey("SASH", building.type);
     if (!def) continue;
 
+    counts[building.type] = (counts[building.type] || 0) + 1;
     area += def.w * def.h;
 
-    if (building.type === pair.residentialKey) {
-      residentialCount++;
+    if (def.category === "residential") {
+      totalResidentialCount++;
       colonists += Number(def.colonists || 0);
-      if (def.creditAmount && def.creditHours) {
-        credits4h +=
-          Number(def.creditAmount) * (4 / Number(def.creditHours));
-      }
-    } else if (building.type === pair.supportKey) {
-      supportCount++;
+      credits4h += sashCredit4h(def);
+      if (building.type === pair.residentialKey) residentialCount++;
+    } else if (def.category === "lifeSupport") {
+      totalSupportCount++;
       lifeSupport += Number(def.lifeSupport || 0);
+      supportArea += def.w * def.h;
+      if (building.type === pair.supportKey) supportCount++;
     }
   }
 
@@ -97,37 +147,248 @@ function sashPairStats(state, pairOrId) {
     supportName: supportDef?.name || pair.supportKey,
     residentialCount,
     supportCount,
+    totalResidentialCount,
+    totalSupportCount,
     colonists,
     lifeSupport,
     ratio,
     green: colonists > 0 && lifeSupport * 4 >= colonists * 5,
     credits4h,
     area,
+    supportArea,
+    counts,
   };
 }
 
 function sashGreenStateUsesPair(state, pairOrId) {
-  const pair =
-    typeof pairOrId === "string" ? sashPairFromId(pairOrId) : pairOrId;
-  return (state?.buildings || []).every(
-    (building) =>
-      building.type === pair.residentialKey ||
-      building.type === pair.supportKey,
-  );
+  const allowed = sashAllowedKeys(pairOrId);
+  const keys = new Set([...allowed.residential, ...allowed.support]);
+  return (state?.buildings || []).every((building) => keys.has(building.type));
 }
 
 function sashGreenBetter(a, b) {
   if (!b) return true;
+  if ((a.credits4h || 0) !== (b.credits4h || 0))
+    return (a.credits4h || 0) > (b.credits4h || 0);
+
+  if ((a.unused ?? Infinity) !== (b.unused ?? Infinity))
+    return (a.unused ?? Infinity) < (b.unused ?? Infinity);
+
   const aResidential = a.residentialCount ?? 0;
   const bResidential = b.residentialCount ?? 0;
   if (aResidential !== bResidential)
     return aResidential > bResidential;
 
-  const aSupport = a.supportCount ?? 0;
-  const bSupport = b.supportCount ?? 0;
-  if (aSupport !== bSupport) return aSupport < bSupport;
+  if ((a.supportArea ?? Infinity) !== (b.supportArea ?? Infinity))
+    return (a.supportArea ?? Infinity) < (b.supportArea ?? Infinity);
 
-  return (a.unused ?? Infinity) < (b.unused ?? Infinity);
+  return (a.totalSupportCount ?? Infinity) < (b.totalSupportCount ?? Infinity);
+}
+
+function sashStatsSummary(stats) {
+  if (!stats?.counts) return "";
+  const order = [
+    "officersQuarters",
+    "simpleCrewQuarters",
+    "sitEatSpacePizza",
+    "cosmicCleanExpress",
+    "floraShipExpress",
+  ];
+  return order
+    .filter((key) => stats.counts[key])
+    .map((key) => {
+      const def = eraBoardBuildingByKey("SASH", key);
+      return stats.counts[key] + " " + (def?.name || key);
+    })
+    .join(" · ");
+}
+
+function sashPlacementForDef(ctx, hall, def, r, c) {
+  if (r < 0 || c < 0 || r + def.h > 28 || c + def.w > 28) return null;
+  const ids = oxRect(r, c, def.h, def.w);
+  const mask = oxMask(ids);
+  if ((mask & ~ctx.ownedMask) !== 0n || (mask & hall.mask) !== 0n) return null;
+  return { type: def.key, r, c, ids, mask, touch: 0 };
+}
+
+function sashFillPreviousBuildings(ctx, state, pairOrId) {
+  const pair =
+    typeof pairOrId === "string" ? sashPairFromId(pairOrId) : pairOrId;
+  const defs = sashAllowedDefs(pair);
+  const sol = oxSolFromState(ctx, state);
+  if (!sol) return { state, stats: sashPairStats(state, pair), changed: false };
+
+  let occupied = sol.hall.mask;
+  for (const placement of sol.placements) occupied |= placement.mask;
+
+  const residentialDefs = [...defs.residential].sort(
+    (a, b) =>
+      sashCredit4h(b) - sashCredit4h(a) ||
+      a.w * a.h - b.w * b.h,
+  );
+  const supportDefs = [...defs.support].sort(
+    (a, b) =>
+      Number(b.lifeSupport || 0) / (b.w * b.h) -
+        Number(a.lifeSupport || 0) / (a.w * a.h) ||
+      a.w * a.h - b.w * b.h,
+  );
+
+  const allPlacements = (def) =>
+    oxPlacements(ctx, def, sol.hall, new Set()).filter(
+      (placement) => (placement.mask & occupied) === 0n,
+    );
+
+  let work = {
+    hall: sol.hall,
+    roads: new Set(),
+    placements: sol.placements.map((placement) => ({ ...placement })),
+  };
+  let stats = sashPairStats(state, pair);
+  let changed = false;
+
+  const addPlacement = (placement, def) => {
+    work.placements.push(placement);
+    occupied |= placement.mask;
+    stats = {
+      ...stats,
+      counts: { ...stats.counts },
+    };
+    stats.counts[def.key] = (stats.counts[def.key] || 0) + 1;
+    stats.area += def.w * def.h;
+    if (def.category === "residential") {
+      stats.totalResidentialCount++;
+      stats.colonists += Number(def.colonists || 0);
+      stats.credits4h += sashCredit4h(def);
+      if (def.key === pair.residentialKey) stats.residentialCount++;
+    } else {
+      stats.totalSupportCount++;
+      stats.lifeSupport += Number(def.lifeSupport || 0);
+      stats.supportArea += def.w * def.h;
+      if (def.key === pair.supportKey) stats.supportCount++;
+    }
+    stats.ratio = stats.colonists ? stats.lifeSupport / stats.colonists : 0;
+    stats.green =
+      stats.colonists > 0 && stats.lifeSupport * 4 >= stats.colonists * 5;
+    changed = true;
+  };
+
+  // First consume every credit-producing placement that fits inside the
+  // existing Life Support headroom. Higher-credit buildings win first.
+  while (true) {
+    let best = null;
+    for (const def of residentialDefs) {
+      for (const placement of allPlacements(def)) {
+        const colonists = stats.colonists + Number(def.colonists || 0);
+        if (stats.lifeSupport * 4 < colonists * 5) continue;
+        const candidate = { def, placement, credit: sashCredit4h(def) };
+        if (
+          !best ||
+          candidate.credit > best.credit ||
+          (candidate.credit === best.credit &&
+            def.w * def.h < best.def.w * best.def.h)
+        )
+          best = candidate;
+      }
+    }
+    if (!best) break;
+    addPlacement(best.placement, best.def);
+  }
+
+  // When Life Support is the blocker, add the smallest useful earlier/current
+  // support building together with the best residence it enables. Never add
+  // Life Support by itself because the objective is credits, not spare support.
+  while (true) {
+    let best = null;
+    for (const supportDef of supportDefs) {
+      for (const supportPlacement of allPlacements(supportDef)) {
+        const occupiedWithSupport = occupied | supportPlacement.mask;
+        for (const residentialDef of residentialDefs) {
+          const residentialPlacements = oxPlacements(
+            ctx,
+            residentialDef,
+            sol.hall,
+            new Set(),
+          );
+          for (const residentialPlacement of residentialPlacements) {
+            if ((residentialPlacement.mask & occupiedWithSupport) !== 0n)
+              continue;
+            const lifeSupport =
+              stats.lifeSupport + Number(supportDef.lifeSupport || 0);
+            const colonists =
+              stats.colonists + Number(residentialDef.colonists || 0);
+            if (lifeSupport * 4 < colonists * 5) continue;
+
+            const candidate = {
+              supportDef,
+              supportPlacement,
+              residentialDef,
+              residentialPlacement,
+              credit: sashCredit4h(residentialDef),
+              area:
+                supportDef.w * supportDef.h +
+                residentialDef.w * residentialDef.h,
+            };
+            if (
+              !best ||
+              candidate.credit > best.credit ||
+              (candidate.credit === best.credit &&
+                candidate.area < best.area) ||
+              (candidate.credit === best.credit &&
+                candidate.area === best.area &&
+                Number(supportDef.lifeSupport || 0) >
+                  Number(best.supportDef.lifeSupport || 0))
+            )
+              best = candidate;
+          }
+        }
+      }
+    }
+
+    if (!best) break;
+    addPlacement(best.supportPlacement, best.supportDef);
+    addPlacement(best.residentialPlacement, best.residentialDef);
+
+    // The support/residence pair may leave enough headroom for more residences.
+    while (true) {
+      let extra = null;
+      for (const def of residentialDefs) {
+        for (const placement of allPlacements(def)) {
+          const colonists = stats.colonists + Number(def.colonists || 0);
+          if (stats.lifeSupport * 4 < colonists * 5) continue;
+          const candidate = { def, placement, credit: sashCredit4h(def) };
+          if (
+            !extra ||
+            candidate.credit > extra.credit ||
+            (candidate.credit === extra.credit &&
+              def.w * def.h < extra.def.w * extra.def.h)
+          )
+            extra = candidate;
+        }
+      }
+      if (!extra) break;
+      addPlacement(extra.placement, extra.def);
+    }
+  }
+
+  if (!changed)
+    return {
+      state,
+      stats: {
+        ...stats,
+        unused: ctx.ownedCount - ctx.hall.w * ctx.hall.h - stats.area,
+      },
+      changed: false,
+    };
+
+  const improvedState = oxState(ctx, work);
+  const improvedStats = {
+    ...sashPairStats(improvedState, pair),
+    unused:
+      ctx.ownedCount -
+      ctx.hall.w * ctx.hall.h -
+      sashPairStats(improvedState, pair).area,
+  };
+  return { state: improvedState, stats: improvedStats, changed: true };
 }
 
 function sashPlacementIndex(ctx, hall, residentialDef, supportDef) {
@@ -475,6 +736,15 @@ async function optimizeSashGreen(ctx, pairId) {
     throw new Error("Missing SASH optimizer building data");
 
   let best = sashKnownStartingFallback(ctx, pair);
+  if (best) {
+    const filled = sashFillPreviousBuildings(ctx, best.state, pair);
+    if (filled.stats.green && sashGreenBetter(filled.stats, best.stats)) {
+      best = {
+        state: filled.state,
+        stats: filled.stats,
+      };
+    }
+  }
 
   const current = currentColonyState();
   const currentStats = sashPairStats(current, pair);
@@ -587,13 +857,10 @@ async function optimizeSashGreen(ctx, pairId) {
       }
 
       if (attempt.solution) {
-        const state = oxState(ctx, attempt.solution);
-        const baseStats = sashPairStats(state, pair);
-        const stats = {
-          ...baseStats,
-          unused:
-            ctx.ownedCount - hallArea - baseStats.area,
-        };
+        const baseState = oxState(ctx, attempt.solution);
+        const filled = sashFillPreviousBuildings(ctx, baseState, pair);
+        const state = filled.state;
+        const stats = filled.stats;
 
         if (
           oxValid(ctx, state) &&
@@ -601,7 +868,7 @@ async function optimizeSashGreen(ctx, pairId) {
           stats.green &&
           sashGreenBetter(stats, best?.stats)
         ) {
-          best = { state, stats, solution: attempt.solution };
+          best = { state, stats };
           ctx.bestState = state;
           ctx.bestScore = oxScore(
             ctx,
@@ -613,7 +880,7 @@ async function optimizeSashGreen(ctx, pairId) {
 
         if (
           stats.green &&
-          stats.residentialCount === residentialTarget
+          stats.residentialCount >= residentialTarget
         ) {
           return {
             state,
@@ -626,8 +893,7 @@ async function optimizeSashGreen(ctx, pairId) {
             tested: ctx.tested,
             sashGreen: stats,
             sashPairId: pair.id,
-            proven:
-              candidateComplete && allHigherCandidatesProvenImpossible,
+            proven: false,
           };
         }
       }
