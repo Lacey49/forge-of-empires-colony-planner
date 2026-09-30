@@ -1369,20 +1369,14 @@ async function runOptimizerDialog() {
           "<strong>Best found: " +
           best +
           "</strong><span>" +
-          nextSash.residentialCount +
-          " " +
-          nextSash.residentialName +
-          " · " +
-          nextSash.supportCount +
-          " " +
-          nextSash.supportName +
+          sashStatsSummary(nextSash) +
           " · " +
           ratio +
           "% Life Support · " +
           sc.unused +
           " unused</span><span>" +
           (result.proven
-            ? "Maximum credit-producing building count proven for this footprint."
+            ? "Maximum credit output proven for this footprint."
             : "Best verified in this search.") +
           "</span>";
       } else {
@@ -1403,13 +1397,7 @@ async function runOptimizerDialog() {
         const ratio = (nextSash.ratio * 100).toFixed(2);
         $("optimizerProgress").innerHTML =
           "<strong>Your green layout is already as good as this search found</strong><span>" +
-          nextSash.residentialCount +
-          " " +
-          nextSash.residentialName +
-          " · " +
-          nextSash.supportCount +
-          " " +
-          nextSash.supportName +
+          sashStatsSummary(nextSash) +
           " · " +
           ratio +
           "% Life Support</span>";
