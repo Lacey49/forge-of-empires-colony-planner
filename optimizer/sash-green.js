@@ -1025,12 +1025,6 @@ async function optimizeSashGreen(ctx, pairId) {
       supportTarget * supportArea;
     if (required > ctx.ownedCount) continue;
 
-    if (
-      best?.stats &&
-      residentialTarget < best.stats.residentialCount
-    )
-      break;
-
     let candidateComplete = true;
 
     for (let hi = 0; hi < hubs.length; hi++) {
@@ -1084,24 +1078,9 @@ async function optimizeSashGreen(ctx, pairId) {
           oxProgress(ctx, "Improved");
         }
 
-        if (
-          stats.green &&
-          stats.residentialCount >= residentialTarget
-        ) {
-          return {
-            state,
-            score: oxScore(
-              ctx,
-              state,
-              pair.residentialKey,
-            ),
-            cancelled: false,
-            tested: ctx.tested,
-            sashGreen: stats,
-            sashPairId: pair.id,
-            proven: false,
-          };
-        }
+        // Do not return the first valid selected-pair count. SASH is a
+        // max-credits problem, so a slightly lower count of the selected large
+        // building can still win after earlier buildings fill awkward gaps.
       }
 
       if ((hi & 3) === 3) {
