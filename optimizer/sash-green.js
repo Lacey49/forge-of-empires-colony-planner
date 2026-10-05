@@ -565,6 +565,178 @@ function sashExactPackingForHall(
   };
 }
 
+function sashGreedyPairForHall(
+  ctx,
+  hall,
+  residentialDef,
+  supportDef,
+  residentialTarget,
+  supportTarget,
+  seed,
+) {
+  const residentialPlacements = oxPlacements(
+    ctx,
+    residentialDef,
+    hall,
+    new Set(),
+  );
+  const supportPlacements = oxPlacements(
+    ctx,
+    supportDef,
+    hall,
+    new Set(),
+  );
+
+  // Try several deterministic scan orders plus hashed orders. This is not the
+  // proof search. Its job is to produce a valid full-footprint baseline fast,
+  // so expanded SASH colonies never depend on a starting-land preset.
+  for (let attempt = 0; attempt < 28; attempt++) {
+    const order = attempt < 6 ? attempt : 6 + attempt;
+    const attemptSeed = seed + attempt * 104729;
+    const residentialOrder = oxSort(
+      residentialPlacements,
+      order,
+      attemptSeed + 17,
+    );
+    const supportOrder = oxSort(
+      supportPlacements,
+      order,
+      attemptSeed + 53,
+    );
+
+    let blocked = hall.mask;
+    let residentialLeft = residentialTarget;
+    let supportLeft = supportTarget;
+    const placements = [];
+
+    while (residentialLeft > 0 || supportLeft > 0) {
+      const availableResidential =
+        residentialLeft > 0
+          ? residentialOrder.filter((p) => (p.mask & blocked) === 0n)
+          : [];
+      const availableSupport =
+        supportLeft > 0
+          ? supportOrder.filter((p) => (p.mask & blocked) === 0n)
+          : [];
+
+      if (
+        (residentialLeft > 0 &&
+          availableResidential.length < residentialLeft) ||
+        (supportLeft > 0 && availableSupport.length < supportLeft)
+      )
+        break;
+
+      let useSupport = false;
+      if (supportLeft > 0 && residentialLeft <= 0) useSupport = true;
+      else if (residentialLeft > 0 && supportLeft <= 0) useSupport = false;
+      else {
+        // Place whichever type is currently more constrained. Alternating the
+        // tie breaker prevents the same large rectangles from always claiming
+        // the useful corners first.
+        const residentialSlack =
+          availableResidential.length / Math.max(1, residentialLeft);
+        const supportSlack =
+          availableSupport.length / Math.max(1, supportLeft);
+        useSupport =
+          supportSlack < residentialSlack ||
+          (supportSlack === residentialSlack && attempt % 2 === 0);
+      }
+
+      const placement = useSupport
+        ? availableSupport[0]
+        : availableResidential[0];
+      if (!placement) break;
+
+      placements.push(placement);
+      blocked |= placement.mask;
+      if (useSupport) supportLeft--;
+      else residentialLeft--;
+    }
+
+    if (residentialLeft === 0 && supportLeft === 0)
+      return { hall, roads: new Set(), placements };
+  }
+
+  return null;
+}
+
+function sashGreedyExpandedBaseline(
+  ctx,
+  pair,
+  residentialDef,
+  supportDef,
+  hubs,
+  theoreticalMax,
+) {
+  let best = null;
+  const hallArea = ctx.hall.w * ctx.hall.h;
+  const residentialArea = residentialDef.w * residentialDef.h;
+  const supportArea = supportDef.w * supportDef.h;
+
+  // Usually the top feasible count packs immediately. Looking a few counts
+  // lower handles awkward edges around the 5x5 Town Hall without turning this
+  // fast baseline into another exhaustive search.
+  const minTarget = Math.max(0, theoreticalMax - 12);
+  const hallLimit = Math.min(hubs.length, 36);
+
+  for (
+    let residentialTarget = theoreticalMax;
+    residentialTarget >= minTarget;
+    residentialTarget--
+  ) {
+    const supportTarget = sashMinSupportForResidential(
+      pair,
+      residentialTarget,
+    );
+    const required =
+      hallArea +
+      residentialTarget * residentialArea +
+      supportTarget * supportArea;
+    if (required > ctx.ownedCount) continue;
+
+    let foundAtThisCount = false;
+
+    for (let hi = 0; hi < hallLimit; hi++) {
+      const hall = oxHall(ctx, hubs[hi]);
+      if (!hall) continue;
+
+      const sol = sashGreedyPairForHall(
+        ctx,
+        hall,
+        residentialDef,
+        supportDef,
+        residentialTarget,
+        supportTarget,
+        7919 + hi * 65537 + residentialTarget * 313,
+      );
+      if (!sol) continue;
+
+      ctx.tested++;
+      const baseState = oxState(ctx, sol);
+      const filled = sashFillPreviousBuildings(ctx, baseState, pair);
+      const state = filled.state;
+      const stats = filled.stats;
+
+      if (
+        oxValid(ctx, state) &&
+        sashGreenStateUsesPair(state, pair) &&
+        stats.green
+      ) {
+        foundAtThisCount = true;
+        if (!best || sashGreenBetter(stats, best.stats))
+          best = { state, stats };
+      }
+    }
+
+    // More selected residential buildings are never worse for the selected
+    // SASH pair once we also compare total credits, so stop after the first
+    // target count that yields valid layouts.
+    if (foundAtThisCount) break;
+  }
+
+  return best;
+}
+
 const SASH_STARTING_GREEN_SEEDS = Object.freeze({
   "scq-cce": Object.freeze({
     hub: [0, 4],
@@ -785,15 +957,6 @@ async function optimizeSashGreen(ctx, pairId) {
       best = candidate;
   }
 
-  if (best) {
-    ctx.bestState = best.state;
-    ctx.bestScore = oxScore(
-      ctx,
-      best.state,
-      pair.residentialKey,
-    );
-  }
-
   const hallArea = ctx.hall.w * ctx.hall.h;
   const residentialArea = residentialDef.w * residentialDef.h;
   const supportArea = supportDef.w * supportDef.h;
@@ -817,6 +980,31 @@ async function optimizeSashGreen(ctx, pairId) {
     ctx.cfg.defaultHub,
     [0, 4],
   ]);
+
+  // Starting-layout seeds are only hints. The unlocked footprint is always
+  // authoritative, so build a fresh baseline that can use every owned tile.
+  const expandedBaseline = sashGreedyExpandedBaseline(
+    ctx,
+    pair,
+    residentialDef,
+    supportDef,
+    hubs,
+    theoreticalMax,
+  );
+  if (
+    expandedBaseline &&
+    (!best || sashGreenBetter(expandedBaseline.stats, best.stats))
+  )
+    best = expandedBaseline;
+
+  if (best) {
+    ctx.bestState = best.state;
+    ctx.bestScore = oxScore(
+      ctx,
+      best.state,
+      pair.residentialKey,
+    );
+  }
 
   let allHigherCandidatesProvenImpossible = true;
 
@@ -927,7 +1115,7 @@ async function optimizeSashGreen(ctx, pairId) {
 
   if (!best)
     throw new Error(
-      "No green-Life-Support SASH layout was found for the selected buildings",
+      "No valid layout was found for this building combination on your unlocked land while keeping Life Support at 125% or higher.",
     );
 
   return {
