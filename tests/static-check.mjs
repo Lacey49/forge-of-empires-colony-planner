@@ -495,8 +495,14 @@ function testSashGeometryAndPresets() {
   const officerPreset = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PRESET_BUILDINGS")})`,
   );
+  const officerCosmic = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PRESET_COSMIC")})`,
+  );
   const officerFillers = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PRESET_FILLERS")})`,
+  );
+  const officerFlora = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PRESET_FLORA")})`,
   );
   const officerAll = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_ALL_PRESET_BUILDINGS")})`,
@@ -583,8 +589,17 @@ function testSashGeometryAndPresets() {
     "Exact second SASH preset title changed",
   );
   check(
-    officerPreset.length === 14 && officerFillers.length === 5,
-    "SASH starting Officers preset should contain 14 Officers Quarters and 5 Simple Crew fillers",
+    officerPreset.length === 8 &&
+      officerCosmic.length === 8 &&
+      officerFillers.length === 3 &&
+      officerFlora.length === 1,
+    "SASH starting Officers preset should contain 8 Officers Quarters, 8 CosmicClean Expresses, 3 Simple Crew Quarters, and 1 FloraShip Express",
+  );
+  check(
+    plannerSource.includes(
+      'name: "Officers Quarters (8) + CosmicClean Express (8)"',
+    ),
+    "Exact SASH Officers preset title changed",
   );
   check(
     officerAll.length === 37 && officerAllFillers.length === 5,
