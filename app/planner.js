@@ -1257,8 +1257,14 @@ function makeSashPresetState(kind) {
     for (const [r, c] of SASH_OFFICER_PRESET_BUILDINGS) {
       addBuilding("officersQuarters", r, c);
     }
+    for (const [r, c] of SASH_OFFICER_PRESET_COSMIC) {
+      addBuilding("cosmicCleanExpress", r, c);
+    }
     for (const [r, c] of SASH_OFFICER_PRESET_FILLERS) {
       addBuilding("simpleCrewQuarters", r, c);
+    }
+    for (const [r, c] of SASH_OFFICER_PRESET_FLORA) {
+      addBuilding("floraShipExpress", r, c);
     }
     return state;
   }
@@ -1378,7 +1384,7 @@ function getPresetCatalog() {
       },
       {
         id: "builtin:sash-officers",
-        name: "Officers Quarters (14)",
+        name: "Officers Quarters (8) + CosmicClean Express (8)",
         kind: "Built-in",
         state: makeSashPresetState("officers"),
       },
