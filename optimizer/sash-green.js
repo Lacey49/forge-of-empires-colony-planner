@@ -753,16 +753,34 @@ async function optimizeSashGreen(ctx, pairId) {
     currentStats.green &&
     oxValid(ctx, current)
   ) {
-    const candidate = {
-      state: cloneState(current),
-      stats: {
-        ...currentStats,
-        unused:
-          ctx.ownedCount -
-          ctx.hall.w * ctx.hall.h -
-          currentStats.area,
-      },
-    };
+    // This matters especially after buying expansions. The old SASH search
+    // treated the existing layout as a comparison baseline but never tried to
+    // grow it into the newly unlocked land, so a starting-land layout could be
+    // reported as "not improvable" on a much larger footprint.
+    const grown = sashFillPreviousBuildings(
+      ctx,
+      cloneState(current),
+      pair,
+    );
+    const candidate =
+      grown.stats.green &&
+      sashGreenStateUsesPair(grown.state, pair) &&
+      oxValid(ctx, grown.state)
+        ? {
+            state: grown.state,
+            stats: grown.stats,
+          }
+        : {
+            state: cloneState(current),
+            stats: {
+              ...currentStats,
+              unused:
+                ctx.ownedCount -
+                ctx.hall.w * ctx.hall.h -
+                currentStats.area,
+            },
+          };
+
     if (!best || sashGreenBetter(candidate.stats, best.stats))
       best = candidate;
   }
