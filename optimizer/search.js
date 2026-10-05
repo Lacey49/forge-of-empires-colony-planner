@@ -1396,7 +1396,7 @@ async function runOptimizerDialog() {
       if (era === "SASH") {
         const ratio = (nextSash.ratio * 100).toFixed(2);
         $("optimizerProgress").innerHTML =
-          "<strong>Your green layout is already as good as this search found</strong><span>" +
+          "<strong>No better layout found</strong><span>Your current layout matches or beats the best valid layout found in this search.</span><span>" +
           sashStatsSummary(nextSash) +
           " · " +
           ratio +
@@ -1414,8 +1414,12 @@ async function runOptimizerDialog() {
     $("optimizerRunBtn").disabled = false;
   } catch (err) {
     console.error("Optimizer failed", err);
-    $("optimizerProgress").innerHTML =
-      "<strong>Optimizer error</strong><span>Your layout was left unchanged.</span>";
+    const progress = $("optimizerProgress");
+    progress.innerHTML =
+      "<strong>Couldn't finish this search</strong><span></span><span>Your layout was left unchanged.</span>";
+    progress.querySelector("span").textContent =
+      err?.message ||
+      "Something went wrong while searching for a valid layout.";
     $("optimizerRunBtn").textContent = "Try again";
     $("optimizerRunBtn").disabled = false;
   } finally {
