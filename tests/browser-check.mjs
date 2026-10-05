@@ -231,6 +231,139 @@ try {
   });
   notes.push("SASH pair math and the 26 + 7 CosmicClean preset checked");
 
+  const sashExpandedBaselines = await page.evaluate(() => {
+    showEditableColonyUi("SASH");
+    activateFreeBuild();
+    loadBlank();
+    setExpansionCount(activeExpansions().length);
+
+    return SASH_OPTIMIZER_PAIRS.map((pair) => {
+      const ctx = oxCtx("SASH");
+      const residentialDef = eraBoardBuildingByKey(
+        "SASH",
+        pair.residentialKey,
+      );
+      const supportDef = eraBoardBuildingByKey("SASH", pair.supportKey);
+      const hallArea = ctx.hall.w * ctx.hall.h;
+      const residentialArea = residentialDef.w * residentialDef.h;
+      const supportArea = supportDef.w * supportDef.h;
+
+      let theoreticalMax = Math.floor(
+        (ctx.ownedCount - hallArea) / residentialArea,
+      );
+      while (
+        theoreticalMax > 0 &&
+        hallArea +
+          theoreticalMax * residentialArea +
+          sashMinSupportForResidential(pair, theoreticalMax) * supportArea >
+          ctx.ownedCount
+      )
+        theoreticalMax--;
+
+      const hubs = oxHubs(ctx, [hubTop, ctx.cfg.defaultHub, [0, 4]]);
+      const baseline = sashGreedyExpandedBaseline(
+        ctx,
+        pair,
+        residentialDef,
+        supportDef,
+        hubs,
+        theoreticalMax,
+      );
+      const stats = baseline ? sashPairStats(baseline.state, pair) : null;
+      return {
+        id: pair.id,
+        valid:
+          !!baseline &&
+          baseline.state.enabled.length === activeExpansions().length &&
+          colonyStateMatchesGeometry(baseline.state, "SASH") &&
+          oxValid(ctx, baseline.state) &&
+          sashGreenStateUsesPair(baseline.state, pair) &&
+          stats.green &&
+          stats.credits4h > 0,
+        enabled: baseline?.state.enabled.length ?? -1,
+        credits4h: stats?.credits4h ?? 0,
+      };
+    });
+  });
+  assert.equal(
+    sashExpandedBaselines.every((item) => item.valid),
+    true,
+    `Expanded SASH baseline failed: ${JSON.stringify(sashExpandedBaselines)}`,
+  );
+  notes.push("All four SASH optimizer choices use all 23 unlocked expansions");
+
+  const sashExpansionGrowth = await page.evaluate(async () => {
+    showEditableColonyUi("SASH");
+    activateFreeBuild();
+    loadBlank();
+    const preset = getPresetById("builtin:sash-simple-crew");
+    await loadPresetItem(preset);
+    activateFreeBuild();
+    applyColonyState(preset.state, { preserveCamera: true });
+
+    const before = sashPairStats(currentColonyState(), "scq-fse");
+    setExpansionCount(activeExpansions().length);
+    const ctx = oxCtx("SASH");
+    const grown = sashFillPreviousBuildings(
+      ctx,
+      currentColonyState(),
+      "scq-fse",
+    );
+    const after = sashPairStats(grown.state, "scq-fse");
+
+    return {
+      enabled: grown.state.enabled.length,
+      beforeCredits: before.credits4h,
+      afterCredits: after.credits4h,
+      valid:
+        grown.state.enabled.length === activeExpansions().length &&
+        after.green &&
+        oxValid(ctx, grown.state),
+    };
+  });
+  assert.equal(sashExpansionGrowth.valid, true);
+  assert.equal(sashExpansionGrowth.enabled, 23);
+  assert.ok(
+    sashExpansionGrowth.afterCredits > sashExpansionGrowth.beforeCredits,
+    "Unlocking SASH expansions should let the optimizer grow the layout",
+  );
+  notes.push("SASH layouts grow into newly unlocked expansion land");
+
+  const sashPizzaBlankSearch = await page.evaluate(async () => {
+    showEditableColonyUi("SASH");
+    activateFreeBuild();
+    loadBlank();
+    setExpansionCount(activeExpansions().length);
+
+    const ctx = oxCtx("SASH");
+    ctx.goal = "maxCredits";
+    ctx.primaryKey = "oq-sesp";
+    ctx.started = performance.now();
+    ctx.lastYield = ctx.started;
+    ctx.deadline = ctx.started + 750;
+    optimizerCancelRequested = false;
+
+    try {
+      const result = await optimizeSashGreen(ctx, "oq-sesp");
+      return {
+        valid:
+          !!result?.state &&
+          result.sashGreen?.green &&
+          result.state.enabled.length === activeExpansions().length &&
+          oxValid(ctx, result.state),
+        error: null,
+      };
+    } catch (error) {
+      return { valid: false, error: error?.message || String(error) };
+    }
+  });
+  assert.equal(
+    sashPizzaBlankSearch.valid,
+    true,
+    `Blank expanded OQ + Pizza search failed: ${sashPizzaBlankSearch.error}`,
+  );
+  notes.push("Blank all-expansion Officers + SpacePizza search returns a valid result");
+
   const sashEarlierFillers = await page.evaluate(() => {
     showEditableColonyUi("SASH");
     activateFreeBuild();
