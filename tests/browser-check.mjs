@@ -157,9 +157,9 @@ try {
       return counts;
     };
 
-    const signature = (building) =>
-      `${building.type}:${building.r},${building.c}`;
-    const allBuildings = new Set((all?.state?.buildings || []).map(signature));
+    const startStats = start ? sashPairStats(start.state, "oq-sesp") : null;
+    const allStats = all ? sashPairStats(all.state, "oq-sesp") : null;
+    const allowed = sashAllowedKeys("oq-sesp");
 
     return {
       startTitle: start?.name,
@@ -168,32 +168,50 @@ try {
       allCounts: countTypes(all?.state),
       startEnabled: start?.state?.enabled?.length ?? -1,
       allEnabled: all?.state?.enabled?.length ?? -1,
-      startGreen: start ? sashPairStats(start.state, "oq-sesp").green : false,
-      allGreen: all ? sashPairStats(all.state, "oq-sesp").green : false,
-      allExtendsStart: (start?.state?.buildings || []).every((building) =>
-        allBuildings.has(signature(building)),
+      startGreen: startStats?.green ?? false,
+      allGreen: allStats?.green ?? false,
+      startCredits4h: startStats?.credits4h ?? -1,
+      allCredits4h: allStats?.credits4h ?? -1,
+      startUnused: startStats
+        ? 288 - 25 - startStats.area
+        : -1,
+      allUnused: allStats
+        ? 656 - 25 - allStats.area
+        : -1,
+      enhancedAllowed: allowed.residential.includes("enhancedCrewQuarters"),
+      oldAllPresetExists: catalog.some(
+        (item) => item.id === "builtin:sash-officers-all",
       ),
     };
   });
   assert.deepEqual(pizzaPresets, {
-    startTitle: "Officers Quarters (9) + Sit'n'Eat SpacePizza (5)",
-    allTitle: "Officers Quarters (24) + Sit'n'Eat SpacePizza (13)",
+    startTitle: "Officers Quarters (10)",
+    allTitle: "Officers Quarters (25)",
     startCounts: {
-      officersQuarters: 9,
-      sitEatSpacePizza: 5,
+      officersQuarters: 10,
+      floraShipExpress: 1,
+      cosmicCleanExpress: 2,
+      sitEatSpacePizza: 4,
     },
     allCounts: {
-      officersQuarters: 24,
-      sitEatSpacePizza: 13,
+      officersQuarters: 25,
+      floraShipExpress: 1,
+      cosmicCleanExpress: 2,
+      sitEatSpacePizza: 12,
     },
     startEnabled: 0,
     allEnabled: 23,
     startGreen: true,
     allGreen: true,
-    allExtendsStart: true,
+    startCredits4h: 92335,
+    allCredits4h: 230837.5,
+    startUnused: 6,
+    allUnused: 6,
+    enhancedAllowed: false,
+    oldAllPresetExists: false,
   });
   notes.push(
-    "Starting and all-expansion Officers + SpacePizza presets are green and share the same base layout",
+    "SASH Officers presets use max-credit mixed Life Support layouts and exclude Enhanced Crew Quarters",
   );
 
   const lifeSupportSummary = await page.evaluate(async () => {
@@ -631,20 +649,28 @@ try {
         valid:
           !!result?.state &&
           result.sashGreen?.green &&
+          result.sashGreen?.credits4h >= 230837.5 &&
           result.state.enabled.length === activeExpansions().length &&
           oxValid(ctx, result.state),
+        credits4h: result?.sashGreen?.credits4h ?? 0,
         error: null,
       };
     } catch (error) {
-      return { valid: false, error: error?.message || String(error) };
+      return {
+        valid: false,
+        credits4h: 0,
+        error: error?.message || String(error),
+      };
     }
   });
   assert.equal(
     sashPizzaBlankSearch.valid,
     true,
-    `Blank expanded OQ + Pizza search failed: ${sashPizzaBlankSearch.error}`,
+    `Blank expanded OQ + Pizza search failed or lost the max-credit baseline: ${sashPizzaBlankSearch.error}; credits=${sashPizzaBlankSearch.credits4h}`,
   );
-  notes.push("Blank all-expansion Officers + SpacePizza search returns a valid result");
+  notes.push(
+    "Blank all-expansion Officers + SpacePizza search keeps the 230,837.5-credit baseline",
+  );
 
   const sashEarlierFillers = await page.evaluate(() => {
     showEditableColonyUi("SASH");

@@ -27,6 +27,8 @@ const SASH_OPTIMIZER_PAIRS = Object.freeze([
   }),
 ]);
 
+// Enhanced Crew Quarters are intentionally excluded here. They produce fewer
+// credits for their footprint and population cost than the useful filler choices.
 const SASH_CORE_RESIDENTIAL_KEYS = Object.freeze([
   "simpleCrewQuarters",
   "officersQuarters",
@@ -803,8 +805,20 @@ const SASH_STARTING_GREEN_SEEDS = Object.freeze({
   }),
   "oq-sesp": Object.freeze({
     hub: SASH_OFFICER_PIZZA_PRESET_HUB,
-    residential: SASH_OFFICER_PIZZA_PRESET_BUILDINGS,
-    support: SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT,
+    placements: Object.freeze([
+      ...SASH_OFFICER_PIZZA_PRESET_BUILDINGS.map(([r, c]) =>
+        Object.freeze(["officersQuarters", r, c]),
+      ),
+      ...SASH_OFFICER_PIZZA_PRESET_FLORA.map(([r, c]) =>
+        Object.freeze(["floraShipExpress", r, c]),
+      ),
+      ...SASH_OFFICER_PIZZA_PRESET_COSMIC.map(([r, c]) =>
+        Object.freeze(["cosmicCleanExpress", r, c]),
+      ),
+      ...SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT.map(([r, c]) =>
+        Object.freeze(["sitEatSpacePizza", r, c]),
+      ),
+    ]),
   }),
 });
 
@@ -847,17 +861,24 @@ function sashKnownStartingFallback(ctx, pairOrId) {
     };
   };
 
+  const placements = seed.placements
+    ? seed.placements.map(([type, r, c]) => {
+        const def = eraBoardBuildingByKey("SASH", type);
+        return def ? makePlacement(def, r, c) : null;
+      }).filter(Boolean)
+    : [
+        ...seed.support.map(([r, c]) =>
+          makePlacement(supportDef, r, c),
+        ),
+        ...seed.residential.map(([r, c]) =>
+          makePlacement(residentialDef, r, c),
+        ),
+      ];
+
   const sol = {
     hall,
     roads: new Set(),
-    placements: [
-      ...seed.support.map(([r, c]) =>
-        makePlacement(supportDef, r, c),
-      ),
-      ...seed.residential.map(([r, c]) =>
-        makePlacement(residentialDef, r, c),
-      ),
-    ],
+    placements,
   };
 
   const state = oxState(ctx, sol);

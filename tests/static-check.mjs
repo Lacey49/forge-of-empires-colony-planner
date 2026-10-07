@@ -504,17 +504,17 @@ function testSashGeometryAndPresets() {
   const officerFlora = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PRESET_FLORA")})`,
   );
-  const officerAll = vm.runInNewContext(
-    `(${extractConst(layouts, "SASH_OFFICER_ALL_PRESET_BUILDINGS")})`,
-  );
-  const officerAllFillers = vm.runInNewContext(
-    `(${extractConst(layouts, "SASH_OFFICER_ALL_PRESET_FILLERS")})`,
-  );
   const officerPizzaHub = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PIZZA_PRESET_HUB")})`,
   );
   const officerPizza = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PIZZA_PRESET_BUILDINGS")})`,
+  );
+  const officerPizzaFlora = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_PRESET_FLORA")})`,
+  );
+  const officerPizzaCosmic = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_PRESET_COSMIC")})`,
   );
   const officerPizzaSupport = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT")})`,
@@ -524,6 +524,12 @@ function testSashGeometryAndPresets() {
   );
   const officerPizzaAll = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PIZZA_ALL_PRESET_BUILDINGS")})`,
+  );
+  const officerPizzaAllFlora = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_ALL_PRESET_FLORA")})`,
+  );
+  const officerPizzaAllCosmic = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_ALL_PRESET_COSMIC")})`,
   );
   const officerPizzaAllSupport = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_PIZZA_ALL_PRESET_LIFE_SUPPORT")})`,
@@ -619,13 +625,14 @@ function testSashGeometryAndPresets() {
     ),
     "Exact SASH Officers preset title changed",
   );
-  check(
-    officerAll.length === 37 && officerAllFillers.length === 5,
-    "SASH all-expansion Officers preset should contain 37 Officers Quarters and 5 Simple Crew fillers",
-  );
-
   const officersDef = parsedEras.SASH.residential.find(
     (def) => def.key === "officersQuarters",
+  );
+  const floraDef = parsedEras.SASH.lifeSupport.find(
+    (def) => def.key === "floraShipExpress",
+  );
+  const cosmicDef = parsedEras.SASH.lifeSupport.find(
+    (def) => def.key === "cosmicCleanExpress",
   );
   const pizzaDef = parsedEras.SASH.lifeSupport.find(
     (def) => def.key === "sitEatSpacePizza",
@@ -633,53 +640,55 @@ function testSashGeometryAndPresets() {
 
   check(
     JSON.stringify(officerPizzaHub) === JSON.stringify([0, 4]) &&
-      officerPizza.length === 9 &&
-      officerPizzaSupport.length === 5,
-    "SASH starting Officers + SpacePizza preset should contain 9 Officers Quarters and 5 SpacePizza buildings",
+      officerPizza.length === 10 &&
+      officerPizzaFlora.length === 1 &&
+      officerPizzaCosmic.length === 2 &&
+      officerPizzaSupport.length === 4,
+    "SASH starting max-credit Officers preset should contain 10 Officers, 1 FloraShip, 2 CosmicClean, and 4 SpacePizza buildings",
   );
   check(
     JSON.stringify(officerPizzaAllHub) === JSON.stringify([0, 4]) &&
-      officerPizzaAll.length === 24 &&
-      officerPizzaAllSupport.length === 13,
-    "SASH all-expansion Officers + SpacePizza preset should contain 24 Officers Quarters and 13 SpacePizza buildings",
+      officerPizzaAll.length === 25 &&
+      officerPizzaAllFlora.length === 1 &&
+      officerPizzaAllCosmic.length === 2 &&
+      officerPizzaAllSupport.length === 12,
+    "SASH all-expansion max-credit Officers preset should contain 25 Officers, 1 FloraShip, 2 CosmicClean, and 12 SpacePizza buildings",
   );
 
-  if (officersDef && pizzaDef) {
+  if (officersDef && floraDef && cosmicDef && pizzaDef) {
+    const startLifeSupport =
+      officerPizzaFlora.length * Number(floraDef.lifeSupport) +
+      officerPizzaCosmic.length * Number(cosmicDef.lifeSupport) +
+      officerPizzaSupport.length * Number(pizzaDef.lifeSupport);
+    const allLifeSupport =
+      officerPizzaAllFlora.length * Number(floraDef.lifeSupport) +
+      officerPizzaAllCosmic.length * Number(cosmicDef.lifeSupport) +
+      officerPizzaAllSupport.length * Number(pizzaDef.lifeSupport);
+
     check(
-      officerPizzaSupport.length * Number(pizzaDef.lifeSupport) * 4 >=
+      startLifeSupport * 4 >=
         officerPizza.length * Number(officersDef.colonists) * 5,
-      "SASH starting Officers + SpacePizza preset fell below 125% Life Support",
+      "SASH starting max-credit Officers preset fell below 125% Life Support",
     );
     check(
-      officerPizzaAllSupport.length * Number(pizzaDef.lifeSupport) * 4 >=
+      allLifeSupport * 4 >=
         officerPizzaAll.length * Number(officersDef.colonists) * 5,
-      "SASH all-expansion Officers + SpacePizza preset fell below 125% Life Support",
+      "SASH all-expansion max-credit Officers preset fell below 125% Life Support",
     );
   }
 
-  const pizzaAllOq = new Set(officerPizzaAll.map(([r, c]) => `${r},${c}`));
-  const pizzaAllSupport = new Set(
-    officerPizzaAllSupport.map(([r, c]) => `${r},${c}`),
+  check(
+    plannerSource.includes('name: "Officers Quarters (10)"'),
+    "Exact SASH starting max-credit Officers preset title changed",
   );
   check(
-    officerPizza.every(([r, c]) => pizzaAllOq.has(`${r},${c}`)) &&
-      officerPizzaSupport.every(([r, c]) =>
-        pizzaAllSupport.has(`${r},${c}`),
-      ),
-    "SASH all-expansion Officers + SpacePizza preset should extend the starting layout",
-  );
-
-  check(
-    plannerSource.includes(
-      'name: "Officers Quarters (9) + Sit\'n\'Eat SpacePizza (5)"',
-    ),
-    "Exact SASH starting Officers + SpacePizza preset title changed",
+    plannerSource.includes('name: "Officers Quarters (25)"'),
+    "Exact SASH all-expansion max-credit Officers preset title changed",
   );
   check(
-    plannerSource.includes(
-      'name: "Officers Quarters (24) + Sit\'n\'Eat SpacePizza (13)"',
-    ),
-    "Exact SASH all-expansion Officers + SpacePizza preset title changed",
+    !plannerSource.includes('builtin:sash-officers-all') &&
+      !layouts.includes("SASH_OFFICER_ALL_PRESET"),
+    "Obsolete Officers Quarters (37) preset still exists",
   );
 
   check(
