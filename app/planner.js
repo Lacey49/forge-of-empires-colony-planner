@@ -2383,6 +2383,38 @@ function placedBuildingHasConnectedRoad(placed, connectedRoadIds) {
   );
 }
 
+function colonyLifeSupportStats(
+  era = selectedEra,
+  placedBuildings = buildings,
+) {
+  let colonists = 0;
+  let lifeSupport = 0;
+
+  for (const placed of placedBuildings || []) {
+    const def = eraBuildingByKey(era, placed.type);
+    if (!def) continue;
+
+    if (def.category === "residential") {
+      colonists += Math.max(0, Number(def.colonists || 0));
+    } else if (def.category === "lifeSupport") {
+      lifeSupport += Math.max(0, Number(def.lifeSupport || 0));
+    }
+  }
+
+  const percent = colonists > 0 ? (lifeSupport / colonists) * 100 : 0;
+  return {
+    colonists,
+    lifeSupport,
+    percent,
+    green: colonists > 0 && lifeSupport * 4 >= colonists * 5,
+  };
+}
+
+function formatLifeSupportPercent(percent) {
+  const value = Math.floor(Math.max(0, Number(percent) || 0) * 10) / 10;
+  return `${Number.isInteger(value) ? value.toFixed(0) : value.toFixed(1)}%`;
+}
+
 function updateStats() {
   const rows = $("compactBuildingRows");
   if (!rows) return;
@@ -2494,6 +2526,18 @@ function updateStats() {
   $("creditsPer8h").textContent = Math.round(totalCredits).toLocaleString();
   $("colonistsTotal").textContent = totalColonists.toLocaleString();
   $("emptyTilesTotal").textContent = unused.toLocaleString();
+
+  const lifeSupportStats = colonyLifeSupportStats();
+  const lifeSupportPercent = $("lifeSupportPercent");
+  if (lifeSupportPercent) {
+    lifeSupportPercent.textContent = formatLifeSupportPercent(
+      lifeSupportStats.percent,
+    );
+    lifeSupportPercent.classList.toggle(
+      "life-support-good",
+      lifeSupportStats.green,
+    );
+  }
 
   const maxExp = activeExpansions().length;
   if ($("compactExpCount"))

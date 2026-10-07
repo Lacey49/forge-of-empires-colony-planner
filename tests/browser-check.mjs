@@ -140,6 +140,69 @@ try {
   assert.deepEqual(exactSashPresets.secondHub, [6, 4]);
   notes.push("Exact SASH preset names and mixed Life Support counts checked");
 
+  const lifeSupportSummary = await page.evaluate(async () => {
+    const eraChecks = {};
+    for (const [era, data] of Object.entries(ERA_DATA)) {
+      const residential = data.residential[0];
+      const support = data.lifeSupport[0];
+      const supportCount = Math.ceil(
+        (Number(residential.colonists) * 5) /
+          (Number(support.lifeSupport) * 4),
+      );
+      const sample = [
+        { type: residential.key },
+        ...Array.from({ length: supportCount }, () => ({ type: support.key })),
+      ];
+      const stats = colonyLifeSupportStats(era, sample);
+      eraChecks[era] = {
+        green: stats.green,
+        percent: stats.percent,
+        text: formatLifeSupportPercent(stats.percent),
+      };
+    }
+
+    showEditableColonyUi("SASH");
+    const first = getPresetCatalog().find(
+      (item) => item.id === "builtin:sash-simple-crew",
+    );
+    await loadPresetItem(first);
+    updateStats();
+    const sashStats = colonyLifeSupportStats();
+
+    return {
+      eraChecks,
+      sashText: $("lifeSupportPercent")?.textContent,
+      sashExpectedText: formatLifeSupportPercent(sashStats.percent),
+      sashGreen: $("lifeSupportPercent")?.classList.contains(
+        "life-support-good",
+      ),
+      sashPercent: sashStats.percent,
+    };
+  });
+  assert.deepEqual(Object.keys(lifeSupportSummary.eraChecks).sort(), [
+    "SAAB",
+    "SAJM",
+    "SAM",
+    "SASH",
+    "SAT",
+    "SAV",
+  ]);
+  for (const [era, check] of Object.entries(lifeSupportSummary.eraChecks)) {
+    assert.equal(check.green, true, `${era} should reach green Life Support`);
+    assert.ok(
+      check.percent >= 125,
+      `${era} green Life Support should be at least 125%`,
+    );
+    assert.match(check.text, /%$/);
+  }
+  assert.equal(
+    lifeSupportSummary.sashText,
+    lifeSupportSummary.sashExpectedText,
+  );
+  assert.ok(lifeSupportSummary.sashPercent >= 125);
+  assert.equal(lifeSupportSummary.sashGreen, true);
+  notes.push("Life Support percentage and 125% green state checked in all eras");
+
   const optimizerAvailability = await page.evaluate(() => {
     showEditableColonyUi("SAT");
     const satVisible = getComputedStyle($("optimizeBtn")).display !== "none";
