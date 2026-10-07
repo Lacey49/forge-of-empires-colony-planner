@@ -185,8 +185,8 @@ try {
     };
   });
   assert.deepEqual(pizzaPresets, {
-    startTitle: "Officers Quarters (10)",
-    allTitle: "Officers Quarters (25)",
+    startTitle: "Officers Quarters (10) + Sit'n'Eat SpacePizza (4)",
+    allTitle: "Officers Quarters (25) + Sit'n'Eat SpacePizza (12)",
     startCounts: {
       officersQuarters: 10,
       floraShipExpress: 1,
