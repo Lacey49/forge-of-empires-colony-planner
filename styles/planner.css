@@ -3952,3 +3952,283 @@ body[data-density="spacious"] .map-wrap {
   }
   .toast-stack { bottom: 56px !important; }
 }
+
+
+/* Mobile phone layout correction */
+@media (max-width: 700px) {
+  html,
+  body,
+  .app,
+  .window {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+  }
+
+  .app-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 34px 34px 34px !important;
+    align-items: center !important;
+    min-height: 42px !important;
+    padding: 4px 6px !important;
+    gap: 5px !important;
+  }
+
+  .app-brand {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 5px 4px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    font-size: 11px !important;
+  }
+
+  .app-support-btn,
+  .app-github-btn,
+  .app-settings-btn {
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    justify-self: center !important;
+  }
+
+  .app-support-btn span {
+    display: none !important;
+  }
+
+  .support-btn-icon {
+    width: 25px !important;
+    height: 25px !important;
+    min-width: 25px !important;
+    flex-basis: 25px !important;
+  }
+
+  .github-mark {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .era-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+    width: 100% !important;
+    padding: 4px 5px 0 !important;
+    overflow: hidden !important;
+  }
+
+  .era-tabs .era-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 2px !important;
+    font-size: 9px !important;
+  }
+
+  .compact-topbar {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 5px !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  .compact-topbar .compact-sep,
+  .compact-topbar .spacer {
+    display: none !important;
+  }
+
+  .compact-topbar > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  #freeBuildBtn { order: 1; }
+  #presetsBtn { order: 2; }
+  #savePresetBtn { order: 3; }
+  #optimizeBtn { order: 4; }
+
+  #compactMoveBtn { order: 5; }
+  #compactEraseBtn { order: 6; }
+  #compactUndoBtn { order: 7; }
+  #clearAllBtn { order: 8; }
+
+  .compact-topbar .compact-label {
+    order: 9;
+    min-height: 36px !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    padding: 0 4px !important;
+    border: 1px solid var(--theme-soft-border);
+    border-radius: 3px;
+    background: var(--theme-panel2);
+    font-size: 8px !important;
+  }
+
+  #compactExpNone { order: 10; }
+  #compactExpAll { order: 11; }
+  #validateBtn { order: 12; }
+
+  .compact-topbar .compact-tool,
+  .compact-topbar .compact-action {
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 4px 3px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 9px !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  .main,
+  body[data-density="compact"] .main,
+  body[data-density="normal"] .main,
+  body[data-density="spacious"] .main {
+    position: relative !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 0 !important;
+    padding-bottom: 58px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .map-pane,
+  .map-wrap {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .side {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    height: min(66dvh, 560px) !important;
+    max-height: calc(100dvh - 118px) !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--theme-border) !important;
+    overflow: hidden !important;
+    transform: translateY(calc(100% - 48px)) !important;
+    box-shadow: 0 -8px 26px rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .side.mobile-open {
+    transform: translateY(0) !important;
+  }
+
+  .side > .mobile-side-toggle {
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 14px !important;
+    border-radius: 9px 9px 0 0 !important;
+    font-size: 12px !important;
+  }
+
+  .side:not(.mobile-open) > .mobile-side-toggle {
+    border-radius: 9px !important;
+    border-bottom: 0 !important;
+  }
+
+  .compact-summary {
+    height: calc(100% - 48px) !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  .compact-table-head,
+  .compact-building-row {
+    grid-template-columns: minmax(118px, 1fr) 30px 58px 76px !important;
+  }
+
+  .compact-table-head {
+    min-height: 32px !important;
+  }
+
+  .compact-building-row {
+    min-height: 52px !important;
+    padding: 4px 6px !important;
+  }
+
+  .compact-building-cell img {
+    width: 40px !important;
+    height: 34px !important;
+  }
+
+  .compact-building-name {
+    font-size: 9px !important;
+  }
+
+  .compact-number,
+  .compact-colonists,
+  .compact-credits {
+    font-size: 9px !important;
+  }
+
+  .compact-summary-footer {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    min-height: 48px !important;
+  }
+
+  .build-tabs {
+    top: 32px !important;
+  }
+
+  .build-tab {
+    min-height: 42px !important;
+    padding: 5px 2px !important;
+  }
+
+  .build-item {
+    min-height: 58px !important;
+  }
+
+  .preset-popover {
+    left: 8px !important;
+    right: 8px !important;
+    top: 148px !important;
+    bottom: 66px !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+
+  .preset-popover-main {
+    height: 100% !important;
+    grid-template-columns: minmax(130px, 42%) minmax(0, 58%) !important;
+  }
+
+  .preset-list,
+  .preset-preview-pane {
+    min-height: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  .toast-stack {
+    bottom: 66px !important;
+  }
+
+  .version-label {
+    display: none !important;
+  }
+}
