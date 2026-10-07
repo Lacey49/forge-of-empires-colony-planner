@@ -227,6 +227,65 @@ try {
     "SASH Officers presets use max-credit mixed Life Support layouts and exclude Enhanced Crew Quarters",
   );
 
+  const presetPreviewSync = await page.evaluate(() => {
+    setAppPage("planner");
+    showEditableColonyUi("SASH");
+
+    const items = getPresetCatalog();
+    activeLayoutMode = "preset";
+    activePresetId = items[0].id;
+    renderPresetPopover();
+
+    const rows = [...document.querySelectorAll("#presetList .preset-item")];
+    const initial = {
+      previewTitle: $("presetPreviewTitle")?.textContent,
+      previewingId:
+        rows.find((row) => row.classList.contains("previewing"))?.dataset
+          .presetId || null,
+      loadedId:
+        rows.find((row) => row.classList.contains("loaded"))?.dataset
+          .presetId || null,
+    };
+
+    rows[1].dispatchEvent(
+      new PointerEvent("pointerenter", { bubbles: false }),
+    );
+
+    const afterHover = {
+      previewTitle: $("presetPreviewTitle")?.textContent,
+      previewingId:
+        rows.find((row) => row.classList.contains("previewing"))?.dataset
+          .presetId || null,
+      loadedId:
+        rows.find((row) => row.classList.contains("loaded"))?.dataset
+          .presetId || null,
+      previewingCount: rows.filter((row) =>
+        row.classList.contains("previewing"),
+      ).length,
+    };
+
+    return {
+      firstId: items[0].id,
+      firstName: items[0].name,
+      secondId: items[1].id,
+      secondName: items[1].name,
+      initial,
+      afterHover,
+    };
+  });
+  assert.deepEqual(presetPreviewSync.initial, {
+    previewTitle: presetPreviewSync.firstName,
+    previewingId: presetPreviewSync.firstId,
+    loadedId: presetPreviewSync.firstId,
+  });
+  assert.deepEqual(presetPreviewSync.afterHover, {
+    previewTitle: presetPreviewSync.secondName,
+    previewingId: presetPreviewSync.secondId,
+    loadedId: presetPreviewSync.firstId,
+    previewingCount: 1,
+  });
+  notes.push("Preset preview outline follows the row being previewed");
+
   const lifeSupportSummary = await page.evaluate(async () => {
     const eraChecks = {};
     for (const [era, data] of Object.entries(ERA_DATA)) {
