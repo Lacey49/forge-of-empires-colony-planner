@@ -52,6 +52,11 @@ body {
     ),
     #201a18;
 }
+
+/* Do not paint the default colony UI while startup is choosing the real page. */
+body[aria-busy="true"] .app {
+  visibility: hidden;
+}
 button,
 select,
 input {

@@ -75,6 +75,19 @@ try {
   await page.goto(base);
   await page.waitForFunction(() => !document.body.hasAttribute("aria-busy"));
   assert.equal(await page.evaluate(() => grid.length), 28);
+
+  const startupVisibility = await page.evaluate(() => {
+    document.body.setAttribute("aria-busy", "true");
+    const hidden = getComputedStyle(document.querySelector(".app")).visibility;
+    document.body.removeAttribute("aria-busy");
+    const ready = getComputedStyle(document.querySelector(".app")).visibility;
+    return { hidden, ready };
+  });
+  assert.deepEqual(startupVisibility, {
+    hidden: "hidden",
+    ready: "visible",
+  });
+  notes.push("Startup hides the default colony UI until Home is ready");
   // Check every real preset, including roads and building records, in all six eras.
   const presets = await page.evaluate(async () => {
     const errors = [];
