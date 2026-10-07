@@ -88,6 +88,13 @@
     holdTimer = 0;
   }
 
+  function isEditableTextTarget(target) {
+    if (!target || !target.closest) return false;
+    return !!target.closest(
+      'input[type="text"], input[type="search"], input[type="email"], input[type="number"], input[type="password"], textarea, [contenteditable="true"]',
+    );
+  }
+
   function positionTouchTooltip(x, y) {
     const tip = document.getElementById("hoverTooltip");
     if (!tip || tip.hidden) return;
@@ -202,6 +209,37 @@
   document.addEventListener("pointermove", moveHold, true);
   document.addEventListener("pointerup", endHold, true);
   document.addEventListener("pointercancel", endHold, true);
+
+  document.addEventListener(
+    "selectstart",
+    (e) => {
+      if (!e.target.closest?.(".app") || isEditableTextTarget(e.target)) return;
+      e.preventDefault();
+    },
+    true,
+  );
+
+  document.addEventListener("selectionchange", () => {
+    const selection = document.getSelection?.();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const anchor =
+      selection.anchorNode?.nodeType === Node.ELEMENT_NODE
+        ? selection.anchorNode
+        : selection.anchorNode?.parentElement;
+    const focus =
+      selection.focusNode?.nodeType === Node.ELEMENT_NODE
+        ? selection.focusNode
+        : selection.focusNode?.parentElement;
+
+    const insidePlanner =
+      anchor?.closest?.(".app") || focus?.closest?.(".app");
+    if (!insidePlanner) return;
+
+    const editable =
+      isEditableTextTarget(anchor) || isEditableTextTarget(focus);
+    if (!editable) selection.removeAllRanges();
+  });
 
   // Touch has no hover. Stop the desktop board hover from firing on a tap.
   document.addEventListener("pointerover", (e) => {
