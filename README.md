@@ -15,9 +15,9 @@ Plan your Space Age colony before rebuilding it in-game.
 
 ## What is it?
 
-I made this because rebuilding a colony just to realize the layout doesn't fit gets old fast.
+I made this tool because rebuilding a colony only to realize one more building could've fit with one less path gets annoying fast.
 
-Pick your era, select the expansions you have, and build the layout before changing anything in-game. You can make your own layout, load a preset, or use **Optimize** to try to get more credits out of the space you have.
+Pick your era, select the expansions you have, and build the layout before changing anything in-game. You can make your own layout, load a preset, or use the **Optimize** button to have an algorithm find the maximum amount of credits per tile.
 
 The planner supports:
 
@@ -35,9 +35,9 @@ The planner supports:
 1. Pick your era.
 2. Select the expansions you own.
 3. Build your colony or load a preset.
-4. Use **Optimize** if you want to try for more credits.
+4. Use the **Optimize** button to find a more efficient layout.
 
-Your Free Build layout is kept separate while you look through presets, so you can go back to it without losing what you were working on.
+The Free Build layout stays separate while you look through presets, so you can return to it without losing what you were working on.
 
 If you make a layout you want to keep, save it as a custom preset.
 
@@ -58,15 +58,15 @@ Move and Undo can be changed in **Settings**.
 
 ## Optimize
 
-**Optimize** tries to rearrange your colony for more credit production.
+The **Optimize** button tries to rearrange your colony to produce the maximum amount of credits per tile.
 
-It can move buildings, move the Town Hall, and add paths where they are needed. It only gives you a result when it finds something better than the layout you started with.
+It moves the town hall, buildings, and paths (when relevant) to try to find a more efficient layout. It only gives you a result when it finds something better than the layout you started with.
 
-For **Space Hub**, it also keeps Life Support at **125% or higher**.
+For **Space Age Space Hub**, it also keeps Life Support at **125% or higher** by adding life support buildings to the calculation.
 
-In the other eras, Optimize focuses on credits. If the new layout would remove something important, the planner warns you before you apply it.
+In the other eras, the optimizer focuses on credits. If the new layout would remove some goods buildings or anything else, the planner warns you before you apply it.
 
-Optimize can usually find a better layout, but there may still be an even better one out there.
+The optimizer can usually find a better layout, but I can't guarantee an improvement.
 
 ## Saving and backups
 
