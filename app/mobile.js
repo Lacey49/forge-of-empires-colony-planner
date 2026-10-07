@@ -60,7 +60,8 @@
 
     panX = 0;
     panY = 0;
-    if (typeof scheduleViewTransform === "function") scheduleViewTransform();
+    if (typeof applyViewTransform === "function") applyViewTransform();
+    else if (typeof scheduleViewTransform === "function") scheduleViewTransform();
     if (typeof persistColonyState === "function" && typeof selectedEra !== "undefined") {
       setTimeout(() => persistColonyState(selectedEra), 0);
     }
