@@ -1413,13 +1413,13 @@ function getPresetCatalog() {
       },
       {
         id: "builtin:sash-officers-pizza",
-        name: "Officers Quarters (10)",
+        name: "Officers Quarters (10) + Sit'n'Eat SpacePizza (4)",
         kind: "Built-in",
         state: makeSashPresetState("officersPizza"),
       },
       {
         id: "builtin:sash-officers-pizza-all",
-        name: "Officers Quarters (25)",
+        name: "Officers Quarters (25) + Sit'n'Eat SpacePizza (12)",
         kind: "Built-in",
         state: makeSashPresetState("officersPizzaAll"),
       },

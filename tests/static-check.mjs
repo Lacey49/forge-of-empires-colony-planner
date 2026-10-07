@@ -678,12 +678,12 @@ function testSashGeometryAndPresets() {
   }
 
   check(
-    plannerSource.includes('name: "Officers Quarters (10)"'),
-    "Exact SASH starting max-credit Officers preset title changed",
+    plannerSource.includes('name: "Officers Quarters (10) + Sit\'n\'Eat SpacePizza (4)"'),
+    "Exact SASH starting Officers + SpacePizza preset title changed",
   );
   check(
-    plannerSource.includes('name: "Officers Quarters (25)"'),
-    "Exact SASH all-expansion max-credit Officers preset title changed",
+    plannerSource.includes('name: "Officers Quarters (25) + Sit\'n\'Eat SpacePizza (12)"'),
+    "Exact SASH all-expansion Officers + SpacePizza preset title changed",
   );
   check(
     !plannerSource.includes('builtin:sash-officers-all') &&
