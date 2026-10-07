@@ -36,6 +36,43 @@
     return mobileQuery.matches;
   }
 
+  function boardIntersectsMap() {
+    if (!mapWrap) return true;
+    const board = document.getElementById("board");
+    if (!board || getComputedStyle(board).display === "none") return true;
+
+    const boardRect = board.getBoundingClientRect();
+    const mapRect = mapWrap.getBoundingClientRect();
+    const padding = 18;
+
+    return (
+      boardRect.right > mapRect.left + padding &&
+      boardRect.left < mapRect.right - padding &&
+      boardRect.bottom > mapRect.top + padding &&
+      boardRect.top < mapRect.bottom - padding
+    );
+  }
+
+  function ensureMobileBoardVisible() {
+    if (!isMobileLayout() || !mapWrap || document.body.classList.contains("home-mode")) return;
+    if (boardIntersectsMap()) return;
+    if (typeof panX === "undefined" || typeof panY === "undefined") return;
+
+    panX = 0;
+    panY = 0;
+    if (typeof scheduleViewTransform === "function") scheduleViewTransform();
+    if (typeof persistColonyState === "function" && typeof selectedEra !== "undefined") {
+      setTimeout(() => persistColonyState(selectedEra), 0);
+    }
+  }
+
+  function scheduleMobileBoardCheck() {
+    if (!isMobileLayout()) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(ensureMobileBoardVisible);
+    });
+  }
+
   function setDrawer(open) {
     if (!side || !sideToggle) return;
     const next = !!open;
@@ -194,12 +231,21 @@
   document.addEventListener("click", (e) => {
     if (!isMobileLayout()) return;
     if (e.target.closest && e.target.closest(".build-item")) setDrawer(false);
-    if (e.target.closest && e.target.closest(".era-btn")) setDrawer(false);
+    if (e.target.closest && e.target.closest(".era-btn")) {
+      setDrawer(false);
+      scheduleMobileBoardCheck();
+    }
   });
 
   mobileQuery.addEventListener && mobileQuery.addEventListener("change", (e) => {
-    if (!e.matches) setDrawer(false);
+    if (!e.matches) {
+      setDrawer(false);
+      return;
+    }
+    scheduleMobileBoardCheck();
   });
+
+  window.addEventListener("resize", scheduleMobileBoardCheck);
 
   function distance(a, b) {
     return Math.hypot(b.x - a.x, b.y - a.y);

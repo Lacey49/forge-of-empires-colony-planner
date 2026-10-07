@@ -1114,6 +1114,51 @@ try {
     true,
   );
 
+  const mobileBoardVisible = await page.evaluate(async () => {
+    setDrawer(false);
+    panX = 5000;
+    panY = 5000;
+    applyViewTransform();
+
+    document.querySelector('.era-btn[data-era="SAM"]').click();
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    const boardRect = $("board").getBoundingClientRect();
+    const mapRect = document.querySelector(".map-wrap").getBoundingClientRect();
+    return {
+      intersects:
+        boardRect.right > mapRect.left + 18 &&
+        boardRect.left < mapRect.right - 18 &&
+        boardRect.bottom > mapRect.top + 18 &&
+        boardRect.top < mapRect.bottom - 18,
+      panX,
+      panY,
+    };
+  });
+  assert.equal(mobileBoardVisible.intersects, true);
+  assert.equal(mobileBoardVisible.panX, 0);
+  assert.equal(mobileBoardVisible.panY, 0);
+
+  await page.locator("#appHomeBtn").click();
+  const homeMobileLayout = await page.evaluate(() => {
+    const tabs = document.querySelector(".era-tabs").getBoundingClientRect();
+    const screen = $("homeScreen").getBoundingClientRect();
+    const firstCard = document.querySelector(".home-era-card").getBoundingClientRect();
+    const gridColumns = getComputedStyle(document.querySelector(".home-townhall-grid"))
+      .gridTemplateColumns.split(" ").filter(Boolean).length;
+
+    return {
+      screenBelowTabs: screen.top >= tabs.bottom - 1,
+      firstCardBelowTabs: firstCard.top >= tabs.bottom - 1,
+      gridColumns,
+    };
+  });
+  assert.equal(homeMobileLayout.screenBelowTabs, true);
+  assert.equal(homeMobileLayout.firstCardBelowTabs, true);
+  assert.equal(homeMobileLayout.gridColumns, 2);
+
+  await page.locator('.era-btn[data-era="SAM"]').click();
+
   const mobileLongPress = await page.evaluate(async () => {
     const item = document.querySelector(".build-item");
     const rect = item.getBoundingClientRect();
