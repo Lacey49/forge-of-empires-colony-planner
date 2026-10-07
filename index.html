@@ -199,7 +199,7 @@
   Forge of Empires Colony Planner by Lacey49.
   Fan-made project. Not affiliated with or endorsed by InnoGames.
 -->
-    <link rel="stylesheet" href="./styles/planner.css?v=104" />
+    <link rel="stylesheet" href="./styles/planner.css?v=105" />
   </head>
   <body aria-busy="true">
     <div class="app">
@@ -785,6 +785,10 @@
               <div id="compactBuildingRows"></div>
 
               <div class="compact-total compact-summary-footer">
+                <div class="summary-footer-stat credits-footer">
+                  <span id="creditsTotalLabel">Credit output (4h):</span>
+                  <b id="creditsPer8h">0</b>
+                </div>
                 <div class="summary-footer-stat">
                   <span>Empty tiles:</span>
                   <b id="emptyTilesTotal">0</b>
@@ -792,10 +796,6 @@
                 <div class="summary-footer-stat">
                   <span>Colonists:</span>
                   <b id="colonistsTotal">0</b>
-                </div>
-                <div class="summary-footer-stat credits-footer">
-                  <span id="creditsTotalLabel">Credit output (4h):</span>
-                  <b id="creditsPer8h">0</b>
                 </div>
                 <div
                   class="summary-footer-stat life-support-footer"
@@ -1089,7 +1089,7 @@
 
     <script defer src="./data/buildings.js?v=102"></script>
     <script defer src="./data/layouts.js?v=108"></script>
-    <script defer src="./app/planner.js?v=110"></script>
+    <script defer src="./app/planner.js?v=111"></script>
     <script defer src="./app/backups.js?v=100"></script>
     <script defer src="./data/titan-land.js?v=100"></script>
     <script defer src="./data/titan-save-migration.js?v=100"></script>

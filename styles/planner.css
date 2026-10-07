@@ -1419,6 +1419,23 @@ input[type="range"] {
   z-index: 9;
 }
 
+.placement-preview.floating-placement-preview {
+  position: absolute !important;
+  inset: 0 auto auto 0 !important;
+  width: var(--floating-preview-w) !important;
+  height: var(--floating-preview-h) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  transform: translate3d(
+    var(--floating-preview-x),
+    var(--floating-preview-y),
+    0
+  );
+  align-self: auto !important;
+  justify-self: auto !important;
+  z-index: 20;
+}
+
 /* Building overlays never intercept the mouse.
    Erase is handled by the exact underlying grid tile. */
 #board .building-overlay,

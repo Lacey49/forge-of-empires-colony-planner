@@ -253,6 +253,7 @@ try {
     );
     return {
       statCount: stats.length,
+      labels: stats.map((stat) => stat.querySelector("span")?.textContent),
       trackCount: getComputedStyle(footer).gridTemplateColumns
         .split(" ")
         .filter(Boolean).length,
@@ -264,13 +265,83 @@ try {
   });
   assert.deepEqual(summaryLayout, {
     statCount: 4,
+    labels: ["Credit output (4h):", "Empty tiles:", "Colonists:", "Life Support:"],
     trackCount: 4,
     emptyFlexDirection: "column",
     lifeFlexDirection: "column",
     emptyFontSize: "10px",
     lifeFontSize: "10px",
   });
-  notes.push("Summary footer keeps all four stats in one matching row");
+  notes.push("Summary footer keeps Credit output first in the four-stat row");
+
+  const placementPreviewCoverage = await page.evaluate(() => {
+    showEditableColonyUi("SAM");
+    activateFreeBuild();
+    loadBlank();
+    setMode("build:dropPod");
+
+    const board = $("board");
+    const wrap = document.querySelector(".map-wrap");
+    const boardRect = board.getBoundingClientRect();
+    const wrapRect = wrap.getBoundingClientRect();
+
+    const outCell = [...board.querySelectorAll(".cell.out")][0];
+    const outR = Number(outCell.dataset.r);
+    const outC = Number(outCell.dataset.c);
+    const outX = boardRect.left + ((outC + 0.5) * boardRect.width) / 28;
+    const outY = boardRect.top + ((outR + 0.5) * boardRect.height) / 28;
+    wrap.dispatchEvent(
+      new PointerEvent("pointermove", {
+        bubbles: true,
+        clientX: outX,
+        clientY: outY,
+      }),
+    );
+
+    const gridPreview = $("placementPreview");
+    const outShowsInvalid =
+      gridPreview.style.display === "block" &&
+      gridPreview.classList.contains("invalid-preview");
+
+    const outsideX =
+      boardRect.left - wrapRect.left > 2
+        ? wrapRect.left + 1
+        : wrapRect.right - 1;
+    const outsideY =
+      boardRect.top - wrapRect.top > 2
+        ? wrapRect.top + 1
+        : wrapRect.bottom - 1;
+    wrap.dispatchEvent(
+      new PointerEvent("pointermove", {
+        bubbles: true,
+        clientX: outsideX,
+        clientY: outsideY,
+      }),
+    );
+
+    const floating = $("floatingPlacementPreview");
+    const floatingShows =
+      floating?.style.display === "block" &&
+      floating.classList.contains("invalid-preview");
+
+    wrap.dispatchEvent(new PointerEvent("pointerleave", { bubbles: false }));
+
+    return {
+      outShowsInvalid,
+      floatingShows,
+      hiddenAfterLeave:
+        $("placementPreview").style.display === "none" &&
+        $("floatingPlacementPreview")?.style.display === "none",
+    };
+  });
+  assert.deepEqual(placementPreviewCoverage, {
+    outShowsInvalid: true,
+    floatingShows: true,
+    hiddenAfterLeave: true,
+  });
+  notes.push(
+    "Selected-building hologram follows the full map area without enabling invalid placement",
+  );
 
   const optimizerAvailability = await page.evaluate(() => {
     showEditableColonyUi("SAT");
