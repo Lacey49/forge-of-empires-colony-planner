@@ -15,6 +15,8 @@
   let pinchActive = false;
   let pinchStartDistance = 0;
   let pinchStartZoom = 1;
+  let mapTouchSelectionBlocked = false;
+  let mapTouchSelectionTimer = 0;
 
   let holdTimer = 0;
   let holdPointerId = null;
@@ -86,13 +88,6 @@
   function clearHoldTimer() {
     if (holdTimer) clearTimeout(holdTimer);
     holdTimer = 0;
-  }
-
-  function isEditableTextTarget(target) {
-    if (!target || !target.closest) return false;
-    return !!target.closest(
-      'input[type="text"], input[type="search"], input[type="email"], input[type="number"], input[type="password"], textarea, [contenteditable="true"]',
-    );
   }
 
   function positionTouchTooltip(x, y) {
@@ -210,37 +205,6 @@
   document.addEventListener("pointerup", endHold, true);
   document.addEventListener("pointercancel", endHold, true);
 
-  document.addEventListener(
-    "selectstart",
-    (e) => {
-      if (!e.target.closest?.(".app") || isEditableTextTarget(e.target)) return;
-      e.preventDefault();
-    },
-    true,
-  );
-
-  document.addEventListener("selectionchange", () => {
-    const selection = document.getSelection?.();
-    if (!selection || selection.rangeCount === 0) return;
-
-    const anchor =
-      selection.anchorNode?.nodeType === 1
-        ? selection.anchorNode
-        : selection.anchorNode?.parentElement;
-    const focus =
-      selection.focusNode?.nodeType === 1
-        ? selection.focusNode
-        : selection.focusNode?.parentElement;
-
-    const insidePlanner =
-      anchor?.closest?.(".app") || focus?.closest?.(".app");
-    if (!insidePlanner) return;
-
-    const editable =
-      isEditableTextTarget(anchor) || isEditableTextTarget(focus);
-    if (!editable) selection.removeAllRanges();
-  });
-
   // Touch has no hover. Stop the desktop board hover from firing on a tap.
   document.addEventListener("pointerover", (e) => {
     if (e.pointerType === "touch" && e.target.closest && e.target.closest("#board")) e.stopPropagation();
@@ -290,8 +254,40 @@
     return Math.hypot(b.x - a.x, b.y - a.y);
   }
 
+  function setMapTouchSelectionBlocked(blocked) {
+    if (mapTouchSelectionTimer) clearTimeout(mapTouchSelectionTimer);
+    mapTouchSelectionTimer = 0;
+
+    if (blocked) {
+      mapTouchSelectionBlocked = true;
+      return;
+    }
+
+    mapTouchSelectionTimer = setTimeout(() => {
+      mapTouchSelectionBlocked = false;
+      mapTouchSelectionTimer = 0;
+    }, 250);
+  }
+
+  document.addEventListener(
+    "selectstart",
+    (e) => {
+      if (mapTouchSelectionBlocked) e.preventDefault();
+    },
+    true,
+  );
+
+  document.addEventListener("selectionchange", () => {
+    if (!mapTouchSelectionBlocked) return;
+    const selection = document.getSelection?.();
+    if (selection?.rangeCount) selection.removeAllRanges();
+  });
+
   if (mapWrap) {
     mapWrap.addEventListener("selectstart", (e) => {
+      e.preventDefault();
+    });
+    mapWrap.addEventListener("contextmenu", (e) => {
       e.preventDefault();
     });
 
@@ -300,6 +296,7 @@
       if (typeof isEditableColonyEra === "function" && !isEditableColonyEra(selectedEra)) return;
 
       e.stopImmediatePropagation();
+      setMapTouchSelectionBlocked(true);
       touchPoints.set(e.pointerId, { x: e.clientX, y: e.clientY });
       try { mapWrap.setPointerCapture(e.pointerId); } catch {}
 
@@ -366,6 +363,7 @@
       if (e.pointerType !== "touch" || !touchPoints.has(e.pointerId)) return;
       e.stopImmediatePropagation();
       touchPoints.delete(e.pointerId);
+      if (touchPoints.size === 0) setMapTouchSelectionBlocked(false);
       try {
         if (mapWrap.hasPointerCapture(e.pointerId)) mapWrap.releasePointerCapture(e.pointerId);
       } catch {}
