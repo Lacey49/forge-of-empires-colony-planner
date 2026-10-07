@@ -253,6 +253,10 @@
   }
 
   if (mapWrap) {
+    mapWrap.addEventListener("selectstart", (e) => {
+      e.preventDefault();
+    });
+
     mapWrap.addEventListener("pointerdown", (e) => {
       if (e.pointerType !== "touch" || e.button !== 0) return;
       if (typeof isEditableColonyEra === "function" && !isEditableColonyEra(selectedEra)) return;

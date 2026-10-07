@@ -4281,3 +4281,17 @@ body[data-density="spacious"] .map-wrap {
     font-size: 9px !important;
   }
 }
+
+
+/* Prevent browser selection/callouts on the interactive map. */
+.map-pane,
+.map-wrap,
+#board,
+#board *,
+.placement-preview,
+.exp-buy-overlay {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent;
+}

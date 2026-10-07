@@ -1159,6 +1159,28 @@ try {
 
   await page.locator('.era-btn[data-era="SAM"]').click();
 
+  const mapSelectionGuard = await page.evaluate(() => {
+    const wrap = document.querySelector(".map-wrap");
+    const board = document.querySelector("#board");
+    const boardStyle = getComputedStyle(board);
+    const event = new Event("selectstart", {
+      bubbles: true,
+      cancelable: true,
+    });
+    const allowed = board.dispatchEvent(event);
+
+    return {
+      userSelect: boardStyle.userSelect,
+      webkitUserSelect: boardStyle.webkitUserSelect,
+      selectionBlocked: !allowed || event.defaultPrevented,
+      wrapTouchAction: getComputedStyle(wrap).touchAction,
+    };
+  });
+  assert.equal(mapSelectionGuard.userSelect, "none");
+  assert.equal(mapSelectionGuard.selectionBlocked, true);
+  assert.equal(mapSelectionGuard.wrapTouchAction, "none");
+  notes.push("Map long-press cannot start browser text selection");
+
   const mobileLongPress = await page.evaluate(async () => {
     const item = document.querySelector(".build-item");
     const rect = item.getBoundingClientRect();
