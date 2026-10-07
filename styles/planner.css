@@ -1537,14 +1537,16 @@ input[type="range"] {
   text-align: left;
 }
 .preset-item:hover {
-  border-color: var(--theme-border);
   background: color-mix(
     in srgb,
     var(--theme-panel) 80%,
     var(--theme-accent-soft) 20%
   );
 }
-.preset-item.active {
+.preset-item.loaded {
+  box-shadow: inset 2px 0 0 var(--theme-border);
+}
+.preset-item.previewing {
   border-color: var(--theme-accent);
   background: color-mix(
     in srgb,
