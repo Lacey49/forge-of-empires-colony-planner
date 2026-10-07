@@ -173,9 +173,26 @@ try {
       eraChecks,
       sashText: $("lifeSupportPercent")?.textContent,
       sashExpectedText: formatLifeSupportPercent(sashStats.percent),
-      sashGreen: $("lifeSupportPercent")?.classList.contains(
-        "life-support-good",
+      sashTierClass: [...$("lifeSupportPercent")?.classList || []].find(
+        (name) => name.startsWith("life-support-"),
       ),
+      sashColor: getComputedStyle($("lifeSupportPercent")).color,
+      tierSamples: {
+        red: lifeSupportTier(99.9),
+        orangeStart: lifeSupportTier(100),
+        orangeEnd: lifeSupportTier(124.9),
+        green: lifeSupportTier(125),
+      },
+      tierColors: (() => {
+        const el = $("lifeSupportPercent");
+        const colors = {};
+        for (const tier of ["red", "orange", "green"]) {
+          el.className = `life-support-${tier}`;
+          colors[tier] = getComputedStyle(el).color;
+        }
+        el.className = "life-support-green";
+        return colors;
+      })(),
       sashPercent: sashStats.percent,
     };
   });
@@ -200,8 +217,32 @@ try {
     lifeSupportSummary.sashExpectedText,
   );
   assert.ok(lifeSupportSummary.sashPercent >= 125);
-  assert.equal(lifeSupportSummary.sashGreen, true);
-  notes.push("Life Support percentage and 125% green state checked in all eras");
+  assert.equal(lifeSupportSummary.sashTierClass, "life-support-green");
+  assert.deepEqual(lifeSupportSummary.tierSamples, {
+    red: "red",
+    orangeStart: "orange",
+    orangeEnd: "orange",
+    green: "green",
+  });
+  assert.notEqual(
+    lifeSupportSummary.tierColors.red,
+    lifeSupportSummary.tierColors.orange,
+  );
+  assert.notEqual(
+    lifeSupportSummary.tierColors.orange,
+    lifeSupportSummary.tierColors.green,
+  );
+  assert.notEqual(
+    lifeSupportSummary.tierColors.red,
+    lifeSupportSummary.tierColors.green,
+  );
+  assert.equal(
+    lifeSupportSummary.sashColor,
+    lifeSupportSummary.tierColors.green,
+  );
+  notes.push(
+    "Life Support red, orange, and green tiers checked, including live 125%+ styling",
+  );
 
   const optimizerAvailability = await page.evaluate(() => {
     showEditableColonyUi("SAT");

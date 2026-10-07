@@ -1816,8 +1816,14 @@ input[type="range"] {
   border-top: 1px solid #44362b;
   border-right: 0;
 }
-.summary-footer-stat b.life-support-good {
-  color: #7bd66f;
+.summary-footer-stat b.life-support-red {
+  color: #e4665a !important;
+}
+.summary-footer-stat b.life-support-orange {
+  color: #e2a447 !important;
+}
+.summary-footer-stat b.life-support-green {
+  color: #7bd66f !important;
 }
 
 .build-item {

@@ -2415,6 +2415,13 @@ function formatLifeSupportPercent(percent) {
   return `${Number.isInteger(value) ? value.toFixed(0) : value.toFixed(1)}%`;
 }
 
+function lifeSupportTier(percent) {
+  const value = Math.max(0, Number(percent) || 0);
+  if (value >= 125) return "green";
+  if (value >= 100) return "orange";
+  return "red";
+}
+
 function updateStats() {
   const rows = $("compactBuildingRows");
   if (!rows) return;
@@ -2533,10 +2540,13 @@ function updateStats() {
     lifeSupportPercent.textContent = formatLifeSupportPercent(
       lifeSupportStats.percent,
     );
-    lifeSupportPercent.classList.toggle(
-      "life-support-good",
-      lifeSupportStats.green,
+    const tier = lifeSupportTier(lifeSupportStats.percent);
+    lifeSupportPercent.classList.remove(
+      "life-support-red",
+      "life-support-orange",
+      "life-support-green",
     );
+    lifeSupportPercent.classList.add(`life-support-${tier}`);
   }
 
   const maxExp = activeExpansions().length;
