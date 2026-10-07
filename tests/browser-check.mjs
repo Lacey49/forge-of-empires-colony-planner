@@ -1181,15 +1181,36 @@ try {
   assert.equal(mapSelectionGuard.wrapTouchAction, "none");
   notes.push("Map long-press cannot start browser text selection");
 
-  const plannerSelectionGuard = await page.evaluate(() => {
+  const plannerSelectionGuard = await page.evaluate(async () => {
     const check = $("validateBtn");
-    const style = getComputedStyle(check);
+    const stat = document.querySelector(".summary-footer-stat");
+    const wrap = document.querySelector(".map-wrap");
+    const rect = wrap.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
 
-    const selectEvent = new Event("selectstart", {
+    const normalSelect = new Event("selectstart", {
       bubbles: true,
       cancelable: true,
     });
-    const allowed = check.dispatchEvent(selectEvent);
+    const normalAllowed = check.dispatchEvent(normalSelect);
+
+    wrap.dispatchEvent(
+      new PointerEvent("pointerdown", {
+        bubbles: true,
+        pointerType: "touch",
+        pointerId: 77,
+        button: 0,
+        clientX: x,
+        clientY: y,
+      }),
+    );
+
+    const duringMapTouch = new Event("selectstart", {
+      bubbles: true,
+      cancelable: true,
+    });
+    const touchAllowed = check.dispatchEvent(duringMapTouch);
 
     const range = document.createRange();
     range.selectNodeContents(check);
@@ -1197,17 +1218,42 @@ try {
     selection.removeAllRanges();
     selection.addRange(range);
     document.dispatchEvent(new Event("selectionchange"));
+    const clearedDuringMapTouch = selection.rangeCount === 0;
+
+    wrap.dispatchEvent(
+      new PointerEvent("pointerup", {
+        bubbles: true,
+        pointerType: "touch",
+        pointerId: 77,
+        button: 0,
+        clientX: x,
+        clientY: y,
+      }),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 280));
+
+    const afterTouch = new Event("selectstart", {
+      bubbles: true,
+      cancelable: true,
+    });
+    const afterAllowed = check.dispatchEvent(afterTouch);
 
     return {
-      checkUserSelect: style.userSelect,
-      selectBlocked: !allowed || selectEvent.defaultPrevented,
-      remainingRanges: selection.rangeCount,
+      checkUserSelect: getComputedStyle(check).userSelect,
+      statUserSelect: getComputedStyle(stat).userSelect,
+      normalAllowed,
+      touchBlocked: !touchAllowed || duringMapTouch.defaultPrevented,
+      clearedDuringMapTouch,
+      afterAllowed,
     };
   });
-  assert.equal(plannerSelectionGuard.checkUserSelect, "none");
-  assert.equal(plannerSelectionGuard.selectBlocked, true);
-  assert.equal(plannerSelectionGuard.remainingRanges, 0);
-  notes.push("Planner UI clears accidental browser text selection");
+  assert.notEqual(plannerSelectionGuard.checkUserSelect, "none");
+  assert.notEqual(plannerSelectionGuard.statUserSelect, "none");
+  assert.equal(plannerSelectionGuard.normalAllowed, true);
+  assert.equal(plannerSelectionGuard.touchBlocked, true);
+  assert.equal(plannerSelectionGuard.clearedDuringMapTouch, true);
+  assert.equal(plannerSelectionGuard.afterAllowed, true);
+  notes.push("Map touch blocks accidental selection without disabling copyable planner text");
 
   const mobileLongPress = await page.evaluate(async () => {
     const item = document.querySelector(".build-item");
