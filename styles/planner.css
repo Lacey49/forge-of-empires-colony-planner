@@ -3862,11 +3862,11 @@ body[data-density="spacious"] .map-wrap {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
   .side.mobile-open { transform: translateY(0); }
-  .mobile-side-toggle {
+  .side > .mobile-side-toggle {
     width: 100%;
     height: 46px;
     min-height: 46px;
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: space-between;
     padding: 0 14px;
