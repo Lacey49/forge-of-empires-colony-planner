@@ -338,12 +338,18 @@ try {
     const lifeStyle = getComputedStyle(
       document.querySelector(".life-support-footer"),
     );
+    const rects = stats.map((stat) => stat.getBoundingClientRect());
+    const sameRow = rects.every(
+      (rect) => Math.abs(rect.top - rects[0].top) < 0.5,
+    );
+    const equalWidths = rects.every(
+      (rect) => Math.abs(rect.width - rects[0].width) < 0.5,
+    );
     return {
       statCount: stats.length,
       labels: stats.map((stat) => stat.querySelector("span")?.textContent),
-      trackCount: getComputedStyle(footer).gridTemplateColumns
-        .split(" ")
-        .filter(Boolean).length,
+      sameRow,
+      equalWidths,
       emptyFlexDirection: emptyStyle.flexDirection,
       lifeFlexDirection: lifeStyle.flexDirection,
       emptyFontSize: emptyStyle.fontSize,
@@ -353,13 +359,14 @@ try {
   assert.deepEqual(summaryLayout, {
     statCount: 4,
     labels: ["Empty tiles:", "Colonists:", "Life Support:", "Credit output (4h):"],
-    trackCount: 4,
+    sameRow: true,
+    equalWidths: true,
     emptyFlexDirection: "column",
     lifeFlexDirection: "column",
     emptyFontSize: "10px",
     lifeFontSize: "10px",
   });
-  notes.push("Summary footer keeps Credit output on the far right");
+  notes.push("Summary footer keeps four equal tiles in one row with Credit output on the far right");
 
   const placementPreviewCoverage = await page.evaluate(() => {
     showEditableColonyUi("SAM");
