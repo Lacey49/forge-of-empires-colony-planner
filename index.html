@@ -199,7 +199,7 @@
   Forge of Empires Colony Planner by Lacey49.
   Fan-made project. Not affiliated with or endorsed by InnoGames.
 -->
-    <link rel="stylesheet" href="./styles/planner.css?v=107" />
+    <link rel="stylesheet" href="./styles/planner.css?v=108" />
   </head>
   <body aria-busy="true">
     <div class="app">
@@ -772,6 +772,16 @@
           </section>
 
           <aside class="side">
+            <button
+              id="mobileSideToggle"
+              class="mobile-side-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="compactSummary"
+            >
+              <span>Buildings & stats</span>
+              <span class="mobile-side-chevron" aria-hidden="true">▲</span>
+            </button>
             <div class="compact-summary" id="compactSummary">
               <div class="compact-table-head">
                 <span>Building</span>
@@ -1089,7 +1099,8 @@
 
     <script defer src="./data/buildings.js?v=102"></script>
     <script defer src="./data/layouts.js?v=112"></script>
-    <script defer src="./app/planner.js?v=117"></script>
+    <script defer src="./app/planner.js?v=118"></script>
+    <script defer src="./app/mobile.js?v=100"></script>
     <script defer src="./app/backups.js?v=100"></script>
     <script defer src="./data/titan-land.js?v=100"></script>
     <script defer src="./data/titan-save-migration.js?v=100"></script>

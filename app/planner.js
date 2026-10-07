@@ -3376,7 +3376,8 @@ if (mapWrap) {
       if (
         !isEditableColonyEra(selectedEra) ||
         mode !== "erase" ||
-        e.button !== 0
+        e.button !== 0 ||
+        e.pointerType === "touch"
       )
         return;
       const hit = boardCellFromPointer(e);
