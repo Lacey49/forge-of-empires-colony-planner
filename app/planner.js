@@ -1953,33 +1953,31 @@ function showFloatingPlacementPreview(e, hit = null) {
     return;
   }
 
-  const hasGridHit =
-    hit && Number.isInteger(hit.r) && Number.isInteger(hit.c);
-  const spec = hasGridHit ? previewSpec(hit.r, hit.c) : previewSpec();
-  if (!spec) {
-    preview.style.display = "none";
-    return;
-  }
-
   const wrapRect = wrap.getBoundingClientRect();
   const boardRect = board.getBoundingClientRect();
   const cellWidth = boardRect.width > 0 ? boardRect.width / 28 : 24;
   const cellHeight = boardRect.height > 0 ? boardRect.height / 28 : 24;
 
-  let x;
-  let y;
-  let invalid = true;
+  // Keep the hologram locked to the board's grid spacing everywhere in the
+  // map area, even when the pointer is outside the 28×28 board itself.
+  const snappedC = Math.floor((e.clientX - boardRect.left) / cellWidth);
+  const snappedR = Math.floor((e.clientY - boardRect.top) / cellHeight);
+  const insideBoard =
+    snappedR >= 0 && snappedR < 28 && snappedC >= 0 && snappedC < 28;
+  const gridR = insideBoard && hit ? hit.r : snappedR;
+  const gridC = insideBoard && hit ? hit.c : snappedC;
 
-  if (hasGridHit) {
-    const previewR = Number.isInteger(spec.r) ? spec.r : hit.r;
-    const previewC = Number.isInteger(spec.c) ? spec.c : hit.c;
-    x = boardRect.left - wrapRect.left + previewC * cellWidth;
-    y = boardRect.top - wrapRect.top + previewR * cellHeight;
-    invalid = !previewFits(hit.r, hit.c, spec);
-  } else {
-    x = e.clientX - wrapRect.left - cellWidth / 2;
-    y = e.clientY - wrapRect.top - cellHeight / 2;
+  const spec = insideBoard ? previewSpec(gridR, gridC) : previewSpec();
+  if (!spec) {
+    preview.style.display = "none";
+    return;
   }
+
+  const previewR = Number.isInteger(spec.r) ? spec.r : gridR;
+  const previewC = Number.isInteger(spec.c) ? spec.c : gridC;
+  const x = boardRect.left - wrapRect.left + previewC * cellWidth;
+  const y = boardRect.top - wrapRect.top + previewR * cellHeight;
+  const invalid = insideBoard ? !previewFits(gridR, gridC, spec) : true;
 
   stylePlacementPreview(preview, spec, invalid, true);
   preview.style.setProperty("--floating-preview-x", `${x}px`);

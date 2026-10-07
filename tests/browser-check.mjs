@@ -325,12 +325,31 @@ try {
       floating?.style.display === "block" &&
       floating.classList.contains("invalid-preview");
 
+    const cellWidth = boardRect.width / 28;
+    const cellHeight = boardRect.height / 28;
+    const expectedC = Math.floor((outsideX - boardRect.left) / cellWidth);
+    const expectedR = Math.floor((outsideY - boardRect.top) / cellHeight);
+    const expectedX =
+      boardRect.left - wrapRect.left + expectedC * cellWidth;
+    const expectedY =
+      boardRect.top - wrapRect.top + expectedR * cellHeight;
+    const actualX = parseFloat(
+      floating.style.getPropertyValue("--floating-preview-x"),
+    );
+    const actualY = parseFloat(
+      floating.style.getPropertyValue("--floating-preview-y"),
+    );
+    const outsideSnapsToGrid =
+      Math.abs(actualX - expectedX) < 0.01 &&
+      Math.abs(actualY - expectedY) < 0.01;
+
     wrap.dispatchEvent(new PointerEvent("pointerleave", { bubbles: false }));
 
     return {
       outShowsInvalid,
       gridPreviewHidden,
       floatingShows,
+      outsideSnapsToGrid,
       hiddenAfterLeave:
         $("placementPreview").style.display === "none" &&
         $("floatingPlacementPreview")?.style.display === "none",
@@ -340,10 +359,11 @@ try {
     outShowsInvalid: true,
     gridPreviewHidden: true,
     floatingShows: true,
+    outsideSnapsToGrid: true,
     hiddenAfterLeave: true,
   });
   notes.push(
-    "Selected-building hologram stays in the top map overlay across grid and background",
+    "Selected-building hologram stays in the top map overlay and snaps to the grid everywhere",
   );
 
   const optimizerAvailability = await page.evaluate(() => {
