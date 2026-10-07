@@ -298,10 +298,11 @@ try {
       }),
     );
 
-    const gridPreview = $("placementPreview");
+    const floatingOnGrid = $("floatingPlacementPreview");
     const outShowsInvalid =
-      gridPreview.style.display === "block" &&
-      gridPreview.classList.contains("invalid-preview");
+      floatingOnGrid?.style.display === "block" &&
+      floatingOnGrid.classList.contains("invalid-preview");
+    const gridPreviewHidden = $("placementPreview").style.display === "none";
 
     const outsideX =
       boardRect.left - wrapRect.left > 2
@@ -328,6 +329,7 @@ try {
 
     return {
       outShowsInvalid,
+      gridPreviewHidden,
       floatingShows,
       hiddenAfterLeave:
         $("placementPreview").style.display === "none" &&
@@ -336,11 +338,12 @@ try {
   });
   assert.deepEqual(placementPreviewCoverage, {
     outShowsInvalid: true,
+    gridPreviewHidden: true,
     floatingShows: true,
     hiddenAfterLeave: true,
   });
   notes.push(
-    "Selected-building hologram follows the full map area without enabling invalid placement",
+    "Selected-building hologram stays in the top map overlay across grid and background",
   );
 
   const optimizerAvailability = await page.evaluate(() => {
