@@ -140,6 +140,62 @@ try {
   assert.deepEqual(exactSashPresets.secondHub, [6, 4]);
   notes.push("Exact SASH preset names and mixed Life Support counts checked");
 
+  const pizzaPresets = await page.evaluate(() => {
+    showEditableColonyUi("SASH");
+    const catalog = getPresetCatalog();
+    const start = catalog.find(
+      (item) => item.id === "builtin:sash-officers-pizza",
+    );
+    const all = catalog.find(
+      (item) => item.id === "builtin:sash-officers-pizza-all",
+    );
+
+    const countTypes = (state) => {
+      const counts = {};
+      for (const building of state?.buildings || [])
+        counts[building.type] = (counts[building.type] || 0) + 1;
+      return counts;
+    };
+
+    const signature = (building) =>
+      `${building.type}:${building.r},${building.c}`;
+    const allBuildings = new Set((all?.state?.buildings || []).map(signature));
+
+    return {
+      startTitle: start?.name,
+      allTitle: all?.name,
+      startCounts: countTypes(start?.state),
+      allCounts: countTypes(all?.state),
+      startEnabled: start?.state?.enabled?.length ?? -1,
+      allEnabled: all?.state?.enabled?.length ?? -1,
+      startGreen: start ? sashPairStats(start.state, "oq-sesp").green : false,
+      allGreen: all ? sashPairStats(all.state, "oq-sesp").green : false,
+      allExtendsStart: (start?.state?.buildings || []).every((building) =>
+        allBuildings.has(signature(building)),
+      ),
+    };
+  });
+  assert.deepEqual(pizzaPresets, {
+    startTitle: "Officers Quarters (9) + Sit'n'Eat SpacePizza (5)",
+    allTitle: "Officers Quarters (24) + Sit'n'Eat SpacePizza (13)",
+    startCounts: {
+      officersQuarters: 9,
+      sitEatSpacePizza: 5,
+    },
+    allCounts: {
+      officersQuarters: 24,
+      sitEatSpacePizza: 13,
+    },
+    startEnabled: 0,
+    allEnabled: 23,
+    startGreen: true,
+    allGreen: true,
+    allExtendsStart: true,
+  });
+  notes.push(
+    "Starting and all-expansion Officers + SpacePizza presets are green and share the same base layout",
+  );
+
   const lifeSupportSummary = await page.evaluate(async () => {
     const eraChecks = {};
     for (const [era, data] of Object.entries(ERA_DATA)) {

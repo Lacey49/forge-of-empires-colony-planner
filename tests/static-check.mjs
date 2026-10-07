@@ -510,6 +510,24 @@ function testSashGeometryAndPresets() {
   const officerAllFillers = vm.runInNewContext(
     `(${extractConst(layouts, "SASH_OFFICER_ALL_PRESET_FILLERS")})`,
   );
+  const officerPizzaHub = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_PRESET_HUB")})`,
+  );
+  const officerPizza = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_PRESET_BUILDINGS")})`,
+  );
+  const officerPizzaSupport = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT")})`,
+  );
+  const officerPizzaAllHub = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_ALL_PRESET_HUB")})`,
+  );
+  const officerPizzaAll = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_ALL_PRESET_BUILDINGS")})`,
+  );
+  const officerPizzaAllSupport = vm.runInNewContext(
+    `(${extractConst(layouts, "SASH_OFFICER_PIZZA_ALL_PRESET_LIFE_SUPPORT")})`,
+  );
 
   check(
     simplePreset.length === 23 && simpleLifeSupport.length === 12,
@@ -604,6 +622,64 @@ function testSashGeometryAndPresets() {
   check(
     officerAll.length === 37 && officerAllFillers.length === 5,
     "SASH all-expansion Officers preset should contain 37 Officers Quarters and 5 Simple Crew fillers",
+  );
+
+  const officersDef = parsedEras.SASH.residential.find(
+    (def) => def.key === "officersQuarters",
+  );
+  const pizzaDef = parsedEras.SASH.lifeSupport.find(
+    (def) => def.key === "sitEatSpacePizza",
+  );
+
+  check(
+    JSON.stringify(officerPizzaHub) === JSON.stringify([0, 4]) &&
+      officerPizza.length === 9 &&
+      officerPizzaSupport.length === 5,
+    "SASH starting Officers + SpacePizza preset should contain 9 Officers Quarters and 5 SpacePizza buildings",
+  );
+  check(
+    JSON.stringify(officerPizzaAllHub) === JSON.stringify([0, 4]) &&
+      officerPizzaAll.length === 24 &&
+      officerPizzaAllSupport.length === 13,
+    "SASH all-expansion Officers + SpacePizza preset should contain 24 Officers Quarters and 13 SpacePizza buildings",
+  );
+
+  if (officersDef && pizzaDef) {
+    check(
+      officerPizzaSupport.length * Number(pizzaDef.lifeSupport) * 4 >=
+        officerPizza.length * Number(officersDef.colonists) * 5,
+      "SASH starting Officers + SpacePizza preset fell below 125% Life Support",
+    );
+    check(
+      officerPizzaAllSupport.length * Number(pizzaDef.lifeSupport) * 4 >=
+        officerPizzaAll.length * Number(officersDef.colonists) * 5,
+      "SASH all-expansion Officers + SpacePizza preset fell below 125% Life Support",
+    );
+  }
+
+  const pizzaAllOq = new Set(officerPizzaAll.map(([r, c]) => `${r},${c}`));
+  const pizzaAllSupport = new Set(
+    officerPizzaAllSupport.map(([r, c]) => `${r},${c}`),
+  );
+  check(
+    officerPizza.every(([r, c]) => pizzaAllOq.has(`${r},${c}`)) &&
+      officerPizzaSupport.every(([r, c]) =>
+        pizzaAllSupport.has(`${r},${c}`),
+      ),
+    "SASH all-expansion Officers + SpacePizza preset should extend the starting layout",
+  );
+
+  check(
+    plannerSource.includes(
+      'name: "Officers Quarters (9) + Sit\'n\'Eat SpacePizza (5)"',
+    ),
+    "Exact SASH starting Officers + SpacePizza preset title changed",
+  );
+  check(
+    plannerSource.includes(
+      'name: "Officers Quarters (24) + Sit\'n\'Eat SpacePizza (13)"',
+    ),
+    "Exact SASH all-expansion Officers + SpacePizza preset title changed",
   );
 
   check(
