@@ -1779,7 +1779,7 @@ input[type="range"] {
 .compact-summary-footer {
   min-height: 48px !important;
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0 !important;
   padding: 0 !important;
   align-items: stretch !important;
@@ -1804,17 +1804,6 @@ input[type="range"] {
   color: #f0d2a4;
   font-size: 13px;
   font-weight: 800;
-}
-.credits-footer {
-  border-right: 0;
-}
-.life-support-footer {
-  grid-column: 1 / -1;
-  min-height: 28px;
-  flex-direction: row;
-  gap: 6px;
-  border-top: 1px solid #44362b;
-  border-right: 0;
 }
 .summary-footer-stat b.life-support-red {
   color: #e4665a !important;
