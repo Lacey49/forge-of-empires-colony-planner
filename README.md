@@ -9,8 +9,6 @@ Plan your Space Age colony before rebuilding it in-game.
 [![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen?style=for-the-badge)](https://lacey49.github.io/forge-of-empires-colony-planner/)
 [![Current Build](https://img.shields.io/badge/Current%20Build-v0.100-c47a21?style=for-the-badge)](https://github.com/Lacey49/forge-of-empires-colony-planner)
 
-### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
-
 </div>
 
 ---
