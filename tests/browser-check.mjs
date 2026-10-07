@@ -1114,8 +1114,8 @@ try {
     true,
   );
 
+  await page.locator("#mobileSideToggle").click();
   const mobileBoardVisible = await page.evaluate(async () => {
-    setDrawer(false);
     panX = 5000;
     panY = 5000;
     applyViewTransform();
