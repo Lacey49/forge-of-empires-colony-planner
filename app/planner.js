@@ -1881,6 +1881,18 @@ function previewFits(r, c, spec) {
   );
 }
 
+function stylePlacementPreview(preview, spec, invalid, floating = false) {
+  preview.className = floating
+    ? "placement-preview floating-placement-preview"
+    : "placement-preview";
+  if (spec.kind === "road") preview.classList.add("road-preview");
+  if (spec.kind === "hub") preview.classList.add("hub-preview");
+  if (spec.kind === "goods") preview.classList.add("goods-preview");
+  if (spec.kind === "lifeSupport")
+    preview.classList.add("life-support-preview");
+  if (invalid) preview.classList.add("invalid-preview");
+}
+
 function showPlacementPreview(r, c) {
   const preview = $("placementPreview");
   if (!preview) return;
@@ -1899,13 +1911,7 @@ function showPlacementPreview(r, c) {
     return;
   }
 
-  preview.className = "placement-preview";
-  if (spec.kind === "road") preview.classList.add("road-preview");
-  if (spec.kind === "hub") preview.classList.add("hub-preview");
-  if (spec.kind === "goods") preview.classList.add("goods-preview");
-  if (spec.kind === "lifeSupport")
-    preview.classList.add("life-support-preview");
-  if (!previewFits(r, c, spec)) preview.classList.add("invalid-preview");
+  stylePlacementPreview(preview, spec, !previewFits(r, c, spec));
 
   const previewR = Number.isInteger(spec.r) ? spec.r : r;
   const previewC = Number.isInteger(spec.c) ? spec.c : c;
@@ -1915,6 +1921,67 @@ function showPlacementPreview(r, c) {
 
 function hidePlacementPreview() {
   const preview = $("placementPreview");
+  if (preview) preview.style.display = "none";
+}
+
+function floatingPlacementPreview() {
+  let preview = $("floatingPlacementPreview");
+  if (preview) return preview;
+
+  const wrap = document.querySelector(".map-wrap");
+  if (!wrap) return null;
+
+  preview = document.createElement("div");
+  preview.id = "floatingPlacementPreview";
+  preview.className = "placement-preview floating-placement-preview";
+  wrap.appendChild(preview);
+  return preview;
+}
+
+function showFloatingPlacementPreview(e) {
+  const preview = floatingPlacementPreview();
+  const wrap = document.querySelector(".map-wrap");
+  const board = $("board");
+  if (!preview || !wrap || !board || !e) return;
+
+  if (
+    !isEditableColonyEra(selectedEra) ||
+    mode === "erase" ||
+    (mode === "move" && !movingItem)
+  ) {
+    preview.style.display = "none";
+    return;
+  }
+
+  const spec = previewSpec();
+  if (!spec) {
+    preview.style.display = "none";
+    return;
+  }
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+  const cellWidth = boardRect.width > 0 ? boardRect.width / 28 : 24;
+  const cellHeight = boardRect.height > 0 ? boardRect.height / 28 : 24;
+  const x = e.clientX - wrapRect.left - cellWidth / 2;
+  const y = e.clientY - wrapRect.top - cellHeight / 2;
+
+  stylePlacementPreview(preview, spec, true, true);
+  preview.style.setProperty("--floating-preview-x", `${x}px`);
+  preview.style.setProperty("--floating-preview-y", `${y}px`);
+  preview.style.setProperty(
+    "--floating-preview-w",
+    `${Math.max(1, spec.w * cellWidth)}px`,
+  );
+  preview.style.setProperty(
+    "--floating-preview-h",
+    `${Math.max(1, spec.h * cellHeight)}px`,
+  );
+  preview.style.display = "block";
+}
+
+function hideFloatingPlacementPreview() {
+  const preview = $("floatingPlacementPreview");
   if (preview) preview.style.display = "none";
 }
 
@@ -2027,7 +2094,6 @@ function ensureBoardDelegatedEvents() {
     if (grid[pos.r][pos.c] === "out") return;
     const label = placedThingTooltip(pos.r, pos.c);
     if (label) showHoverTooltip(label, e);
-    if (!panMoved) showPlacementPreview(pos.r, pos.c);
   });
 
   board.addEventListener("pointermove", (e) => {
@@ -2046,7 +2112,6 @@ function ensureBoardDelegatedEvents() {
     }
 
     hideHoverTooltip();
-    if (!panMoved) hidePlacementPreview();
   });
 
   board.addEventListener("click", (e) => {
@@ -3101,6 +3166,7 @@ function setMode(next, renderNow = true) {
 
   updateBuyHover(null);
   hidePlacementPreview();
+  hideFloatingPlacementPreview();
   renderBuildMenu();
 
   if (renderNow && isEditableColonyEra(selectedEra)) render();
@@ -3295,6 +3361,7 @@ if (mapWrap) {
         panMoved = true;
         mapWrap.classList.add("is-panning");
         hidePlacementPreview();
+        hideFloatingPlacementPreview();
         hideHoverTooltip();
         mapWrap.setPointerCapture?.(e.pointerId);
       }
@@ -3305,6 +3372,17 @@ if (mapWrap) {
         scheduleViewTransform();
       }
       return;
+    }
+
+    if (panPointerId != null || panMoved) return;
+
+    const hit = boardCellFromPointer(e);
+    if (hit) {
+      hideFloatingPlacementPreview();
+      showPlacementPreview(hit.r, hit.c);
+    } else {
+      hidePlacementPreview();
+      showFloatingPlacementPreview(e);
     }
   });
 
@@ -3326,6 +3404,8 @@ if (mapWrap) {
   mapWrap.addEventListener("pointercancel", stopPan);
   mapWrap.addEventListener("pointerleave", (e) => {
     updateBuyHover(null);
+    hidePlacementPreview();
+    hideFloatingPlacementPreview();
   });
 }
 
