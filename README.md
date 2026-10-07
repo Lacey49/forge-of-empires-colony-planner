@@ -17,7 +17,7 @@ Plan your Space Age colony before rebuilding it in-game.
 
 I made this tool because rebuilding a colony only to realize one more building could've fit with one less path gets annoying fast.
 
-Pick your era, select the expansions you have, and build the layout before changing anything in-game. You can make your own layout, load a preset, or use the **Optimize** button to have an algorithm find the maximum amount of credits per tile.
+Pick your era, select the expansions you have, and build the layout before changing anything in-game. You can make your own layout, load a preset, or use the **Optimize** button to have an algorithm find the maximum amount of credits per tile. Now sort of usable on mobile!
 
 The planner supports:
 
