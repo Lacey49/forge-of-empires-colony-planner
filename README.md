@@ -4,11 +4,10 @@
 
 # Forge of Empires Colony Planner
 
-Plan Space Age colonies before rebuilding them in-game.
+Plan your Space Age colony before rebuilding it in-game.
 
 [![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen?style=for-the-badge)](https://lacey49.github.io/forge-of-empires-colony-planner/)
 [![Current Build](https://img.shields.io/badge/Current%20Build-v0.100-c47a21?style=for-the-badge)](https://github.com/Lacey49/forge-of-empires-colony-planner)
-[![Release Checks](https://img.shields.io/github/actions/workflow/status/Lacey49/forge-of-empires-colony-planner/release-check.yml?branch=main&label=Release%20Checks&style=for-the-badge)](https://github.com/Lacey49/forge-of-empires-colony-planner/actions/workflows/release-check.yml)
 
 ### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
 
@@ -18,11 +17,11 @@ Plan Space Age colonies before rebuilding them in-game.
 
 ## What is it?
 
-I made this because rebuilding a colony just to find out the layout does not fit gets old fast.
+I made this because rebuilding a colony just to realize the layout doesn't fit gets old fast.
 
-Pick your era, turn on the expansions you have, and lay everything out before changing anything in-game. You can build the colony yourself, load a preset, or use **Optimize** to rearrange it for more credits.
+Pick your era, select the expansions you have, and build the layout before changing anything in-game. You can make your own layout, load a preset, or use **Optimize** to try to get more credits out of the space you have.
 
-Nothing connects to your FoE account. Layouts are saved in your browser.
+The planner supports:
 
 | Era | Colony |
 | --- | --- |
@@ -33,67 +32,64 @@ Nothing connects to your FoE account. Layouts are saved in your browser.
 | **SAT** | Space Age Titan |
 | **SASH** | Space Age Space Hub |
 
-## Features
-
-- Free Build
-- Built-in and custom presets
-- Credit optimizer
-- Expansion selection
-- Move, delete, Undo, zoom, and pan
-- Layout checks
-- Local saves, backups, and recovery
-
 ## Getting started
 
 1. Pick your era.
-2. Turn on the expansions you own.
-3. Build the colony yourself or load a preset.
-4. Use **Optimize** if you want the planner to rearrange the colony for more credits.
+2. Select the expansions you own.
+3. Build your colony or load a preset.
+4. Use **Optimize** if you want to try for more credits.
 
-Your Free Build layout is kept separately when you preview a preset. Use **Save** if you want to keep a layout as a custom preset.
+Your Free Build layout is kept separate while you look through presets, so you can go back to it without losing what you were working on.
+
+If you make a layout you want to keep, save it as a custom preset.
 
 ## Controls
 
 | What you want to do | How |
 | --- | --- |
 | Place a building | Pick it from the menu, then click the map |
-| Pick from the current building category | Press `1` through `9` |
-| Move a building or the Town Hall | Press `M`, then pick it up and place it |
-| Delete a building or path | Right-click it, or press `Delete` to turn delete mode on |
+| Pick a building with the keyboard | Press `1` through `9` |
+| Move a building or Town Hall | Press `M`, then pick it up and place it |
+| Delete something | Right-click it, or press `Delete` for delete mode |
 | Undo | `Ctrl + Z` |
-| Move around the map | Drag, or use the arrow keys |
+| Move around the map | Drag or use the arrow keys |
 | Zoom | Mouse wheel |
-| Use the grid with a keyboard | Tab to the grid, move with the arrow keys, and press Enter to place or select |
+| Use the grid with a keyboard | Tab to the grid, use the arrow keys, and press Enter |
 
-Move and Undo can be rebound in Settings.
+Move and Undo can be changed in **Settings**.
 
 ## Optimize
 
-Optimize rearranges the colony to try to earn more credits. It can move the Town Hall, use older buildings when they fit better, and add paths where they are needed. It only shows a result if it earns more credits than your current layout.
+**Optimize** tries to rearrange your colony for more credit production.
 
-For Space Hub, Optimize also keeps Life Support at **125% or higher**.
+It can move buildings, move the Town Hall, and add paths where they are needed. It only gives you a result when it finds something better than the layout you started with.
 
-In the other eras, Optimize only cares about credits. If it would remove a goods, population, or Life Support building, the planner warns you before you apply the result.
+For **Space Hub**, it also keeps Life Support at **125% or higher**.
 
-Optimize can find better layouts, but it cannot guarantee that the result is the absolute best possible layout.
+In the other eras, Optimize focuses on credits. If the new layout would remove something important, the planner warns you before you apply it.
 
-## Backups
+Optimize can usually find a better layout, but there may still be an even better one out there.
 
-Layouts are saved in your browser on that device. Use **Settings → Backups → Download** if you want a copy you can keep or move elsewhere.
+## Saving and backups
 
-Backups include layouts and presets, but not your theme or shortcuts.
+Your layouts are saved automatically in your browser on that device.
+
+If you want a backup, or want to move your layouts to another device, go to:
+
+**Settings → Backups → Download**
+
+Backups include your layouts and custom presets.
 
 ## Current build: v0.100
 
-This is the last pre-1.0 build while the final presets, UI changes, and release checks are being finished.
+v0.100 is the final pre-1.0 build while the last presets and UI changes are being finished.
 
 [![Read the Changes](https://img.shields.io/badge/Read-the%20Changes-6f42c1)](./docs/changes.md)
-[![Code Guide](https://img.shields.io/badge/Code-Folder%20Guide-2475ca)](./docs/working-on-the-planner.md)
 [![Report a Bug](https://img.shields.io/badge/Report-a%20Bug-d73a49)](https://github.com/Lacey49/forge-of-empires-colony-planner/issues)
 
 ## Found something broken?
 
-[Open an issue](https://github.com/Lacey49/forge-of-empires-colony-planner/issues) and tell me the era and what went wrong. A screenshot or backup helps.
+[Open an issue](https://github.com/Lacey49/forge-of-empires-colony-planner/issues) and tell me what happened. The era you were using and a screenshot are usually enough to get started.
 
 ## Support the planner
 
