@@ -419,14 +419,20 @@ try {
       floating?.style.display === "block" &&
       floating.classList.contains("invalid-preview");
 
-    const cellWidth = boardRect.width / 28;
-    const cellHeight = boardRect.height / 28;
-    const expectedC = Math.floor((outsideX - boardRect.left) / cellWidth);
-    const expectedR = Math.floor((outsideY - boardRect.top) / cellHeight);
+    const first = board.querySelector('.cell[data-r="0"][data-c="0"]');
+    const right = board.querySelector('.cell[data-r="0"][data-c="1"]');
+    const down = board.querySelector('.cell[data-r="1"][data-c="0"]');
+    const firstRect = first.getBoundingClientRect();
+    const rightRect = right.getBoundingClientRect();
+    const downRect = down.getBoundingClientRect();
+    const stepX = rightRect.left - firstRect.left;
+    const stepY = downRect.top - firstRect.top;
+    const expectedC = Math.floor((outsideX - firstRect.left) / stepX);
+    const expectedR = Math.floor((outsideY - firstRect.top) / stepY);
     const expectedX =
-      boardRect.left - wrapRect.left + expectedC * cellWidth;
+      firstRect.left - wrapRect.left + expectedC * stepX;
     const expectedY =
-      boardRect.top - wrapRect.top + expectedR * cellHeight;
+      firstRect.top - wrapRect.top + expectedR * stepY;
     const actualX = parseFloat(
       floating.style.getPropertyValue("--floating-preview-x"),
     );
