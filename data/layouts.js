@@ -1834,13 +1834,13 @@ const SASH_OFFICER_PIZZA_PRESET_HUB = [0, 4];
 // Older Life Support buildings are used where their smaller footprints let
 // another Officers Quarters fit while keeping Life Support green.
 const SASH_OFFICER_PIZZA_PRESET_BUILDINGS = [
-  [0, 9],
-  [0, 16],
-  [4, 16],
+  [8, 0],
   [8, 4],
   [8, 8],
+  [8, 12],
   [12, 0],
   [12, 4],
+  [12, 8],
   [16, 0],
   [16, 4],
   [16, 8],
@@ -1849,15 +1849,15 @@ const SASH_OFFICER_PIZZA_PRESET_BUILDINGS = [
 const SASH_OFFICER_PIZZA_PRESET_FLORA = [[5, 4]];
 
 const SASH_OFFICER_PIZZA_PRESET_COSMIC = [
-  [0, 13],
-  [4, 9],
+  [0, 17],
+  [4, 17],
 ];
 
 const SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT = [
-  [4, 12],
-  [8, 0],
-  [8, 12],
-  [12, 8],
+  [0, 9],
+  [0, 13],
+  [4, 9],
+  [4, 13],
 ];
 
 const SASH_OFFICER_PIZZA_ALL_PRESET_HUB = [0, 4];
