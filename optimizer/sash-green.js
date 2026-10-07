@@ -822,6 +822,38 @@ const SASH_STARTING_GREEN_SEEDS = Object.freeze({
   }),
 });
 
+function sashKnownExpandedFallback(ctx, pairOrId) {
+  const pair =
+    typeof pairOrId === "string" ? sashPairFromId(pairOrId) : pairOrId;
+  if (pair.id !== "oq-sesp" || typeof makeSashPresetState !== "function")
+    return null;
+
+  const allExpansionIds = COLONY_CONFIGS.SASH.expansions.map((exp) => exp.id);
+  if (
+    ctx.enabled.size !== allExpansionIds.length ||
+    allExpansionIds.some((id) => !ctx.enabled.has(id))
+  )
+    return null;
+
+  const state = makeSashPresetState("officersPizzaAll");
+  const stats = sashPairStats(state, pair);
+  if (
+    !oxValid(ctx, state) ||
+    !sashGreenStateUsesPair(state, pair) ||
+    !stats.green
+  )
+    return null;
+
+  return {
+    state,
+    stats: {
+      ...stats,
+      unused:
+        ctx.ownedCount - ctx.hall.w * ctx.hall.h - stats.area,
+    },
+  };
+}
+
 function sashKnownStartingFallback(ctx, pairOrId) {
   if (ctx.enabled.size !== 0) return null;
 
@@ -921,6 +953,14 @@ async function optimizeSashGreen(ctx, pairId) {
         stats: filled.stats,
       };
     }
+  }
+
+  const knownExpanded = sashKnownExpandedFallback(ctx, pair);
+  if (
+    knownExpanded &&
+    (!best || sashGreenBetter(knownExpanded.stats, best.stats))
+  ) {
+    best = knownExpanded;
   }
 
   const current = currentColonyState();
