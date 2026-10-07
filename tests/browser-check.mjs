@@ -1097,6 +1097,71 @@ try {
       : "/tmp/planner-mobile.png",
   });
   notes.push("Desktop and narrow dialog layouts checked");
+
+  await page.evaluate(() => closeOptimizerDialog());
+  await page.locator('.era-btn[data-era="SAM"]').click();
+  assert.equal(
+    await page.locator("#mobileSideToggle").evaluate(
+      (el) => getComputedStyle(el).display !== "none",
+    ),
+    true,
+  );
+  await page.locator("#mobileSideToggle").click();
+  assert.equal(
+    await page.locator(".side").evaluate(
+      (el) => el.classList.contains("mobile-open") && getComputedStyle(el).position === "fixed",
+    ),
+    true,
+  );
+
+  const mobileLongPress = await page.evaluate(async () => {
+    const item = document.querySelector(".build-item");
+    const rect = item.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    item.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, pointerType: "touch", pointerId: 91, button: 0, clientX: x, clientY: y
+    }));
+    await new Promise((resolve) => setTimeout(resolve, 570));
+    const visible = !$("hoverTooltip").hidden;
+    const text = $("hoverTooltip").textContent;
+    item.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, pointerType: "touch", pointerId: 91, button: 0, clientX: x, clientY: y
+    }));
+    return { visible, text };
+  });
+  assert.equal(mobileLongPress.visible, true);
+  assert.ok(mobileLongPress.text.length > 0);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const desktopTouchPinch = await page.evaluate(() => {
+    const wrap = document.querySelector(".map-wrap");
+    const rect = wrap.getBoundingClientRect();
+    const y = rect.top + rect.height / 2;
+    const x1 = rect.left + rect.width * 0.4;
+    const x2 = rect.left + rect.width * 0.6;
+    const before = viewZoom;
+    wrap.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, pointerType: "touch", pointerId: 101, button: 0, clientX: x1, clientY: y
+    }));
+    wrap.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, pointerType: "touch", pointerId: 102, button: 0, clientX: x2, clientY: y
+    }));
+    wrap.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, pointerType: "touch", pointerId: 102, button: 0, clientX: x2 + 70, clientY: y
+    }));
+    const after = viewZoom;
+    wrap.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, pointerType: "touch", pointerId: 101, button: 0, clientX: x1, clientY: y
+    }));
+    wrap.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, pointerType: "touch", pointerId: 102, button: 0, clientX: x2 + 70, clientY: y
+    }));
+    return { before, after };
+  });
+  assert.ok(desktopTouchPinch.after > desktopTouchPinch.before);
+  notes.push("Mobile drawer and touch controls work, including on desktop-width touchscreens");
+
   assert.deepEqual(failures, []);
   console.log(JSON.stringify({ ok: true, notes }, null, 2));
 } finally {

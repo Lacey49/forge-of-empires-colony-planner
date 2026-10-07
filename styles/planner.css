@@ -3769,3 +3769,186 @@ body[data-density="spacious"] .map-wrap {
   outline-offset: -3px !important;
   z-index: 12 !important;
 }
+
+/* Mobile planner layout. Touch gestures are implemented in app/mobile.js and work at any width. */
+.mobile-side-toggle {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .app-header {
+    min-height: 38px !important;
+    padding: 4px 6px !important;
+    gap: 4px !important;
+  }
+  .app-brand {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+  }
+  .app-support-btn {
+    width: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+  }
+  .app-support-btn span { display: none !important; }
+  .app-github-btn,
+  .app-settings-btn {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+  }
+  .era-tabs {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    justify-content: flex-start !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .era-tabs::-webkit-scrollbar,
+  .compact-topbar::-webkit-scrollbar { display: none; }
+  .era-tabs .era-btn {
+    flex: 0 0 58px !important;
+    min-width: 58px !important;
+    min-height: 34px !important;
+    height: 34px !important;
+  }
+  .compact-topbar {
+    min-height: 42px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .compact-topbar > * { flex: 0 0 auto !important; }
+  .compact-tool,
+  .compact-action {
+    min-height: 36px !important;
+    padding-inline: 9px !important;
+  }
+  .main,
+  body[data-density="compact"] .main,
+  body[data-density="normal"] .main,
+  body[data-density="spacious"] .main {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .map-pane {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .side {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 140 !important;
+    width: 100% !important;
+    height: min(62dvh, 520px) !important;
+    max-height: calc(100dvh - 112px) !important;
+    min-height: 0 !important;
+    border: 1px solid var(--theme-border) !important;
+    border-bottom: 0 !important;
+    border-radius: 12px 12px 0 0 !important;
+    background: var(--theme-panel) !important;
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.5) !important;
+    overflow: hidden !important;
+    transform: translateY(calc(100% - 46px));
+    transition: transform 0.18s ease;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .side.mobile-open { transform: translateY(0); }
+  .mobile-side-toggle {
+    width: 100%;
+    height: 46px;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    border: 0;
+    border-bottom: 1px solid var(--theme-soft-border);
+    background: var(--theme-panel2);
+    color: var(--theme-title-text);
+    font-size: 12px;
+    font-weight: 800;
+    text-align: left;
+    touch-action: manipulation;
+  }
+  .mobile-side-chevron {
+    width: 22px;
+    text-align: center;
+    color: var(--theme-accent);
+    font-size: 14px;
+  }
+  .compact-summary {
+    height: calc(100% - 46px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .compact-table-head {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+  }
+  .compact-building-row { min-height: 54px !important; }
+  .compact-summary-footer {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  .summary-footer-stat { min-width: 0 !important; }
+  .summary-footer-stat span { font-size: 8px !important; }
+  .summary-footer-stat b { font-size: 13px !important; }
+  .build-tabs {
+    position: sticky;
+    top: 31px;
+    z-index: 3;
+    background: var(--theme-panel);
+  }
+  .build-tab {
+    min-height: 44px !important;
+    font-size: 9px !important;
+  }
+  .build-item {
+    min-height: 62px !important;
+    padding: 7px 9px !important;
+    touch-action: manipulation;
+  }
+  .build-item img {
+    width: 48px !important;
+    height: 40px !important;
+  }
+  .preset-popover {
+    position: fixed !important;
+    left: 6px !important;
+    right: 6px !important;
+    top: 96px !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 108px) !important;
+    overflow: auto !important;
+  }
+  .preset-popover-main {
+    grid-template-columns: minmax(130px, 42%) minmax(0, 58%) !important;
+  }
+  #presetPreviewCanvas {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+  }
+  .preset-item {
+    min-height: 44px !important;
+    touch-action: manipulation;
+  }
+  .hover-tooltip {
+    z-index: 300 !important;
+    max-width: calc(100vw - 24px) !important;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+  .toast-stack { bottom: 56px !important; }
+}
