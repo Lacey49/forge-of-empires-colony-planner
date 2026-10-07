@@ -1181,6 +1181,34 @@ try {
   assert.equal(mapSelectionGuard.wrapTouchAction, "none");
   notes.push("Map long-press cannot start browser text selection");
 
+  const plannerSelectionGuard = await page.evaluate(() => {
+    const check = $("validateBtn");
+    const style = getComputedStyle(check);
+
+    const selectEvent = new Event("selectstart", {
+      bubbles: true,
+      cancelable: true,
+    });
+    const allowed = check.dispatchEvent(selectEvent);
+
+    const range = document.createRange();
+    range.selectNodeContents(check);
+    const selection = document.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    return {
+      checkUserSelect: style.userSelect,
+      selectBlocked: !allowed || selectEvent.defaultPrevented,
+      remainingRanges: selection.rangeCount,
+    };
+  });
+  assert.equal(plannerSelectionGuard.checkUserSelect, "none");
+  assert.equal(plannerSelectionGuard.selectBlocked, true);
+  assert.equal(plannerSelectionGuard.remainingRanges, 0);
+  notes.push("Planner UI clears accidental browser text selection");
+
   const mobileLongPress = await page.evaluate(async () => {
     const item = document.querySelector(".build-item");
     const rect = item.getBoundingClientRect();
