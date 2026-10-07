@@ -802,25 +802,9 @@ const SASH_STARTING_GREEN_SEEDS = Object.freeze({
     ],
   }),
   "oq-sesp": Object.freeze({
-    hub: [0, 4],
-    residential: [
-      [8, 0],
-      [8, 8],
-      [8, 12],
-      [9, 4],
-      [12, 0],
-      [12, 8],
-      [13, 4],
-      [16, 0],
-      [16, 8],
-    ],
-    support: [
-      [0, 9],
-      [0, 13],
-      [4, 9],
-      [4, 13],
-      [5, 4],
-    ],
+    hub: SASH_OFFICER_PIZZA_PRESET_HUB,
+    residential: SASH_OFFICER_PIZZA_PRESET_BUILDINGS,
+    support: SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT,
   }),
 });
 

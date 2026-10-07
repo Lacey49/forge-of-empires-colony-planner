@@ -1878,6 +1878,73 @@ const SASH_OFFICER_ALL_PRESET_FILLERS = [
   [5, 10],
 ];
 
+const SASH_OFFICER_PIZZA_PRESET_HUB = [0, 4];
+
+const SASH_OFFICER_PIZZA_PRESET_BUILDINGS = [
+  [8, 0],
+  [8, 8],
+  [8, 12],
+  [9, 4],
+  [12, 0],
+  [12, 8],
+  [13, 4],
+  [16, 0],
+  [16, 8],
+];
+
+const SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT = [
+  [0, 9],
+  [0, 13],
+  [4, 9],
+  [4, 13],
+  [5, 4],
+];
+
+const SASH_OFFICER_PIZZA_ALL_PRESET_HUB = [0, 4];
+
+const SASH_OFFICER_PIZZA_ALL_PRESET_BUILDINGS = [
+  [8, 0],
+  [8, 8],
+  [8, 12],
+  [9, 4],
+  [12, 0],
+  [12, 8],
+  [13, 4],
+  [16, 0],
+  [16, 8],
+  [12, 24],
+  [16, 12],
+  [16, 16],
+  [16, 20],
+  [16, 24],
+  [17, 4],
+  [20, 8],
+  [20, 12],
+  [20, 16],
+  [20, 20],
+  [24, 4],
+  [24, 8],
+  [24, 12],
+  [24, 16],
+  [24, 20],
+];
+
+const SASH_OFFICER_PIZZA_ALL_PRESET_LIFE_SUPPORT = [
+  [0, 9],
+  [0, 13],
+  [4, 9],
+  [4, 13],
+  [5, 4],
+  [0, 17],
+  [4, 20],
+  [8, 16],
+  [8, 20],
+  [8, 24],
+  [12, 12],
+  [12, 16],
+  [12, 20],
+];
+
 const ERA_THEMES = {
   SAM: {
     "--theme-page-top": "#332219",
