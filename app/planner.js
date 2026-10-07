@@ -1182,7 +1182,7 @@ function makeSatPresetState(kind) {
 
 function makeSashPresetState(kind) {
   const enabled =
-    kind === "officersAll" || kind === "officersPizzaAll"
+    kind === "officersPizzaAll"
       ? COLONY_CONFIGS.SASH.expansions.map((exp) => exp.id)
       : [];
   const enabledSet = new Set(enabled);
@@ -1269,21 +1269,16 @@ function makeSashPresetState(kind) {
     return state;
   }
 
-  if (kind === "officersAll") {
-    addHub(SASH_OFFICER_ALL_PRESET_HUB);
-    for (const [r, c] of SASH_OFFICER_ALL_PRESET_BUILDINGS) {
-      addBuilding("officersQuarters", r, c);
-    }
-    for (const [r, c] of SASH_OFFICER_ALL_PRESET_FILLERS) {
-      addBuilding("simpleCrewQuarters", r, c);
-    }
-    return state;
-  }
-
   if (kind === "officersPizza") {
     addHub(SASH_OFFICER_PIZZA_PRESET_HUB);
     for (const [r, c] of SASH_OFFICER_PIZZA_PRESET_BUILDINGS) {
       addBuilding("officersQuarters", r, c);
+    }
+    for (const [r, c] of SASH_OFFICER_PIZZA_PRESET_FLORA) {
+      addBuilding("floraShipExpress", r, c);
+    }
+    for (const [r, c] of SASH_OFFICER_PIZZA_PRESET_COSMIC) {
+      addBuilding("cosmicCleanExpress", r, c);
     }
     for (const [r, c] of SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT) {
       addBuilding("sitEatSpacePizza", r, c);
@@ -1295,6 +1290,12 @@ function makeSashPresetState(kind) {
     addHub(SASH_OFFICER_PIZZA_ALL_PRESET_HUB);
     for (const [r, c] of SASH_OFFICER_PIZZA_ALL_PRESET_BUILDINGS) {
       addBuilding("officersQuarters", r, c);
+    }
+    for (const [r, c] of SASH_OFFICER_PIZZA_ALL_PRESET_FLORA) {
+      addBuilding("floraShipExpress", r, c);
+    }
+    for (const [r, c] of SASH_OFFICER_PIZZA_ALL_PRESET_COSMIC) {
+      addBuilding("cosmicCleanExpress", r, c);
     }
     for (const [r, c] of SASH_OFFICER_PIZZA_ALL_PRESET_LIFE_SUPPORT) {
       addBuilding("sitEatSpacePizza", r, c);
@@ -1412,19 +1413,13 @@ function getPresetCatalog() {
       },
       {
         id: "builtin:sash-officers-pizza",
-        name: "Officers Quarters (9) + Sit'n'Eat SpacePizza (5)",
+        name: "Officers Quarters (10)",
         kind: "Built-in",
         state: makeSashPresetState("officersPizza"),
       },
       {
-        id: "builtin:sash-officers-all",
-        name: "Officers Quarters (37)",
-        kind: "Built-in",
-        state: makeSashPresetState("officersAll"),
-      },
-      {
         id: "builtin:sash-officers-pizza-all",
-        name: "Officers Quarters (24) + Sit'n'Eat SpacePizza (13)",
+        name: "Officers Quarters (25)",
         kind: "Built-in",
         state: makeSashPresetState("officersPizzaAll"),
       },

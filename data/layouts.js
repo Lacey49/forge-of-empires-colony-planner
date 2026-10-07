@@ -1828,37 +1828,59 @@ const SASH_OFFICER_PRESET_FILLERS = [
 
 const SASH_OFFICER_PRESET_FLORA = [[9, 3]];
 
-const SASH_OFFICER_ALL_PRESET_HUB = [0, 4];
+const SASH_OFFICER_PIZZA_PRESET_HUB = [0, 4];
 
-const SASH_OFFICER_ALL_PRESET_BUILDINGS = [
-  [0, 11],
-  [0, 15],
-  [0, 20],
-  [4, 12],
+// Max-credit starting-land layout at the Officers + SpacePizza unlock point.
+// Older Life Support buildings are used where their smaller footprints let
+// another Officers Quarters fit while keeping Life Support green.
+const SASH_OFFICER_PIZZA_PRESET_BUILDINGS = [
+  [0, 9],
+  [0, 16],
   [4, 16],
-  [4, 20],
+  [8, 4],
+  [8, 8],
+  [12, 0],
+  [12, 4],
+  [16, 0],
+  [16, 4],
+  [16, 8],
+];
+
+const SASH_OFFICER_PIZZA_PRESET_FLORA = [[5, 4]];
+
+const SASH_OFFICER_PIZZA_PRESET_COSMIC = [
+  [0, 13],
+  [4, 9],
+];
+
+const SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT = [
+  [4, 12],
+  [8, 0],
+  [8, 12],
+  [12, 8],
+];
+
+const SASH_OFFICER_PIZZA_ALL_PRESET_HUB = [0, 4];
+
+// Max-credit all-expansion layout at the same unlock point.
+const SASH_OFFICER_PIZZA_ALL_PRESET_BUILDINGS = [
+  [0, 13],
+  [0, 17],
+  [4, 9],
+  [4, 13],
   [8, 0],
   [8, 4],
   [8, 8],
   [8, 12],
   [8, 16],
-  [8, 20],
   [8, 24],
-  [12, 0],
   [12, 4],
-  [12, 8],
-  [12, 12],
-  [12, 16],
-  [12, 20],
-  [12, 24],
   [16, 0],
   [16, 4],
   [16, 8],
   [16, 12],
   [16, 16],
-  [16, 20],
   [16, 24],
-  [20, 4],
   [20, 8],
   [20, 12],
   [20, 16],
@@ -1867,82 +1889,28 @@ const SASH_OFFICER_ALL_PRESET_BUILDINGS = [
   [24, 8],
   [24, 12],
   [24, 16],
-  [24, 20],
 ];
 
-const SASH_OFFICER_ALL_PRESET_FILLERS = [
-  [2, 9],
-  [5, 4],
-  [5, 6],
-  [5, 8],
-  [5, 10],
-];
+const SASH_OFFICER_PIZZA_ALL_PRESET_FLORA = [[5, 6]];
 
-const SASH_OFFICER_PIZZA_PRESET_HUB = [0, 4];
-
-const SASH_OFFICER_PIZZA_PRESET_BUILDINGS = [
-  [8, 0],
-  [8, 8],
-  [8, 12],
-  [9, 4],
-  [12, 0],
-  [12, 8],
-  [13, 4],
-  [16, 0],
-  [16, 8],
-];
-
-const SASH_OFFICER_PIZZA_PRESET_LIFE_SUPPORT = [
-  [0, 9],
-  [0, 13],
-  [4, 9],
-  [4, 13],
-  [5, 4],
-];
-
-const SASH_OFFICER_PIZZA_ALL_PRESET_HUB = [0, 4];
-
-const SASH_OFFICER_PIZZA_ALL_PRESET_BUILDINGS = [
-  [8, 0],
-  [8, 8],
-  [8, 12],
-  [9, 4],
-  [12, 0],
-  [12, 8],
-  [13, 4],
-  [16, 0],
-  [16, 8],
-  [12, 24],
-  [16, 12],
-  [16, 16],
-  [16, 20],
-  [16, 24],
-  [17, 4],
-  [20, 8],
-  [20, 12],
-  [20, 16],
-  [20, 20],
-  [24, 4],
-  [24, 8],
-  [24, 12],
-  [24, 16],
-  [24, 20],
+const SASH_OFFICER_PIZZA_ALL_PRESET_COSMIC = [
+  [0, 21],
+  [4, 21],
 ];
 
 const SASH_OFFICER_PIZZA_ALL_PRESET_LIFE_SUPPORT = [
   [0, 9],
-  [0, 13],
-  [4, 9],
-  [4, 13],
-  [5, 4],
-  [0, 17],
-  [4, 20],
-  [8, 16],
+  [4, 17],
   [8, 20],
-  [8, 24],
+  [12, 0],
+  [12, 8],
   [12, 12],
   [12, 16],
   [12, 20],
+  [12, 24],
+  [16, 20],
+  [20, 4],
+  [24, 20],
 ];
 
 const ERA_THEMES = {
