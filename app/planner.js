@@ -1983,14 +1983,17 @@ function showFloatingPlacementPreview(e, hit = null) {
   }
 
   const wrapRect = wrap.getBoundingClientRect();
-  const boardRect = board.getBoundingClientRect();
-  const cellWidth = boardRect.width > 0 ? boardRect.width / 28 : 24;
-  const cellHeight = boardRect.height > 0 ? boardRect.height / 28 : 24;
+  const metrics = boardGridMetrics();
+  if (!metrics) {
+    preview.style.display = "none";
+    return;
+  }
 
-  // Keep the hologram locked to the board's grid spacing everywhere in the
-  // map area, even when the pointer is outside the 28×28 board itself.
-  const snappedC = Math.floor((e.clientX - boardRect.left) / cellWidth);
-  const snappedR = Math.floor((e.clientY - boardRect.top) / cellHeight);
+  // Keep the hologram locked to the real rendered grid step. Using the
+  // board's total width would also divide the gaps between cells and drifts
+  // farther off-grid the farther the pointer gets from the board.
+  const snappedC = Math.floor((e.clientX - metrics.originX) / metrics.stepX);
+  const snappedR = Math.floor((e.clientY - metrics.originY) / metrics.stepY);
   const insideBoard =
     snappedR >= 0 && snappedR < 28 && snappedC >= 0 && snappedC < 28;
   const gridR = insideBoard && hit ? hit.r : snappedR;
@@ -2004,20 +2007,24 @@ function showFloatingPlacementPreview(e, hit = null) {
 
   const previewR = Number.isInteger(spec.r) ? spec.r : gridR;
   const previewC = Number.isInteger(spec.c) ? spec.c : gridC;
-  const x = boardRect.left - wrapRect.left + previewC * cellWidth;
-  const y = boardRect.top - wrapRect.top + previewR * cellHeight;
+  const x = metrics.originX - wrapRect.left + previewC * metrics.stepX;
+  const y = metrics.originY - wrapRect.top + previewR * metrics.stepY;
   const invalid = insideBoard ? !previewFits(gridR, gridC, spec) : true;
+  const width =
+    metrics.cellWidth + Math.max(0, spec.w - 1) * metrics.stepX;
+  const height =
+    metrics.cellHeight + Math.max(0, spec.h - 1) * metrics.stepY;
 
   stylePlacementPreview(preview, spec, invalid, true);
   preview.style.setProperty("--floating-preview-x", `${x}px`);
   preview.style.setProperty("--floating-preview-y", `${y}px`);
   preview.style.setProperty(
     "--floating-preview-w",
-    `${Math.max(1, spec.w * cellWidth)}px`,
+    `${Math.max(1, width)}px`,
   );
   preview.style.setProperty(
     "--floating-preview-h",
-    `${Math.max(1, spec.h * cellHeight)}px`,
+    `${Math.max(1, height)}px`,
   );
   preview.style.display = "block";
 }
@@ -3302,21 +3309,38 @@ document.addEventListener("keydown", (e) => {
 });
 
 // Wheel zoom.
-function boardCellFromPointer(e) {
+function boardGridMetrics() {
   const board = $("board");
   if (!board) return null;
-  const rect = board.getBoundingClientRect();
-  if (rect.width <= 0 || rect.height <= 0) return null;
-  if (
-    e.clientX < rect.left ||
-    e.clientX >= rect.right ||
-    e.clientY < rect.top ||
-    e.clientY >= rect.bottom
-  )
-    return null;
 
-  const c = Math.floor(((e.clientX - rect.left) * 28) / rect.width);
-  const r = Math.floor(((e.clientY - rect.top) * 28) / rect.height);
+  const first = board.querySelector('.cell[data-r="0"][data-c="0"]');
+  const right = board.querySelector('.cell[data-r="0"][data-c="1"]');
+  const down = board.querySelector('.cell[data-r="1"][data-c="0"]');
+  if (!first || !right || !down) return null;
+
+  const firstRect = first.getBoundingClientRect();
+  const rightRect = right.getBoundingClientRect();
+  const downRect = down.getBoundingClientRect();
+  const stepX = rightRect.left - firstRect.left;
+  const stepY = downRect.top - firstRect.top;
+  if (stepX <= 0 || stepY <= 0) return null;
+
+  return {
+    originX: firstRect.left,
+    originY: firstRect.top,
+    stepX,
+    stepY,
+    cellWidth: firstRect.width,
+    cellHeight: firstRect.height,
+  };
+}
+
+function boardCellFromPointer(e) {
+  const metrics = boardGridMetrics();
+  if (!metrics) return null;
+
+  const c = Math.floor((e.clientX - metrics.originX) / metrics.stepX);
+  const r = Math.floor((e.clientY - metrics.originY) / metrics.stepY);
   if (r < 0 || r >= 28 || c < 0 || c >= 28) return null;
   return { r, c };
 }
