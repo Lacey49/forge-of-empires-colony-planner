@@ -244,6 +244,34 @@ try {
     "Life Support red, orange, and green tiers checked, including live 125%+ styling",
   );
 
+  const summaryLayout = await page.evaluate(() => {
+    const footer = document.querySelector(".compact-summary-footer");
+    const stats = [...footer.querySelectorAll(".summary-footer-stat")];
+    const emptyStyle = getComputedStyle(stats[0]);
+    const lifeStyle = getComputedStyle(
+      document.querySelector(".life-support-footer"),
+    );
+    return {
+      statCount: stats.length,
+      trackCount: getComputedStyle(footer).gridTemplateColumns
+        .split(" ")
+        .filter(Boolean).length,
+      emptyFlexDirection: emptyStyle.flexDirection,
+      lifeFlexDirection: lifeStyle.flexDirection,
+      emptyFontSize: emptyStyle.fontSize,
+      lifeFontSize: lifeStyle.fontSize,
+    };
+  });
+  assert.deepEqual(summaryLayout, {
+    statCount: 4,
+    trackCount: 4,
+    emptyFlexDirection: "column",
+    lifeFlexDirection: "column",
+    emptyFontSize: "10px",
+    lifeFontSize: "10px",
+  });
+  notes.push("Summary footer keeps all four stats in one matching row");
+
   const optimizerAvailability = await page.evaluate(() => {
     showEditableColonyUi("SAT");
     const satVisible = getComputedStyle($("optimizeBtn")).display !== "none";
