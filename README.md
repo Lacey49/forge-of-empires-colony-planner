@@ -20,7 +20,7 @@ Plan Space Age colonies before rebuilding them in-game.
 
 I made this because rebuilding a colony just to find out the layout does not fit gets old fast.
 
-Pick your era, turn on the expansions you have, and lay everything out before changing anything in-game. You can build manually, load a preset, or use **Optimize** to search for a higher-credit setup.
+Pick your era, turn on the expansions you have, and lay everything out before changing anything in-game. You can build the colony yourself, load a preset, or use **Optimize** to rearrange it for more credits.
 
 Nothing connects to your FoE account. Layouts are saved in your browser.
 
@@ -47,8 +47,8 @@ Nothing connects to your FoE account. Layouts are saved in your browser.
 
 1. Pick your era.
 2. Turn on the expansions you own.
-3. Start from **Free Build** or load a preset.
-4. Use **Optimize** if you want the planner to look for more credit output.
+3. Build the colony yourself or load a preset.
+4. Use **Optimize** if you want the planner to rearrange the colony for more credits.
 
 Your Free Build layout is kept separately when you preview a preset. Use **Save** if you want to keep a layout as a custom preset.
 
@@ -69,13 +69,13 @@ Move and Undo can be rebound in Settings.
 
 ## Optimize
 
-Optimize is for credit output. It can move the Town Hall, mix in older buildings when they fit better, and add paths where the colony needs them. It only offers a result if it beats your current layout.
+Optimize rearranges the colony to try to earn more credits. It can move the Town Hall, use older buildings when they fit better, and add paths where they are needed. It only shows a result if it earns more credits than your current layout.
 
-For Space Hub, Optimize also keeps Life Support at **125% or higher**. It can mix older residential and Life Support buildings when that gives a better result instead of forcing one building pair into every gap.
+For Space Hub, Optimize also keeps Life Support at **125% or higher**. It can use older residential and Life Support buildings if they help earn more credits or fill leftover space.
 
-In the other eras, goods, population, and Life Support are not optimization goals. If a result would remove one of those buildings, the planner warns you before applying it.
+In the other eras, Optimize only cares about credits. If it would remove a goods, population, or Life Support building, the planner warns you before you apply the result.
 
-The optimizer searches for better layouts, but it is not proof that no better arrangement exists.
+Optimize can find better layouts, but it cannot guarantee that the result is the absolute best possible layout.
 
 ## Backups
 
