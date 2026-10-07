@@ -265,14 +265,14 @@ try {
   });
   assert.deepEqual(summaryLayout, {
     statCount: 4,
-    labels: ["Credit output (4h):", "Empty tiles:", "Colonists:", "Life Support:"],
+    labels: ["Empty tiles:", "Colonists:", "Life Support:", "Credit output (4h):"],
     trackCount: 4,
     emptyFlexDirection: "column",
     lifeFlexDirection: "column",
     emptyFontSize: "10px",
     lifeFontSize: "10px",
   });
-  notes.push("Summary footer keeps Credit output first in the four-stat row");
+  notes.push("Summary footer keeps Credit output on the far right");
 
   const placementPreviewCoverage = await page.evaluate(() => {
     showEditableColonyUi("SAM");
