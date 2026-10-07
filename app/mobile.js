@@ -224,11 +224,11 @@
     if (!selection || selection.rangeCount === 0) return;
 
     const anchor =
-      selection.anchorNode?.nodeType === Node.ELEMENT_NODE
+      selection.anchorNode?.nodeType === 1
         ? selection.anchorNode
         : selection.anchorNode?.parentElement;
     const focus =
-      selection.focusNode?.nodeType === Node.ELEMENT_NODE
+      selection.focusNode?.nodeType === 1
         ? selection.focusNode
         : selection.focusNode?.parentElement;
 
