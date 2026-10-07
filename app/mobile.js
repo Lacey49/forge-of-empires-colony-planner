@@ -100,7 +100,7 @@
 
     const presetItem = target && target.closest ? target.closest(".preset-item") : null;
     if (presetItem) {
-      presetItem.dispatchEvent(new PointerEvent("pointerenter", {
+      presetItem.dispatchEvent(new window.PointerEvent("pointerenter", {
         bubbles: false,
         pointerType: "touch",
         clientX: x,
