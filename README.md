@@ -71,7 +71,7 @@ Move and Undo can be rebound in Settings.
 
 Optimize rearranges the colony to try to earn more credits. It can move the Town Hall, use older buildings when they fit better, and add paths where they are needed. It only shows a result if it earns more credits than your current layout.
 
-For Space Hub, Optimize also keeps Life Support at **125% or higher**. It can use older residential and Life Support buildings if they help earn more credits or fill leftover space.
+For Space Hub, Optimize also keeps Life Support at **125% or higher**.
 
 In the other eras, Optimize only cares about credits. If it would remove a goods, population, or Life Support building, the planner warns you before you apply the result.
 
