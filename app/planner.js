@@ -1938,7 +1938,7 @@ function floatingPlacementPreview() {
   return preview;
 }
 
-function showFloatingPlacementPreview(e) {
+function showFloatingPlacementPreview(e, hit = null) {
   const preview = floatingPlacementPreview();
   const wrap = document.querySelector(".map-wrap");
   const board = $("board");
@@ -1953,7 +1953,9 @@ function showFloatingPlacementPreview(e) {
     return;
   }
 
-  const spec = previewSpec();
+  const hasGridHit =
+    hit && Number.isInteger(hit.r) && Number.isInteger(hit.c);
+  const spec = hasGridHit ? previewSpec(hit.r, hit.c) : previewSpec();
   if (!spec) {
     preview.style.display = "none";
     return;
@@ -1963,10 +1965,23 @@ function showFloatingPlacementPreview(e) {
   const boardRect = board.getBoundingClientRect();
   const cellWidth = boardRect.width > 0 ? boardRect.width / 28 : 24;
   const cellHeight = boardRect.height > 0 ? boardRect.height / 28 : 24;
-  const x = e.clientX - wrapRect.left - cellWidth / 2;
-  const y = e.clientY - wrapRect.top - cellHeight / 2;
 
-  stylePlacementPreview(preview, spec, true, true);
+  let x;
+  let y;
+  let invalid = true;
+
+  if (hasGridHit) {
+    const previewR = Number.isInteger(spec.r) ? spec.r : hit.r;
+    const previewC = Number.isInteger(spec.c) ? spec.c : hit.c;
+    x = boardRect.left - wrapRect.left + previewC * cellWidth;
+    y = boardRect.top - wrapRect.top + previewR * cellHeight;
+    invalid = !previewFits(hit.r, hit.c, spec);
+  } else {
+    x = e.clientX - wrapRect.left - cellWidth / 2;
+    y = e.clientY - wrapRect.top - cellHeight / 2;
+  }
+
+  stylePlacementPreview(preview, spec, invalid, true);
   preview.style.setProperty("--floating-preview-x", `${x}px`);
   preview.style.setProperty("--floating-preview-y", `${y}px`);
   preview.style.setProperty(
@@ -3377,13 +3392,8 @@ if (mapWrap) {
     if (panPointerId != null || panMoved) return;
 
     const hit = boardCellFromPointer(e);
-    if (hit) {
-      hideFloatingPlacementPreview();
-      showPlacementPreview(hit.r, hit.c);
-    } else {
-      hidePlacementPreview();
-      showFloatingPlacementPreview(e);
-    }
+    hidePlacementPreview();
+    showFloatingPlacementPreview(e, hit);
   });
 
   const stopPan = (e) => {
