@@ -7,7 +7,7 @@
 Plan Space Age colonies before rebuilding them in-game.
 
 [![Open Planner](https://img.shields.io/badge/Open-Colony%20Planner-brightgreen?style=for-the-badge)](https://lacey49.github.io/forge-of-empires-colony-planner/)
-[![Current Build](https://img.shields.io/badge/Current%20Build-v0.1-c47a21?style=for-the-badge)](https://github.com/Lacey49/forge-of-empires-colony-planner)
+[![Current Build](https://img.shields.io/badge/Current%20Build-v0.100-c47a21?style=for-the-badge)](https://github.com/Lacey49/forge-of-empires-colony-planner)
 [![Release Checks](https://img.shields.io/github/actions/workflow/status/Lacey49/forge-of-empires-colony-planner/release-check.yml?branch=main&label=Release%20Checks&style=for-the-badge)](https://github.com/Lacey49/forge-of-empires-colony-planner/actions/workflows/release-check.yml)
 
 ### [Open the Colony Planner](https://lacey49.github.io/forge-of-empires-colony-planner/)
@@ -18,9 +18,11 @@ Plan Space Age colonies before rebuilding them in-game.
 
 ## What is it?
 
-Testing colony layouts in-game is a pain. You move half the colony, run out of room, and then have to put everything back. I made this so I could figure out the layout first.
+I made this because rebuilding a colony just to find out the layout does not fit gets old fast.
 
-Choose your era and expansions, then build from scratch, load a preset, or use **Optimize** to look for a higher-credit layout. Everything stays in your browser. The planner does not connect to your FoE account or change anything in-game.
+Pick your era, turn on the expansions you have, and lay everything out before changing anything in-game. You can build manually, load a preset, or use **Optimize** to search for a higher-credit setup.
+
+Nothing connects to your FoE account. Layouts are saved in your browser.
 
 | Era | Colony |
 | --- | --- |
@@ -31,22 +33,24 @@ Choose your era and expansions, then build from scratch, load a preset, or use *
 | **SAT** | Space Age Titan |
 | **SASH** | Space Age Space Hub |
 
-## What it has
+## Features
 
-- All six Space Age colonies, with their real land and building sizes
-- Free Build, built-in presets, and custom saved presets
-- Movable Town Halls, paths, expansions, Undo, zoom, and pan
-- A credit optimizer and a path checker
-- Local saving, backup downloads, and recovery options
+- Free Build
+- Built-in and custom presets
+- Credit optimizer
+- Expansion selection
+- Move, delete, Undo, zoom, and pan
+- Layout checks
+- Local saves, backups, and recovery
 
 ## Getting started
 
-1. Click your era at the top.
+1. Pick your era.
 2. Turn on the expansions you own.
-3. Pick a building and click the map to place it. Buildings do not rotate.
-4. Use **Check** to find buildings that need a connected path. Titan and Space Hub do not use paths.
+3. Start from **Free Build** or load a preset.
+4. Use **Optimize** if you want the planner to look for more credit output.
 
-Your **Free Build** layout is saved separately when you try a preset. Click **Save** to keep the layout on the map as a custom preset.
+Your Free Build layout is kept separately when you preview a preset. Use **Save** if you want to keep a layout as a custom preset.
 
 ## Controls
 
@@ -63,19 +67,25 @@ Your **Free Build** layout is saved separately when you try a preset. Click **Sa
 
 Move and Undo can be rebound in Settings.
 
-## How Optimize works
+## Optimize
 
-Pick the homes you want to focus on and start the search. The optimizer tries different Town Hall positions, homes, filler buildings, and paths where the colony needs them. It only offers a result if it finds an improvement over your current layout.
+Optimize is for credit output. It can move the Town Hall, mix in older buildings when they fit better, and add paths where the colony needs them. It only offers a result if it beats your current layout.
 
-For Space Hub, you also choose a Life Support building and the search aims to keep support at 125% or higher. In other eras it does not balance goods, population, or life support. If a result removes one of those buildings, the planner warns you before applying it. It finds good layouts, not guaranteed perfect ones. Colony Tetris still has hands.
+For Space Hub, Optimize also keeps Life Support at **125% or higher**. It can mix older residential and Life Support buildings when that gives a better result instead of forcing one building pair into every gap.
 
-## Backups and saved layouts
+In the other eras, goods, population, and Life Support are not optimization goals. If a result would remove one of those buildings, the planner warns you before applying it.
 
-Layouts are saved in your browser on that device. Use **Settings → Backups → Download** if you want a copy you can keep or move elsewhere. Backups include layouts and presets, but not your theme or shortcuts.
+The optimizer searches for better layouts, but it is not proof that no better arrangement exists.
 
-## Current build: v0.1
+## Backups
 
-This update fixes several save, Undo, preset, and optimizer bugs. It also clears out old code and reorganizes the project folders.
+Layouts are saved in your browser on that device. Use **Settings → Backups → Download** if you want a copy you can keep or move elsewhere.
+
+Backups include layouts and presets, but not your theme or shortcuts.
+
+## Current build: v0.100
+
+This is the last pre-1.0 build while the final presets, UI changes, and release checks are being finished.
 
 [![Read the Changes](https://img.shields.io/badge/Read-the%20Changes-6f42c1)](./docs/changes.md)
 [![Code Guide](https://img.shields.io/badge/Code-Folder%20Guide-2475ca)](./docs/working-on-the-planner.md)
