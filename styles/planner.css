@@ -4232,3 +4232,52 @@ body[data-density="spacious"] .map-wrap {
     display: none !important;
   }
 }
+
+
+/* Mobile home and board visibility fixes */
+@media (max-width: 700px) {
+  body.home-mode .home-screen {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+    padding: 12px 8px 24px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.home-mode .home-panel {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 16px 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  body.home-mode .home-townhall-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+  }
+
+  body.home-mode .home-era-card {
+    min-width: 0 !important;
+    gap: 7px !important;
+    padding: 10px 7px !important;
+  }
+
+  body.home-mode .home-era-thumb {
+    min-height: 84px !important;
+  }
+
+  body.home-mode .home-era-thumb img {
+    width: min(100%, 92px) !important;
+    max-height: 84px !important;
+  }
+
+  body.home-mode .home-era-code {
+    font-size: 11px !important;
+  }
+
+  body.home-mode .home-era-name {
+    font-size: 9px !important;
+  }
+}
