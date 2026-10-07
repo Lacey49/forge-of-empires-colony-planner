@@ -332,6 +332,8 @@ try {
   );
 
   const summaryLayout = await page.evaluate(() => {
+    setAppPage("planner");
+    showEditableColonyUi("SASH");
     const footer = document.querySelector(".compact-summary-footer");
     const stats = [...footer.querySelectorAll(".summary-footer-stat")];
     const emptyStyle = getComputedStyle(stats[0]);
@@ -369,6 +371,7 @@ try {
   notes.push("Summary footer keeps four equal tiles in one row with Credit output on the far right");
 
   const placementPreviewCoverage = await page.evaluate(() => {
+    setAppPage("planner");
     showEditableColonyUi("SAM");
     activateFreeBuild();
     loadBlank();
