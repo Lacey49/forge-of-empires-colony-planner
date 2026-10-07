@@ -3066,18 +3066,34 @@ function drawPresetPreview(state, name) {
   $("presetPreviewTitle").textContent = name || "Preset";
 }
 
+function setPresetPreview(item, btn) {
+  const list = $("presetList");
+  if (!item || !btn || !list) return;
+
+  for (const row of list.querySelectorAll(".preset-item.previewing"))
+    row.classList.remove("previewing");
+
+  btn.classList.add("previewing");
+  drawPresetPreview(item.state, item.name);
+}
+
 function renderPresetPopover() {
   const list = $("presetList");
   if (!list) return;
   list.innerHTML = "";
 
   const items = getPresetCatalog();
+  let initialPreview = null;
+
   for (const item of items) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "preset-item";
-    if (activeLayoutMode === "preset" && activePresetId === item.id)
-      btn.classList.add("active");
+    btn.dataset.presetId = item.id;
+
+    const loaded =
+      activeLayoutMode === "preset" && activePresetId === item.id;
+    if (loaded) btn.classList.add("loaded");
 
     const name = document.createElement("span");
     name.textContent = item.name;
@@ -3085,17 +3101,24 @@ function renderPresetPopover() {
     kind.textContent = item.kind;
     btn.append(name, kind);
 
-    btn.addEventListener("mouseenter", () =>
-      drawPresetPreview(item.state, item.name),
-    );
-    btn.addEventListener("focus", () =>
-      drawPresetPreview(item.state, item.name),
-    );
+    const preview = () => setPresetPreview(item, btn);
+    btn.addEventListener("pointerenter", preview);
+    btn.addEventListener("focus", preview);
     btn.addEventListener("click", () => loadPresetItem(item));
     list.appendChild(btn);
+
+    if (loaded) initialPreview = { item, btn };
   }
 
-  if (items.length) drawPresetPreview(items[0].state, items[0].name);
+  if (!initialPreview && items.length) {
+    initialPreview = {
+      item: items[0],
+      btn: list.querySelector(".preset-item"),
+    };
+  }
+
+  if (initialPreview)
+    setPresetPreview(initialPreview.item, initialPreview.btn);
 }
 
 function openPresetPopover() {
