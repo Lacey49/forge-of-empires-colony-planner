@@ -1864,23 +1864,22 @@ const SASH_OFFICER_PIZZA_ALL_PRESET_HUB = [0, 4];
 
 // Max-credit all-expansion layout at the same unlock point.
 const SASH_OFFICER_PIZZA_ALL_PRESET_BUILDINGS = [
-  [0, 13],
-  [0, 17],
-  [4, 9],
-  [4, 13],
   [8, 0],
-  [8, 4],
-  [8, 8],
-  [8, 12],
-  [8, 16],
-  [8, 24],
+  [12, 0],
   [12, 4],
+  [12, 8],
+  [12, 12],
+  [12, 16],
+  [12, 20],
+  [12, 24],
   [16, 0],
   [16, 4],
   [16, 8],
   [16, 12],
   [16, 16],
+  [16, 20],
   [16, 24],
+  [20, 4],
   [20, 8],
   [20, 12],
   [20, 16],
@@ -1889,6 +1888,7 @@ const SASH_OFFICER_PIZZA_ALL_PRESET_BUILDINGS = [
   [24, 8],
   [24, 12],
   [24, 16],
+  [24, 20],
 ];
 
 const SASH_OFFICER_PIZZA_ALL_PRESET_FLORA = [[5, 6]];
@@ -1900,17 +1900,17 @@ const SASH_OFFICER_PIZZA_ALL_PRESET_COSMIC = [
 
 const SASH_OFFICER_PIZZA_ALL_PRESET_LIFE_SUPPORT = [
   [0, 9],
+  [0, 13],
+  [0, 17],
+  [4, 9],
+  [4, 13],
   [4, 17],
+  [8, 4],
+  [8, 8],
+  [8, 12],
+  [8, 16],
   [8, 20],
-  [12, 0],
-  [12, 8],
-  [12, 12],
-  [12, 16],
-  [12, 20],
-  [12, 24],
-  [16, 20],
-  [20, 4],
-  [24, 20],
+  [8, 24],
 ];
 
 const ERA_THEMES = {
