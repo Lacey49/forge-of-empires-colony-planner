@@ -937,6 +937,13 @@ try {
   });
   const firstSashCell = page.locator("#board .cell:not(.out)").first();
   await firstSashCell.evaluate((cell) => {
+    cell.dispatchEvent(
+      new PointerEvent("pointerdown", {
+        bubbles: true,
+        pointerType: "mouse",
+        button: 0,
+      }),
+    );
     cell.focus();
     cell.click();
   });
