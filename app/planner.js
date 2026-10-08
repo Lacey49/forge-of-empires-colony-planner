@@ -2907,6 +2907,7 @@ function showConfirmDialog({
   confirmText = "Confirm",
   cancelText = "Cancel",
 }) {
+  closePresetPopover();
   return new Promise((resolve) => {
     const dlg = $("appDialog");
     const input = $("appDialogInput");
@@ -2927,6 +2928,7 @@ function showInputDialog({
   confirmText = "Save",
   placeholder = "",
 }) {
+  closePresetPopover();
   return new Promise((resolve) => {
     const dlg = $("appDialog");
     const input = $("appDialogInput");
@@ -3121,22 +3123,65 @@ function renderPresetPopover() {
     setPresetPreview(initialPreview.item, initialPreview.btn);
 }
 
-function openPresetPopover() {
-  renderPresetPopover();
-  $("presetPopover").hidden = false;
+function presetFocusableRows() {
+  const list = $("presetList");
+  if (!list) return [];
+  return [...list.querySelectorAll(".preset-item:not(:disabled)")];
 }
 
-function closePresetPopover() {
+function openPresetPopover() {
+  renderPresetPopover();
+
   const pop = $("presetPopover");
-  if (pop) pop.hidden = true;
+  if (!pop) return;
+  pop.hidden = false;
+  $("presetsBtn")?.setAttribute("aria-expanded", "true");
+
+  const rows = presetFocusableRows();
+  const preferred =
+    rows.find((row) => row.classList.contains("previewing")) || rows[0];
+  if (preferred) requestAnimationFrame(() => preferred.focus());
+}
+
+function closePresetPopover({ returnFocus = false } = {}) {
+  const pop = $("presetPopover");
+  if (!pop) return;
+
+  pop.hidden = true;
+  $("presetsBtn")?.setAttribute("aria-expanded", "false");
+  if (returnFocus) requestAnimationFrame(() => $("presetsBtn")?.focus());
 }
 
 function togglePresetPopover() {
   const pop = $("presetPopover");
   if (!pop) return;
   if (pop.hidden) openPresetPopover();
-  else closePresetPopover();
+  else closePresetPopover({ returnFocus: true });
 }
+
+$("presetPopover")?.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    e.preventDefault();
+    e.stopPropagation();
+    closePresetPopover({ returnFocus: true });
+    return;
+  }
+
+  if (e.key !== "Tab") return;
+
+  const rows = presetFocusableRows();
+  if (!rows.length) return;
+
+  const current = rows.indexOf(document.activeElement);
+  let next = e.shiftKey ? current - 1 : current + 1;
+
+  if (current < 0) next = e.shiftKey ? rows.length - 1 : 0;
+  else if (next < 0) next = rows.length - 1;
+  else if (next >= rows.length) next = 0;
+
+  e.preventDefault();
+  rows[next].focus();
+});
 
 async function saveCurrentPreset() {
   if (!isEditableColonyEra(selectedEra)) return;
@@ -3250,6 +3295,7 @@ const bindClick = (id, fn) => {
 };
 
 bindClick("freeBuildBtn", () => activateFreeBuild());
+$("presetsBtn")?.setAttribute("aria-expanded", "false");
 bindClick("presetsBtn", () => togglePresetPopover());
 bindClick("clearAllBtn", () => requestClearAll());
 bindClick("savePresetBtn", () => saveCurrentPreset());
