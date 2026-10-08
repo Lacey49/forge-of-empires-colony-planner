@@ -286,6 +286,69 @@ try {
   });
   notes.push("Preset preview outline follows the row being previewed");
 
+  for (const era of ["SAM", "SASH"]) {
+    await page.evaluate((targetEra) => {
+      setAppPage("planner");
+      showEditableColonyUi(targetEra);
+      closePresetPopover();
+    }, era);
+
+    await page.click("#presetsBtn");
+    await page.waitForFunction(
+      () =>
+        !$("presetPopover").hidden &&
+        document.activeElement?.classList.contains("preset-item"),
+    );
+
+    const firstFocus = await page.evaluate(() => ({
+      insidePopup: $("presetPopover").contains(document.activeElement),
+      isPreset: document.activeElement?.classList.contains("preset-item"),
+      expanded: $("presetsBtn").getAttribute("aria-expanded"),
+    }));
+    assert.deepEqual(firstFocus, {
+      insidePopup: true,
+      isPreset: true,
+      expanded: "true",
+    });
+
+    await page.keyboard.press("Tab");
+    assert.equal(
+      await page.evaluate(
+        () =>
+          $("presetPopover").contains(document.activeElement) &&
+          document.activeElement?.classList.contains("preset-item"),
+      ),
+      true,
+      `${era} Tab should stay inside preset choices`,
+    );
+
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(
+      () =>
+        $("presetPopover").hidden &&
+        document.activeElement === $("presetsBtn"),
+    );
+    assert.equal(
+      await page.getAttribute("#presetsBtn", "aria-expanded"),
+      "false",
+    );
+  }
+
+  await page.evaluate(() => {
+    setAppPage("planner");
+    showEditableColonyUi("SAM");
+  });
+  await page.click("#presetsBtn");
+  await page.click("#savePresetBtn");
+  assert.equal(
+    await page.evaluate(
+      () => $("presetPopover").hidden && $("appDialog").open,
+    ),
+    true,
+  );
+  await page.click("#appDialogCancel");
+  notes.push("Preset popup keyboard focus, Escape, and dialog stacking checked");
+
   const lifeSupportSummary = await page.evaluate(async () => {
     const eraChecks = {};
     for (const [era, data] of Object.entries(ERA_DATA)) {
