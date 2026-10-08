@@ -339,7 +339,14 @@ try {
     showEditableColonyUi("SAM");
   });
   await page.click("#presetsBtn");
-  await page.click("#savePresetBtn");
+  await page.evaluate(() => {
+    void showInputDialog({
+      title: "Test dialog",
+      message: "Check preset popup stacking.",
+      confirmText: "OK",
+      placeholder: "Test",
+    });
+  });
   assert.equal(
     await page.evaluate(
       () => $("presetPopover").hidden && $("appDialog").open,
