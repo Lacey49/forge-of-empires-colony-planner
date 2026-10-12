@@ -1225,6 +1225,7 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.click("#settingsBtn");
   await page.click('[data-settings-tab="backups"]');
+  await page.click('[data-settings-panel="backups"] [data-settings-subtab="backup"]');
   const settingsMobile = await page.evaluate(() => {
     const win = document.querySelector(".settings-window");
     const rect = win.getBoundingClientRect();
