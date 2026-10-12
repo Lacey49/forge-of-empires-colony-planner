@@ -3944,6 +3944,68 @@ function populateHomeTownHallGrid() {
   });
 }
 
+const settingsNavState = {
+  group: "general",
+  sub: {
+    general: "interface",
+    controls: "shortcuts",
+    backups: "backup",
+  },
+};
+
+function showSettingsSubtab(group, subtab) {
+  const panel = document.querySelector(`[data-settings-panel="${group}"]`);
+  if (!panel) return;
+
+  const buttons = [...panel.querySelectorAll("[data-settings-subtab]")];
+  const target = buttons.some((button) => button.dataset.settingsSubtab === subtab)
+    ? subtab
+    : buttons[0]?.dataset.settingsSubtab;
+  if (!target) return;
+
+  settingsNavState.sub[group] = target;
+  buttons.forEach((button) => {
+    const active = button.dataset.settingsSubtab === target;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  panel.querySelectorAll("[data-settings-content]").forEach((content) => {
+    const active = content.dataset.settingsContent === target;
+    content.classList.toggle("active", active);
+    content.hidden = !active;
+  });
+}
+
+function showSettingsGroup(group) {
+  const panels = [...document.querySelectorAll("[data-settings-panel]")];
+  const target = panels.some((panel) => panel.dataset.settingsPanel === group)
+    ? group
+    : panels[0]?.dataset.settingsPanel;
+  if (!target) return;
+
+  settingsNavState.group = target;
+  document.querySelectorAll("[data-settings-tab]").forEach((button) => {
+    const active = button.dataset.settingsTab === target;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  panels.forEach((panel) => {
+    const active = panel.dataset.settingsPanel === target;
+    panel.classList.toggle("active", active);
+    panel.hidden = !active;
+  });
+  showSettingsSubtab(target, settingsNavState.sub[target]);
+}
+
+document.querySelectorAll("[data-settings-tab]").forEach((button) => {
+  button.addEventListener("click", () => showSettingsGroup(button.dataset.settingsTab));
+});
+document.querySelectorAll("[data-settings-subtab]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const panel = button.closest("[data-settings-panel]");
+    showSettingsSubtab(panel?.dataset.settingsPanel, button.dataset.settingsSubtab);
+  });
+});
 let appPage = "home";
 let pageBeforeSettings = "home";
 
@@ -3976,6 +4038,7 @@ function setAppPage(page) {
   else if (isSettings) {
     applyPageTheme("settings");
     syncSettingsUi();
+    showSettingsGroup(settingsNavState.group);
   } else {
     applyConfiguredTheme(selectedEra);
   }
@@ -4099,8 +4162,7 @@ $("themeSetting")?.addEventListener("change", (e) => {
 $("resetSettingsBtn")?.addEventListener("click", async () => {
   const ok = await showConfirmDialog({
     title: "Reset settings?",
-    message:
-      "Reset settings to default? Layouts and presets stay saved.",
+    message: "Layouts and presets stay saved.",
     confirmText: "Reset to default",
     cancelText: "Cancel",
   });

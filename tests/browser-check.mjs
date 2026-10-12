@@ -1152,35 +1152,64 @@ try {
   assert.equal(await page.evaluate(() => optimizerPendingResult), null);
   await page.evaluate(() => closeOptimizerDialog());
   notes.push("Escape cancels a running search");
-  // Settings should behave like a compact tool window and fit at desktop/mobile sizes.
+  // Settings follows the Forge Hammer-style tab + sidebar layout and fits desktop/mobile.
   await page.evaluate(() => {
     setAppPage("planner");
     showEditableColonyUi("SASH");
   });
   await page.click("#settingsBtn");
   const settingsDesktop = await page.evaluate(() => {
-    const panel = document.querySelector(".settings-page-panel");
-    const sections = [...document.querySelectorAll(".settings-panel-section")];
+    const win = document.querySelector(".settings-window");
+    const rect = win.getBoundingClientRect();
+    const layout = document.querySelector('[data-settings-panel="general"] .settings-sub-layout');
     return {
       settingsOpen: appPage === "settings" && !$("settingsScreen").hidden,
-      hasTitlebar: !!document.querySelector(".settings-page-titlebar"),
-      sectionCount: sections.length,
-      panelWidth: panel.getBoundingClientRect().width,
-      viewportWidth: innerWidth,
-      oldCopy: document.body.textContent.includes(
-        "Changes the spacing and size of buttons and panels.",
-      ),
-      closeVisible: getComputedStyle($("settingsCloseBtn")).display !== "none",
+      topTabs: document.querySelectorAll(".settings-top-tab").length,
+      activeTop: document.querySelector(".settings-top-tab.active")?.dataset.settingsTab,
+      activeSub: document.querySelector('[data-settings-panel="general"] .settings-sub-tab.active')?.dataset.settingsSubtab,
+      activeContent: document.querySelector('[data-settings-panel="general"] .settings-detail-panel.active')?.dataset.settingsContent,
+      widthFits: rect.left >= 0 && rect.right <= innerWidth + 1,
+      heightFits: rect.top >= 0 && rect.bottom <= innerHeight + 1,
+      desktopColumns: getComputedStyle(layout).gridTemplateColumns,
+      oldCopy: document.body.textContent.includes("Changes the spacing and size of buttons and panels."),
       supportTitle: $("supportBtn").title,
     };
   });
   assert.equal(settingsDesktop.settingsOpen, true);
-  assert.equal(settingsDesktop.hasTitlebar, true);
-  assert.ok(settingsDesktop.sectionCount >= 5);
-  assert.ok(settingsDesktop.panelWidth < settingsDesktop.viewportWidth);
+  assert.equal(settingsDesktop.topTabs, 3);
+  assert.equal(settingsDesktop.activeTop, "general");
+  assert.equal(settingsDesktop.activeSub, "interface");
+  assert.equal(settingsDesktop.activeContent, "interface");
+  assert.equal(settingsDesktop.widthFits, true);
+  assert.equal(settingsDesktop.heightFits, true);
+  assert.match(settingsDesktop.desktopColumns, /px/);
   assert.equal(settingsDesktop.oldCopy, false);
-  assert.equal(settingsDesktop.closeVisible, true);
   assert.equal(settingsDesktop.supportTitle, "Buy Me a Coffee");
+
+  await page.click('[data-settings-tab="controls"]');
+  assert.equal(
+    await page.evaluate(() => document.querySelector(".settings-top-tab.active")?.dataset.settingsTab),
+    "controls",
+  );
+  assert.equal(
+    await page.evaluate(() => !document.querySelector('[data-settings-content="shortcuts"]').hidden),
+    true,
+  );
+
+  await page.click('[data-settings-tab="backups"]');
+  await page.click('[data-settings-subtab="recovery"]');
+  assert.equal(
+    await page.evaluate(() => document.querySelector('[data-settings-panel="backups"] .settings-detail-panel.active')?.dataset.settingsContent),
+    "recovery",
+  );
+  assert.equal(await page.locator("#restorePreviousPlannerSave").isVisible(), true);
+
+  await page.click('[data-settings-tab="general"]');
+  await page.click('[data-settings-subtab="map"]');
+  assert.equal(
+    await page.evaluate(() => document.querySelector('[data-settings-panel="general"] .settings-detail-panel.active')?.dataset.settingsContent),
+    "map",
+  );
 
   await page.click("#settingsCloseBtn");
   assert.equal(
@@ -1195,23 +1224,28 @@ try {
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.click("#settingsBtn");
+  await page.click('[data-settings-tab="backups"]');
   const settingsMobile = await page.evaluate(() => {
-    const panel = document.querySelector(".settings-page-panel");
-    const rect = panel.getBoundingClientRect();
+    const win = document.querySelector(".settings-window");
+    const rect = win.getBoundingClientRect();
+    const layout = document.querySelector('[data-settings-panel="backups"] .settings-sub-layout');
+    const tabs = document.querySelector(".settings-top-tabs").getBoundingClientRect();
     return {
       widthFits: rect.left >= 0 && rect.right <= innerWidth + 1,
-      closeFits:
-        $("settingsCloseBtn").getBoundingClientRect().right <= innerWidth + 1,
-      backupButtonWidth:
-        $("downloadPlannerBackup").getBoundingClientRect().width > 50,
+      heightFits: rect.top >= 0 && rect.bottom <= innerHeight + 1,
+      tabsFit: tabs.left >= 0 && tabs.right <= innerWidth + 1,
+      mobileColumns: getComputedStyle(layout).gridTemplateColumns,
+      backupButtonWidth: $("downloadPlannerBackup").getBoundingClientRect().width > 50,
     };
   });
   assert.equal(settingsMobile.widthFits, true);
-  assert.equal(settingsMobile.closeFits, true);
+  assert.equal(settingsMobile.heightFits, true);
+  assert.equal(settingsMobile.tabsFit, true);
   assert.equal(settingsMobile.backupButtonWidth, true);
+  assert.ok(settingsMobile.mobileColumns.split(" ").length <= 1);
   await page.click("#settingsCloseBtn");
   await page.setViewportSize({ width: 1365, height: 900 });
-  notes.push("Settings window, close behavior, mobile fit, and trimmed copy checked");
+  notes.push("Forge Hammer-style Settings tabs, sidebar, close behavior, and mobile fit checked");
   // Import a distinguishable Mars save. The pagehide save must not overwrite it.
   const backup = await page.evaluate(() => {
     showEditableColonyUi("SAM");

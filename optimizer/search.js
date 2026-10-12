@@ -1359,7 +1359,7 @@ async function runOptimizerDialog() {
             : Math.round(sc.credits8h / 2).toLocaleString() + " credits / 4h";
     if (result.cancelled) {
       $("optimizerProgress").innerHTML =
-        "<strong>Cancelled</strong><span>Your layout was left unchanged.</span>";
+        "<strong>Cancelled</strong><span>Layout unchanged.</span>";
       $("optimizerRunBtn").textContent = "Optimize";
     } else if (better) {
       optimizerPendingResult = { state: result.state, era };
@@ -1376,8 +1376,8 @@ async function runOptimizerDialog() {
           sc.unused +
           " unused</span><span>" +
           (result.proven
-            ? "Maximum credit output proven for this footprint."
-            : "Best verified in this search.") +
+            ? "Maximum proven for this footprint."
+            : "Best found in this search.") +
           "</span>";
       } else {
         $("optimizerProgress").innerHTML =
@@ -1389,14 +1389,14 @@ async function runOptimizerDialog() {
           sc.unused +
           " unused tiles · " +
           result.tested.toLocaleString() +
-          " layouts tested</span><span>This is the best layout found in this search. There may still be a better fit.</span>";
+          " layouts tested</span>";
       }
       $("optimizerRunBtn").textContent = "Apply result";
     } else {
       if (era === "SASH") {
         const ratio = (nextSash.ratio * 100).toFixed(2);
         $("optimizerProgress").innerHTML =
-          "<strong>No better layout found</strong><span>Your current layout matches or beats the best valid layout found in this search.</span><span>" +
+          "<strong>No better layout found</strong><span>" +
           sashStatsSummary(nextSash) +
           " · " +
           ratio +
@@ -1405,7 +1405,7 @@ async function runOptimizerDialog() {
         $("optimizerProgress").innerHTML =
           "<strong>No higher-credit layout found</strong><span>Best found: " +
           best +
-          ". Your layout was not changed.</span><span>" +
+          "</span><span>" +
           result.tested.toLocaleString() +
           " layouts tested.</span>";
       }
@@ -1416,10 +1416,10 @@ async function runOptimizerDialog() {
     console.error("Optimizer failed", err);
     const progress = $("optimizerProgress");
     progress.innerHTML =
-      "<strong>Couldn't finish this search</strong><span></span><span>Your layout was left unchanged.</span>";
+      "<strong>Search failed</strong><span></span>";
     progress.querySelector("span").textContent =
       err?.message ||
-      "Something went wrong while searching for a valid layout.";
+      "Could not find a valid layout.";
     $("optimizerRunBtn").textContent = "Try again";
     $("optimizerRunBtn").disabled = false;
   } finally {
@@ -1445,5 +1445,5 @@ $("optimizerPrimary").addEventListener("change", () => {
   optimizerPendingResult = null;
   $("optimizerRunBtn").textContent = "Optimize";
   $("optimizerProgress").innerHTML =
-    "<strong>Ready</strong><span>Search again with this building choice.</span>";
+    "<strong>Ready</strong>";
 });

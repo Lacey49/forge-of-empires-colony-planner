@@ -199,7 +199,7 @@
   Forge of Empires Colony Planner by Lacey49.
   Fan-made project. Not affiliated with or endorsed by InnoGames.
 -->
-    <link rel="stylesheet" href="./styles/planner.css?v=116" />
+    <link rel="stylesheet" href="./styles/planner.css?v=117" />
   </head>
   <body aria-busy="true">
     <div class="app">
@@ -326,76 +326,135 @@
         </section>
 
         <section id="settingsScreen" class="settings-screen" hidden>
-          <div class="settings-page-panel" role="region" aria-labelledby="settingsPageTitle">
-            <div class="settings-page-titlebar">
-              <div class="settings-page-title" id="settingsPageTitle">Settings</div>
-              <button id="settingsCloseBtn" class="settings-page-close" type="button" title="Close" aria-label="Close settings">×</button>
+          <div class="settings-window" role="region" aria-labelledby="settingsPageTitle">
+            <div class="settings-window-head">
+              <div class="settings-window-title" id="settingsPageTitle">Settings</div>
+              <button id="settingsCloseBtn" class="settings-window-close" type="button" title="Close" aria-label="Close settings">×</button>
             </div>
-            <div class="settings-page-body">
-              <section class="settings-panel-section">
-                <div class="settings-panel-heading">Interface</div>
-                <div class="settings-list">
-                  <label class="settings-row-control" for="densitySetting">
-                    <span class="settings-control-copy"><b>UI size</b></span>
-                    <select id="densitySetting" class="settings-select">
-                      <option value="compact">Compact</option>
-                      <option value="normal">Normal</option>
-                      <option value="spacious">Spacious</option>
-                    </select>
-                  </label>
-                  <label class="settings-row-control" for="themeSetting">
-                    <span class="settings-control-copy"><b>Theme</b></span>
-                    <select id="themeSetting" class="settings-select">
-                      <option value="auto">Match selected era</option>
-                      <option value="SAM">Mars</option>
-                      <option value="SAAB">Asteroid Belt</option>
-                      <option value="SAV">Venus</option>
-                      <option value="SAJM">Jupiter Moon</option>
-                      <option value="SAT">Titan</option>
-                      <option value="SASH">Space Hub</option>
-                      <option value="neutral">Neutral dark</option>
-                    </select>
-                  </label>
+
+            <div class="settings-window-body">
+              <div class="settings-top-tabs" role="tablist" aria-label="Settings sections">
+                <button class="settings-top-tab active" type="button" role="tab" aria-selected="true" data-settings-tab="general">General</button>
+                <button class="settings-top-tab" type="button" role="tab" aria-selected="false" data-settings-tab="controls">Controls</button>
+                <button class="settings-top-tab" type="button" role="tab" aria-selected="false" data-settings-tab="backups">Backups</button>
+              </div>
+
+              <div class="settings-tab-panel active" data-settings-panel="general">
+                <div class="settings-sub-layout">
+                  <div class="settings-sub-tabs" role="tablist" aria-label="General settings">
+                    <button class="settings-sub-tab active" type="button" role="tab" aria-selected="true" data-settings-subtab="interface">Interface</button>
+                    <button class="settings-sub-tab" type="button" role="tab" aria-selected="false" data-settings-subtab="map">Map</button>
+                  </div>
+                  <div class="settings-sub-content">
+                    <section class="settings-detail-panel active" data-settings-content="interface">
+                      <h2>Interface</h2>
+                      <div class="settings-item-row">
+                        <label for="densitySetting">UI size</label>
+                        <select id="densitySetting" class="settings-select">
+                          <option value="compact">Compact</option>
+                          <option value="normal">Normal</option>
+                          <option value="spacious">Spacious</option>
+                        </select>
+                      </div>
+                      <div class="settings-item-row">
+                        <label for="themeSetting">Theme</label>
+                        <select id="themeSetting" class="settings-select">
+                          <option value="auto">Match selected era</option>
+                          <option value="SAM">Mars</option>
+                          <option value="SAAB">Asteroid Belt</option>
+                          <option value="SAV">Venus</option>
+                          <option value="SAJM">Jupiter Moon</option>
+                          <option value="SAT">Titan</option>
+                          <option value="SASH">Space Hub</option>
+                          <option value="neutral">Neutral dark</option>
+                        </select>
+                      </div>
+                    </section>
+
+                    <section class="settings-detail-panel" data-settings-content="map" hidden>
+                      <h2>Map</h2>
+                      <div class="settings-slider-item">
+                        <div class="settings-slider-head"><label for="zoomSensitivitySetting">Zoom speed</label><output id="zoomSensitivityValue" for="zoomSensitivitySetting">100%</output></div>
+                        <input id="zoomSensitivitySetting" class="settings-range" type="range" min="50" max="150" step="10" value="100" />
+                      </div>
+                      <div class="settings-slider-item">
+                        <div class="settings-slider-head"><label for="panSensitivitySetting">Pan speed</label><output id="panSensitivityValue" for="panSensitivitySetting">100%</output></div>
+                        <input id="panSensitivitySetting" class="settings-range" type="range" min="50" max="150" step="10" value="100" />
+                      </div>
+                    </section>
+                  </div>
                 </div>
-              </section>
-              <section class="settings-panel-section">
-                <div class="settings-panel-heading">Map</div>
-                <div class="settings-list">
-                  <label class="settings-slider-row" for="zoomSensitivitySetting">
-                    <span class="settings-control-copy"><b>Zoom speed</b></span>
-                    <span class="settings-control-value" id="zoomSensitivityValue">100%</span>
-                    <input id="zoomSensitivitySetting" class="settings-range" type="range" min="50" max="150" step="10" value="100" />
-                  </label>
-                  <label class="settings-slider-row" for="panSensitivitySetting">
-                    <span class="settings-control-copy"><b>Pan speed</b></span>
-                    <span class="settings-control-value" id="panSensitivityValue">100%</span>
-                    <input id="panSensitivitySetting" class="settings-range" type="range" min="50" max="150" step="10" value="100" />
-                  </label>
+              </div>
+
+              <div class="settings-tab-panel" data-settings-panel="controls" hidden>
+                <div class="settings-sub-layout">
+                  <div class="settings-sub-tabs" role="tablist" aria-label="Control settings">
+                    <button class="settings-sub-tab active" type="button" role="tab" aria-selected="true" data-settings-subtab="shortcuts">Shortcuts</button>
+                  </div>
+                  <div class="settings-sub-content">
+                    <section class="settings-detail-panel active" data-settings-content="shortcuts">
+                      <h2>Shortcuts</h2>
+                      <p class="settings-note">Click Move or Undo, then press the new shortcut.</p>
+                      <div class="settings-item-row">
+                        <span>Move</span>
+                        <input class="hotkey-input" data-hotkey-setting="hotkeyMove" type="text" readonly value="M" />
+                      </div>
+                      <div class="settings-item-row">
+                        <span>Delete</span>
+                        <span class="hotkey-fixed">Right-click / Delete</span>
+                      </div>
+                      <div class="settings-item-row">
+                        <span>Undo</span>
+                        <input class="hotkey-input" data-hotkey-setting="hotkeyUndo" type="text" readonly value="Ctrl+Z" />
+                      </div>
+                    </section>
+                  </div>
                 </div>
-              </section>
-              <section class="settings-panel-section settings-hotkeys-group">
-                <div class="settings-panel-heading">Shortcuts</div>
-                <div class="settings-panel-note">Click Move or Undo, then press the new shortcut.</div>
-                <div class="hotkey-grid">
-                  <label class="hotkey-row"><span>Move</span><input class="hotkey-input" data-hotkey-setting="hotkeyMove" type="text" readonly value="M" /></label>
-                  <div class="hotkey-row"><span>Delete</span><span class="hotkey-fixed">Right-click / Delete</span></div>
-                  <label class="hotkey-row"><span>Undo</span><input class="hotkey-input" data-hotkey-setting="hotkeyUndo" type="text" readonly value="Ctrl+Z" /></label>
+              </div>
+
+              <div class="settings-tab-panel" data-settings-panel="backups" hidden>
+                <div class="settings-sub-layout">
+                  <div class="settings-sub-tabs" role="tablist" aria-label="Backup settings">
+                    <button class="settings-sub-tab active" type="button" role="tab" aria-selected="true" data-settings-subtab="backup">Backup</button>
+                    <button class="settings-sub-tab" type="button" role="tab" aria-selected="false" data-settings-subtab="recovery">Recovery</button>
+                    <button class="settings-sub-tab" type="button" role="tab" aria-selected="false" data-settings-subtab="reset">Reset</button>
+                  </div>
+                  <div class="settings-sub-content">
+                    <section id="backupRecoveryGroup" class="settings-detail-panel active" data-settings-content="backup">
+                      <h2>Backup</h2>
+                      <div class="settings-item-row">
+                        <span>Download backup</span>
+                        <button id="downloadPlannerBackup" class="settings-action-btn" type="button">Download</button>
+                      </div>
+                      <div class="settings-item-row">
+                        <span class="settings-row-copy"><b>Import backup</b><small>Replaces your current saved data.</small></span>
+                        <button id="importPlannerBackup" class="settings-action-btn" type="button">Import</button>
+                      </div>
+                      <input id="plannerBackupFile" type="file" accept="application/json,.json" hidden />
+                    </section>
+
+                    <section class="settings-detail-panel" data-settings-content="recovery" hidden>
+                      <h2>Recovery</h2>
+                      <div class="settings-item-row">
+                        <span class="settings-row-copy"><b>Previous save</b><small>Before your last change.</small></span>
+                        <button id="restorePreviousPlannerSave" class="settings-action-btn" type="button" disabled>Restore</button>
+                      </div>
+                      <div class="settings-item-row">
+                        <span class="settings-row-copy"><b>Before Optimize</b><small>Before your last Optimize.</small></span>
+                        <button id="restorePreOptimizerSave" class="settings-action-btn" type="button" disabled>Restore</button>
+                      </div>
+                    </section>
+
+                    <section class="settings-detail-panel" data-settings-content="reset" hidden>
+                      <h2>Reset</h2>
+                      <div class="settings-item-row settings-danger-row">
+                        <span class="settings-row-copy"><b>Reset settings</b><small>Layouts and presets stay saved.</small></span>
+                        <button id="resetSettingsBtn" class="settings-reset-btn" type="button">Reset</button>
+                      </div>
+                    </section>
+                  </div>
                 </div>
-              </section>
-              <section id="backupRecoveryGroup" class="settings-panel-section settings-recovery-group">
-                <div class="settings-panel-heading">Backups</div>
-                <div class="settings-recovery-list">
-                  <div class="settings-recovery-row"><div class="settings-control-copy"><b>Download backup</b></div><button id="downloadPlannerBackup" class="settings-recovery-btn" type="button">Download</button></div>
-                  <div class="settings-recovery-row"><div class="settings-control-copy"><b>Import backup</b><small>Replaces your current saved data.</small></div><button id="importPlannerBackup" class="settings-recovery-btn" type="button">Import</button></div>
-                  <div class="settings-recovery-row"><div class="settings-control-copy"><b>Previous save</b><small>Restore the save before your last change.</small></div><button id="restorePreviousPlannerSave" class="settings-recovery-btn" type="button" disabled>Restore</button></div>
-                  <div class="settings-recovery-row"><div class="settings-control-copy"><b>Before Optimize</b><small>Restore the layout from before your last Optimize.</small></div><button id="restorePreOptimizerSave" class="settings-recovery-btn" type="button" disabled>Restore</button></div>
-                </div>
-                <input id="plannerBackupFile" type="file" accept="application/json,.json" hidden />
-              </section>
-              <section class="settings-panel-section settings-reset-zone">
-                <div class="settings-reset-copy"><b>Reset settings</b><small>Layouts and presets stay saved.</small></div>
-                <button id="resetSettingsBtn" class="settings-reset-btn" type="button">Reset</button>
-              </section>
+              </div>
             </div>
           </div>
         </section>
@@ -954,12 +1013,12 @@
 
     <script defer src="./data/buildings.js?v=102"></script>
     <script defer src="./data/layouts.js?v=112"></script>
-    <script defer src="./app/planner.js?v=120"></script>
+    <script defer src="./app/planner.js?v=121"></script>
     <script defer src="./app/mobile.js?v=105"></script>
     <script defer src="./app/backups.js?v=100"></script>
     <script defer src="./data/titan-land.js?v=100"></script>
     <script defer src="./data/titan-save-migration.js?v=100"></script>
-    <script defer src="./optimizer/search.js?v=110"></script>
+    <script defer src="./optimizer/search.js?v=111"></script>
     <script defer src="./optimizer/prune-roads.js?v=100"></script>
     <script defer src="./optimizer/repack-gaps.js?v=100"></script>
     <script defer src="./optimizer/neighborhood.js?v=100"></script>
