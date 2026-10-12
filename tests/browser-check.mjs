@@ -1152,6 +1152,66 @@ try {
   assert.equal(await page.evaluate(() => optimizerPendingResult), null);
   await page.evaluate(() => closeOptimizerDialog());
   notes.push("Escape cancels a running search");
+  // Settings should behave like a compact tool window and fit at desktop/mobile sizes.
+  await page.evaluate(() => {
+    setAppPage("planner");
+    showEditableColonyUi("SASH");
+  });
+  await page.click("#settingsBtn");
+  const settingsDesktop = await page.evaluate(() => {
+    const panel = document.querySelector(".settings-page-panel");
+    const sections = [...document.querySelectorAll(".settings-panel-section")];
+    return {
+      settingsOpen: appPage === "settings" && !$("settingsScreen").hidden,
+      hasTitlebar: !!document.querySelector(".settings-page-titlebar"),
+      sectionCount: sections.length,
+      panelWidth: panel.getBoundingClientRect().width,
+      viewportWidth: innerWidth,
+      oldCopy: document.body.textContent.includes(
+        "Changes the spacing and size of buttons and panels.",
+      ),
+      closeVisible: getComputedStyle($("settingsCloseBtn")).display !== "none",
+      supportTitle: $("supportBtn").title,
+    };
+  });
+  assert.equal(settingsDesktop.settingsOpen, true);
+  assert.equal(settingsDesktop.hasTitlebar, true);
+  assert.ok(settingsDesktop.sectionCount >= 5);
+  assert.ok(settingsDesktop.panelWidth < settingsDesktop.viewportWidth);
+  assert.equal(settingsDesktop.oldCopy, false);
+  assert.equal(settingsDesktop.closeVisible, true);
+  assert.equal(settingsDesktop.supportTitle, "Buy Me a Coffee");
+
+  await page.click("#settingsCloseBtn");
+  assert.equal(
+    await page.evaluate(() => appPage === "planner" && $("settingsScreen").hidden),
+    true,
+  );
+
+  await page.evaluate(() => setAppPage("home"));
+  await page.click("#settingsBtn");
+  await page.click("#settingsCloseBtn");
+  assert.equal(await page.evaluate(() => appPage), "home");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.click("#settingsBtn");
+  const settingsMobile = await page.evaluate(() => {
+    const panel = document.querySelector(".settings-page-panel");
+    const rect = panel.getBoundingClientRect();
+    return {
+      widthFits: rect.left >= 0 && rect.right <= innerWidth + 1,
+      closeFits:
+        $("settingsCloseBtn").getBoundingClientRect().right <= innerWidth + 1,
+      backupButtonWidth:
+        $("downloadPlannerBackup").getBoundingClientRect().width > 50,
+    };
+  });
+  assert.equal(settingsMobile.widthFits, true);
+  assert.equal(settingsMobile.closeFits, true);
+  assert.equal(settingsMobile.backupButtonWidth, true);
+  await page.click("#settingsCloseBtn");
+  await page.setViewportSize({ width: 1365, height: 900 });
+  notes.push("Settings window, close behavior, mobile fit, and trimmed copy checked");
   // Import a distinguishable Mars save. The pagehide save must not overwrite it.
   const backup = await page.evaluate(() => {
     showEditableColonyUi("SAM");

@@ -1230,8 +1230,8 @@ function openOptimizerDialog() {
   optimizerSyncSearchLabels();
   $("optimizerProgress").innerHTML =
     selectedEra === "SASH"
-      ? "<strong>Ready</strong><span>Maximize credits with the selected buildings while keeping Life Support at 125%+.</span>"
-      : "<strong>Ready</strong><span>Try rearranging your homes to earn more credits. Nothing changes until you apply a result.</span>";
+      ? "<strong>Ready</strong><span>Life Support stays at 125%+.</span>"
+      : "<strong>Ready</strong>";
   $("optimizerRunBtn").textContent = "Optimize";
   $("optimizerRunBtn").disabled = false;
   $("optimizerCancelBtn").textContent = "Cancel";

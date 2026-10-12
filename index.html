@@ -199,7 +199,7 @@
   Forge of Empires Colony Planner by Lacey49.
   Fan-made project. Not affiliated with or endorsed by InnoGames.
 -->
-    <link rel="stylesheet" href="./styles/planner.css?v=115" />
+    <link rel="stylesheet" href="./styles/planner.css?v=116" />
   </head>
   <body aria-busy="true">
     <div class="app">
@@ -212,7 +212,7 @@
             id="supportBtn"
             class="app-support-btn"
             type="button"
-            title="The colonists run on credits. I run on coffee."
+            title="Buy Me a Coffee"
             aria-label="Buy Me a Coffee"
           >
             <svg
@@ -326,224 +326,79 @@
         </section>
 
         <section id="settingsScreen" class="settings-screen" hidden>
-          <div class="settings-page-panel">
-            <div class="settings-page-title">Settings</div>
-
-            <div class="settings-group settings-density-group">
-              <label class="settings-control" for="densitySetting">
-                <span class="settings-control-copy">
-                  <b>Button and panel size</b>
-                  <small
-                    >Changes the spacing and size of buttons and panels.</small
-                  >
-                </span>
-              </label>
-              <select id="densitySetting" class="settings-select">
-                <option value="compact">Compact</option>
-                <option value="normal">Normal</option>
-                <option value="spacious">Spacious</option>
-              </select>
+          <div class="settings-page-panel" role="region" aria-labelledby="settingsPageTitle">
+            <div class="settings-page-titlebar">
+              <div class="settings-page-title" id="settingsPageTitle">Settings</div>
+              <button id="settingsCloseBtn" class="settings-page-close" type="button" title="Close" aria-label="Close settings">×</button>
             </div>
-
-            <div class="settings-group">
-              <label class="settings-control" for="zoomSensitivitySetting">
-                <span class="settings-control-copy">
-                  <b>Zoom sensitivity</b>
-                  <small
-                    >How fast the map zooms when you use the mouse wheel.</small
-                  >
-                </span>
-                <span class="settings-control-value" id="zoomSensitivityValue"
-                  >100%</span
-                >
-              </label>
-              <input
-                id="zoomSensitivitySetting"
-                class="settings-range"
-                type="range"
-                min="50"
-                max="150"
-                step="10"
-                value="100"
-              />
-            </div>
-
-            <div class="settings-group">
-              <label class="settings-control" for="panSensitivitySetting">
-                <span class="settings-control-copy">
-                  <b>Pan sensitivity</b>
-                  <small>How fast the map moves when you drag it.</small>
-                </span>
-                <span class="settings-control-value" id="panSensitivityValue"
-                  >100%</span
-                >
-              </label>
-              <input
-                id="panSensitivitySetting"
-                class="settings-range"
-                type="range"
-                min="50"
-                max="150"
-                step="10"
-                value="100"
-              />
-            </div>
-
-            <div class="settings-group settings-theme-group">
-              <label class="settings-control" for="themeSetting">
-                <span class="settings-control-copy">
-                  <b>Planner theme</b>
-                  <small
-                    >Match the current era or choose a different theme.</small
-                  >
-                </span>
-              </label>
-              <select id="themeSetting" class="settings-select">
-                <option value="auto">Match selected era</option>
-                <option value="SAM">Mars</option>
-                <option value="SAAB">Asteroid Belt</option>
-                <option value="SAV">Venus</option>
-                <option value="SAJM">Jupiter Moon</option>
-                <option value="SAT">Titan</option>
-                <option value="SASH">Space Hub</option>
-                <option value="neutral">Neutral dark</option>
-              </select>
-            </div>
-
-            <div class="settings-group settings-hotkeys-group">
-              <div class="settings-section-heading">
-                <b>Keyboard shortcuts</b>
-                <small
-                  >Click the shortcut for Move or Undo, then press the keys you
-                  want to use. Delete always uses right-click or the Delete
-                  key.</small
-                >
-              </div>
-              <div class="hotkey-grid">
-                <label class="hotkey-row"
-                  ><span>Move mode</span
-                  ><input
-                    class="hotkey-input"
-                    data-hotkey-setting="hotkeyMove"
-                    type="text"
-                    readonly
-                    value="M"
-                /></label>
-                <div class="hotkey-row">
-                  <span>Delete building/path</span
-                  ><span class="hotkey-fixed">Right-click / Delete</span>
+            <div class="settings-page-body">
+              <section class="settings-panel-section">
+                <div class="settings-panel-heading">Interface</div>
+                <div class="settings-list">
+                  <label class="settings-row-control" for="densitySetting">
+                    <span class="settings-control-copy"><b>UI size</b></span>
+                    <select id="densitySetting" class="settings-select">
+                      <option value="compact">Compact</option>
+                      <option value="normal">Normal</option>
+                      <option value="spacious">Spacious</option>
+                    </select>
+                  </label>
+                  <label class="settings-row-control" for="themeSetting">
+                    <span class="settings-control-copy"><b>Theme</b></span>
+                    <select id="themeSetting" class="settings-select">
+                      <option value="auto">Match selected era</option>
+                      <option value="SAM">Mars</option>
+                      <option value="SAAB">Asteroid Belt</option>
+                      <option value="SAV">Venus</option>
+                      <option value="SAJM">Jupiter Moon</option>
+                      <option value="SAT">Titan</option>
+                      <option value="SASH">Space Hub</option>
+                      <option value="neutral">Neutral dark</option>
+                    </select>
+                  </label>
                 </div>
-                <label class="hotkey-row"
-                  ><span>Undo last change</span
-                  ><input
-                    class="hotkey-input"
-                    data-hotkey-setting="hotkeyUndo"
-                    type="text"
-                    readonly
-                    value="Ctrl+Z"
-                /></label>
-              </div>
-            </div>
-
-            <div class="settings-reset-zone">
-              <div class="settings-control-copy">
-                <b>Reset settings</b>
-                <small>Reset all settings to default.</small>
-              </div>
-              <button
-                id="resetSettingsBtn"
-                class="settings-reset-btn"
-                type="button"
-              >
-                Reset to default
-              </button>
-            </div>
-
-            <div
-              id="backupRecoveryGroup"
-              class="settings-group settings-recovery-group"
-            >
-              <div class="settings-section-heading">
-                <b>Backups</b>
-                <small
-                  >Save a copy of your planner or recover an earlier
-                  layout.</small
-                >
-              </div>
-              <div class="settings-recovery-list">
-                <div class="settings-recovery-row">
-                  <div class="settings-control-copy">
-                    <b>Download backup</b>
-                    <small
-                      >Download a copy of all your layouts and saved
-                      presets.</small
-                    >
-                  </div>
-                  <button
-                    id="downloadPlannerBackup"
-                    class="settings-recovery-btn"
-                    type="button"
-                  >
-                    Download
-                  </button>
+              </section>
+              <section class="settings-panel-section">
+                <div class="settings-panel-heading">Map</div>
+                <div class="settings-list">
+                  <label class="settings-slider-row" for="zoomSensitivitySetting">
+                    <span class="settings-control-copy"><b>Zoom speed</b></span>
+                    <span class="settings-control-value" id="zoomSensitivityValue">100%</span>
+                    <input id="zoomSensitivitySetting" class="settings-range" type="range" min="50" max="150" step="10" value="100" />
+                  </label>
+                  <label class="settings-slider-row" for="panSensitivitySetting">
+                    <span class="settings-control-copy"><b>Pan speed</b></span>
+                    <span class="settings-control-value" id="panSensitivityValue">100%</span>
+                    <input id="panSensitivitySetting" class="settings-range" type="range" min="50" max="150" step="10" value="100" />
+                  </label>
                 </div>
-                <div class="settings-recovery-row">
-                  <div class="settings-control-copy">
-                    <b>Import backup</b>
-                    <small>Replace your planner data with a backup file.</small>
-                  </div>
-                  <button
-                    id="importPlannerBackup"
-                    class="settings-recovery-btn"
-                    type="button"
-                  >
-                    Import
-                  </button>
+              </section>
+              <section class="settings-panel-section settings-hotkeys-group">
+                <div class="settings-panel-heading">Shortcuts</div>
+                <div class="settings-panel-note">Click Move or Undo, then press the new shortcut.</div>
+                <div class="hotkey-grid">
+                  <label class="hotkey-row"><span>Move</span><input class="hotkey-input" data-hotkey-setting="hotkeyMove" type="text" readonly value="M" /></label>
+                  <div class="hotkey-row"><span>Delete</span><span class="hotkey-fixed">Right-click / Delete</span></div>
+                  <label class="hotkey-row"><span>Undo</span><input class="hotkey-input" data-hotkey-setting="hotkeyUndo" type="text" readonly value="Ctrl+Z" /></label>
                 </div>
-                <div class="settings-recovery-row">
-                  <div class="settings-control-copy">
-                    <b>Previous save</b>
-                    <small
-                      >Go back to the save before your latest change.</small
-                    >
-                  </div>
-                  <button
-                    id="restorePreviousPlannerSave"
-                    class="settings-recovery-btn"
-                    type="button"
-                    disabled
-                  >
-                    Restore
-                  </button>
+              </section>
+              <section id="backupRecoveryGroup" class="settings-panel-section settings-recovery-group">
+                <div class="settings-panel-heading">Backups</div>
+                <div class="settings-recovery-list">
+                  <div class="settings-recovery-row"><div class="settings-control-copy"><b>Download backup</b></div><button id="downloadPlannerBackup" class="settings-recovery-btn" type="button">Download</button></div>
+                  <div class="settings-recovery-row"><div class="settings-control-copy"><b>Import backup</b><small>Replaces your current saved data.</small></div><button id="importPlannerBackup" class="settings-recovery-btn" type="button">Import</button></div>
+                  <div class="settings-recovery-row"><div class="settings-control-copy"><b>Previous save</b><small>Restore the save before your last change.</small></div><button id="restorePreviousPlannerSave" class="settings-recovery-btn" type="button" disabled>Restore</button></div>
+                  <div class="settings-recovery-row"><div class="settings-control-copy"><b>Before Optimize</b><small>Restore the layout from before your last Optimize.</small></div><button id="restorePreOptimizerSave" class="settings-recovery-btn" type="button" disabled>Restore</button></div>
                 </div>
-                <div class="settings-recovery-row">
-                  <div class="settings-control-copy">
-                    <b>Before optimizer</b>
-                    <small
-                      >Restore the layout saved immediately before the last
-                      optimizer apply.</small
-                    >
-                  </div>
-                  <button
-                    id="restorePreOptimizerSave"
-                    class="settings-recovery-btn"
-                    type="button"
-                    disabled
-                  >
-                    Restore
-                  </button>
-                </div>
-              </div>
-              <input
-                id="plannerBackupFile"
-                type="file"
-                accept="application/json,.json"
-                hidden
-              />
+                <input id="plannerBackupFile" type="file" accept="application/json,.json" hidden />
+              </section>
+              <section class="settings-panel-section settings-reset-zone">
+                <div class="settings-reset-copy"><b>Reset settings</b><small>Layouts and presets stay saved.</small></div>
+                <button id="resetSettingsBtn" class="settings-reset-btn" type="button">Reset</button>
+              </section>
             </div>
           </div>
         </section>
-
         <div class="topbar compact-topbar">
           <button class="compact-tool active" id="freeBuildBtn" type="button">
             Free Build
@@ -647,7 +502,7 @@
             <div class="preset-list" id="presetList"></div>
             <div class="preset-preview-pane">
               <div class="preset-preview-title" id="presetPreviewTitle">
-                Hover a preset
+                Preset preview
               </div>
               <canvas
                 id="presetPreviewCanvas"
@@ -686,7 +541,7 @@
 
         <dialog id="optimizerDialog" class="app-dialog">
           <div class="dialog-card optimizer-card">
-            <div class="dialog-title">Optimize Colony</div>
+            <div class="dialog-title">Optimize</div>
             <div class="optimizer-body">
               <label class="optimizer-field"
                 ><span>Goal</span
@@ -1099,7 +954,7 @@
 
     <script defer src="./data/buildings.js?v=102"></script>
     <script defer src="./data/layouts.js?v=112"></script>
-    <script defer src="./app/planner.js?v=119"></script>
+    <script defer src="./app/planner.js?v=120"></script>
     <script defer src="./app/mobile.js?v=105"></script>
     <script defer src="./app/backups.js?v=100"></script>
     <script defer src="./data/titan-land.js?v=100"></script>

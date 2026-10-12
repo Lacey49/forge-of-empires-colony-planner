@@ -3026,7 +3026,7 @@ async function requestClearAll() {
   const ok = await showConfirmDialog({
     title: "Clear all?",
     message:
-      "Remove all buildings and paths? Your expansions stay unlocked, and the Town Hall returns to its starting spot.",
+      "Remove all buildings and paths? Expansions stay selected and the Town Hall returns to its starting spot.",
     confirmText: "Clear all",
   });
   if (!ok || selectedEra !== era) return;
@@ -3189,7 +3189,7 @@ async function saveCurrentPreset() {
   const era = selectedEra;
   const name = await showInputDialog({
     title: "Save preset",
-    message: "Save the current layout as a reusable preset.",
+    message: "Name this preset.",
     confirmText: "Save",
     placeholder: "Preset name",
   });
@@ -3945,8 +3945,13 @@ function populateHomeTownHallGrid() {
 }
 
 let appPage = "home";
+let pageBeforeSettings = "home";
 
 function setAppPage(page) {
+  const previousPage = appPage;
+  if (page === "settings" && previousPage !== "settings")
+    pageBeforeSettings = previousPage;
+
   appPage = page;
   const isHome = page === "home";
   const isSettings = page === "settings";
@@ -3971,6 +3976,8 @@ function setAppPage(page) {
   else if (isSettings) {
     applyPageTheme("settings");
     syncSettingsUi();
+  } else {
+    applyConfiguredTheme(selectedEra);
   }
 }
 
@@ -3978,8 +3985,20 @@ function openPlannerFromEra() {
   setAppPage("planner");
 }
 
+function closeSettingsPage() {
+  const target =
+    pageBeforeSettings === "planner" || pageBeforeSettings === "home"
+      ? pageBeforeSettings
+      : "home";
+  setAppPage(target);
+}
+
 $("appHomeBtn")?.addEventListener("click", () => setAppPage("home"));
-$("settingsBtn")?.addEventListener("click", () => setAppPage("settings"));
+$("settingsBtn")?.addEventListener("click", () => {
+  if (appPage === "settings") closeSettingsPage();
+  else setAppPage("settings");
+});
+$("settingsCloseBtn")?.addEventListener("click", closeSettingsPage);
 
 const BUY_ME_A_COFFEE_URL = "https://buymeacoffee.com/lacey49";
 $("supportBtn")?.addEventListener("click", () => {
@@ -4081,7 +4100,7 @@ $("resetSettingsBtn")?.addEventListener("click", async () => {
   const ok = await showConfirmDialog({
     title: "Reset settings?",
     message:
-      "Reset all settings to their default values? Your colony layouts and saved presets will not be deleted.",
+      "Reset settings to default? Layouts and presets stay saved.",
     confirmText: "Reset to default",
     cancelText: "Cancel",
   });
@@ -4094,12 +4113,7 @@ $("resetSettingsBtn")?.addEventListener("click", async () => {
   applyDensityMode();
   syncSettingsUi();
   applyPageTheme("settings");
-  notifyToast(
-    "Settings reset",
-    "Settings are back to default.",
-    "success",
-    2800,
-  );
+  notifyToast("Settings reset", "", "success", 2400);
 });
 
 document.querySelectorAll(".era-btn").forEach((btn) => {
