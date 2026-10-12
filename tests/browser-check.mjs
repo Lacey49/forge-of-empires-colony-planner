@@ -359,7 +359,7 @@ try {
   const presetKindLayoutDesktop = await page.evaluate(() => {
     setAppPage("planner");
     showEditableColonyUi("SASH");
-    renderPresetPopover();
+    openPresetPopover();
     const row = document.querySelector("#presetList .preset-item");
     const name = row.querySelector("span");
     const kind = row.querySelector("small");
@@ -398,7 +398,7 @@ try {
   const presetKindLayoutMobile = await page.evaluate(() => {
     setAppPage("planner");
     showEditableColonyUi("SASH");
-    renderPresetPopover();
+    openPresetPopover();
     const row = document.querySelector("#presetList .preset-item");
     const name = row.querySelector("span");
     const kind = row.querySelector("small");
@@ -419,6 +419,7 @@ try {
   assert.equal(presetKindLayoutMobile.kindFontSize, "8px");
 
   await page.setViewportSize({ width: 1280, height: 800 });
+  await page.evaluate(() => closePresetPopover());
   notes.push("Preset Built-in label stays unbroken and stacks under names on small screens");
 
   const lifeSupportSummary = await page.evaluate(async () => {
