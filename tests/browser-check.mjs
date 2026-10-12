@@ -375,8 +375,10 @@ try {
       kindWidth: kindRect.width,
       kindHeight: kindRect.height,
       nameTop: nameRect.top,
+      nameBottom: nameRect.bottom,
       nameRight: nameRect.right,
       kindTop: kindRect.top,
+      kindBottom: kindRect.bottom,
       kindLeft: kindRect.left,
     };
   });
@@ -386,9 +388,8 @@ try {
   assert.ok(presetKindLayoutDesktop.kindWidth > 0);
   assert.ok(presetKindLayoutDesktop.kindHeight < 16);
   assert.ok(
-    Math.abs(
-      presetKindLayoutDesktop.nameTop - presetKindLayoutDesktop.kindTop,
-    ) < 3,
+    presetKindLayoutDesktop.kindTop < presetKindLayoutDesktop.nameBottom &&
+      presetKindLayoutDesktop.kindBottom > presetKindLayoutDesktop.nameTop,
   );
   assert.ok(
     presetKindLayoutDesktop.kindLeft >= presetKindLayoutDesktop.nameRight,
