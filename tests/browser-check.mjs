@@ -356,6 +356,67 @@ try {
   await page.click("#appDialogCancel");
   notes.push("Preset popup keyboard focus, Escape, and dialog stacking checked");
 
+  const presetKindLayoutDesktop = await page.evaluate(() => {
+    setAppPage("planner");
+    showEditableColonyUi("SASH");
+    renderPresetPopover();
+    const row = document.querySelector("#presetList .preset-item");
+    const name = row.querySelector("span");
+    const kind = row.querySelector("small");
+    const rowStyle = getComputedStyle(row);
+    const kindStyle = getComputedStyle(kind);
+    const kindRect = kind.getBoundingClientRect();
+
+    return {
+      display: rowStyle.display,
+      columns: rowStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
+      kindText: kind.textContent,
+      kindWhiteSpace: kindStyle.whiteSpace,
+      kindWidth: kindRect.width,
+      nameTop: name.getBoundingClientRect().top,
+      kindTop: kindRect.top,
+    };
+  });
+  assert.equal(presetKindLayoutDesktop.display, "grid");
+  assert.equal(presetKindLayoutDesktop.columns, 2);
+  assert.equal(presetKindLayoutDesktop.kindText, "Built-in");
+  assert.equal(presetKindLayoutDesktop.kindWhiteSpace, "nowrap");
+  assert.ok(presetKindLayoutDesktop.kindWidth > 0);
+  assert.ok(
+    Math.abs(
+      presetKindLayoutDesktop.nameTop - presetKindLayoutDesktop.kindTop,
+    ) < 3,
+  );
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const presetKindLayoutMobile = await page.evaluate(() => {
+    setAppPage("planner");
+    showEditableColonyUi("SASH");
+    renderPresetPopover();
+    const row = document.querySelector("#presetList .preset-item");
+    const name = row.querySelector("span");
+    const kind = row.querySelector("small");
+    const nameRect = name.getBoundingClientRect();
+    const kindRect = kind.getBoundingClientRect();
+    return {
+      columns: getComputedStyle(row).gridTemplateColumns
+        .split(" ")
+        .filter(Boolean).length,
+      kindText: kind.textContent,
+      kindWhiteSpace: getComputedStyle(kind).whiteSpace,
+      kindBelowName: kindRect.top >= nameRect.bottom - 1,
+      kindFontSize: getComputedStyle(kind).fontSize,
+    };
+  });
+  assert.equal(presetKindLayoutMobile.columns, 1);
+  assert.equal(presetKindLayoutMobile.kindText, "Built-in");
+  assert.equal(presetKindLayoutMobile.kindWhiteSpace, "nowrap");
+  assert.equal(presetKindLayoutMobile.kindBelowName, true);
+  assert.equal(presetKindLayoutMobile.kindFontSize, "8px");
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  notes.push("Preset Built-in label stays unbroken and stacks under names on small screens");
+
   const lifeSupportSummary = await page.evaluate(async () => {
     const eraChecks = {};
     for (const [era, data] of Object.entries(ERA_DATA)) {
