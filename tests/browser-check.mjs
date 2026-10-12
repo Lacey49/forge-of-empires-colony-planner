@@ -367,25 +367,31 @@ try {
     const kindStyle = getComputedStyle(kind);
     const kindRect = kind.getBoundingClientRect();
 
+    const nameRect = name.getBoundingClientRect();
     return {
       display: rowStyle.display,
-      columns: rowStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
       kindText: kind.textContent,
       kindWhiteSpace: kindStyle.whiteSpace,
       kindWidth: kindRect.width,
-      nameTop: name.getBoundingClientRect().top,
+      kindHeight: kindRect.height,
+      nameTop: nameRect.top,
+      nameRight: nameRect.right,
       kindTop: kindRect.top,
+      kindLeft: kindRect.left,
     };
   });
   assert.equal(presetKindLayoutDesktop.display, "grid");
-  assert.equal(presetKindLayoutDesktop.columns, 2);
   assert.equal(presetKindLayoutDesktop.kindText, "Built-in");
   assert.equal(presetKindLayoutDesktop.kindWhiteSpace, "nowrap");
   assert.ok(presetKindLayoutDesktop.kindWidth > 0);
+  assert.ok(presetKindLayoutDesktop.kindHeight < 16);
   assert.ok(
     Math.abs(
       presetKindLayoutDesktop.nameTop - presetKindLayoutDesktop.kindTop,
     ) < 3,
+  );
+  assert.ok(
+    presetKindLayoutDesktop.kindLeft >= presetKindLayoutDesktop.nameRight,
   );
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -399,19 +405,17 @@ try {
     const nameRect = name.getBoundingClientRect();
     const kindRect = kind.getBoundingClientRect();
     return {
-      columns: getComputedStyle(row).gridTemplateColumns
-        .split(" ")
-        .filter(Boolean).length,
       kindText: kind.textContent,
       kindWhiteSpace: getComputedStyle(kind).whiteSpace,
       kindBelowName: kindRect.top >= nameRect.bottom - 1,
+      kindLeftAligned: Math.abs(kindRect.left - nameRect.left) < 2,
       kindFontSize: getComputedStyle(kind).fontSize,
     };
   });
-  assert.equal(presetKindLayoutMobile.columns, 1);
   assert.equal(presetKindLayoutMobile.kindText, "Built-in");
   assert.equal(presetKindLayoutMobile.kindWhiteSpace, "nowrap");
   assert.equal(presetKindLayoutMobile.kindBelowName, true);
+  assert.equal(presetKindLayoutMobile.kindLeftAligned, true);
   assert.equal(presetKindLayoutMobile.kindFontSize, "8px");
 
   await page.setViewportSize({ width: 1280, height: 800 });
