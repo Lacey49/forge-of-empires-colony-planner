@@ -1152,7 +1152,7 @@ try {
   assert.equal(await page.evaluate(() => optimizerPendingResult), null);
   await page.evaluate(() => closeOptimizerDialog());
   notes.push("Escape cancels a running search");
-  // Settings follows the Forge Hammer-style tab + sidebar layout and fits desktop/mobile.
+  // Settings tabs and sidebar should work on desktop and mobile.
   await page.evaluate(() => {
     setAppPage("planner");
     showEditableColonyUi("SASH");
@@ -1246,7 +1246,7 @@ try {
   assert.ok(settingsMobile.mobileColumns.split(" ").length <= 1);
   await page.click("#settingsCloseBtn");
   await page.setViewportSize({ width: 1365, height: 900 });
-  notes.push("Forge Hammer-style Settings tabs, sidebar, close behavior, and mobile fit checked");
+  notes.push("Settings tabs, sidebar, close behavior, and mobile layout checked");
   // Import a distinguishable Mars save. The pagehide save must not overwrite it.
   const backup = await page.evaluate(() => {
     showEditableColonyUi("SAM");
