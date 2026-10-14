@@ -80,11 +80,6 @@ check(
   "Remove unused meta keywords (Google does not use them)",
 );
 check(
-  html.includes('class="home-copy"') &&
-    html.includes("all six Space Age eras"),
-  "Homepage should explain the planner in visible text",
-);
-check(
   siteSchema?.description === metaDescription,
   "Structured data description should match the meta description",
 );

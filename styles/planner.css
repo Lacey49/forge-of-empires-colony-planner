@@ -2574,11 +2574,9 @@ body,
   line-height: 1.1;
 }
 .home-copy {
-  max-width: 700px;
-  margin: 10px auto 0;
+  margin-top: 8px;
   color: var(--theme-muted);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 11px;
 }
 
 body.home-mode .compact-topbar,
