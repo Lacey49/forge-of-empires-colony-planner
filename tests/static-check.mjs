@@ -51,6 +51,52 @@ function extractConst(source, name) {
 
 const html = read("index.html");
 
+// Check the homepage search metadata stays in sync with the visible page.
+const metaDescription = html.match(
+  /<meta\s+name="description"\s+content="([^"]+)"/,
+)?.[1];
+const pageTitle = html.match(/<title>([^<]+)<\/title>/)?.[1];
+const schemaBlock = html.match(
+  /<script type="application\/ld\+json">([\s\S]*?)<\/script>/,
+)?.[1];
+let siteSchema = null;
+try {
+  siteSchema = JSON.parse(schemaBlock || "");
+} catch {
+  failures.push("Invalid homepage structured data");
+}
+check(
+  Boolean(metaDescription?.includes("Forge of Empires") &&
+    metaDescription.includes("Space Age") &&
+    metaDescription.includes("presets")),
+  "Homepage description should describe the actual Space Age planner features",
+);
+check(
+  Boolean(pageTitle?.includes("Colony Planner") && pageTitle.includes("Optimizer")),
+  "Homepage title should mention both planner and optimizer",
+);
+check(
+  !/<meta\s+name="keywords"/i.test(html),
+  "Remove unused meta keywords (Google does not use them)",
+);
+check(
+  html.includes('class="home-copy"') &&
+    html.includes("all six Space Age eras"),
+  "Homepage should explain the planner in visible text",
+);
+check(
+  siteSchema?.description === metaDescription,
+  "Structured data description should match the meta description",
+);
+check(
+  html.match(/property="og:description"\s+content="([^"]+)"/)?.[1] ===
+    metaDescription &&
+    html.match(/name="twitter:description"\s+content="([^"]+)"/)?.[1] ===
+      metaDescription,
+  "Social descriptions should match the homepage description",
+);
+notes.push("Homepage title, description, social preview and structured data checked");
+
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
 const duplicateIds = [
   ...new Set(ids.filter((id, index) => ids.indexOf(id) !== index)),
