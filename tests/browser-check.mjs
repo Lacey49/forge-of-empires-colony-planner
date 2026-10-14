@@ -153,6 +153,58 @@ try {
   assert.deepEqual(exactSashPresets.secondHub, [6, 4]);
   notes.push("Exact SASH preset names and mixed Life Support counts checked");
 
+  const officersScreenshot = await page.evaluate(() => {
+    showEditableColonyUi("SASH");
+    const item = getPresetCatalog().find((preset) => preset.id === "builtin:sash-officers");
+    if (!item) return null;
+    const positions = (type) => item.state.buildings
+      .filter((building) => building.type === type)
+      .map(({r, c}) => [r, c]);
+    let colonists = 0;
+    let lifeSupport = 0;
+    let credits4h = 0;
+    for (const building of item.state.buildings) {
+      const def = eraBoardBuildingByKey("SASH", building.type);
+      colonists += def.colonists || 0;
+      lifeSupport += def.lifeSupport || 0;
+      if (def.creditHours) credits4h += (def.creditAmount * 4) / def.creditHours;
+    }
+    return {
+      name: item.name,
+      hub: item.state.hubTop,
+      expansions: item.state.enabled.length,
+      officers: positions("officersQuarters"),
+      cosmic: positions("cosmicCleanExpress"),
+      simple: positions("simpleCrewQuarters"),
+      flora: positions("floraShipExpress"),
+      empty: item.state.grid.flat().filter((cell) => cell === "empty").length,
+      colonists,
+      lifeSupportPercent: Number(((lifeSupport / colonists) * 100).toFixed(1)),
+      credits4h,
+    };
+  });
+  assert.deepEqual(officersScreenshot, {
+    name: "Officers Quarters (8) + CosmicClean Express (8)",
+    hub: [0, 4],
+    expansions: 0,
+    officers: [
+      [8, 8], [8, 12], [12, 0], [12, 4],
+      [12, 8], [16, 0], [16, 4], [16, 8],
+    ],
+    cosmic: [
+      [0, 11], [0, 14], [0, 17], [4, 11],
+      [4, 14], [4, 17], [8, 1], [8, 4],
+    ],
+    simple: [[0, 9], [3, 9], [5, 7]],
+    flora: [[5, 4]],
+    empty: 12,
+    colonists: 3635,
+    lifeSupportPercent: 129.6,
+    credits4h: 80408,
+  });
+  notes.push("SASH Officers layout and output match the reference screenshot");
+
+
   const pizzaPresets = await page.evaluate(() => {
     showEditableColonyUi("SASH");
     const catalog = getPresetCatalog();

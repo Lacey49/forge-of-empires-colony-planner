@@ -1798,9 +1798,10 @@ const SASH_SIMPLE_COSMIC_PRESET_FLORA = [
 
 const SASH_OFFICER_PRESET_HUB = [0, 4];
 
+// Starting SASH Officers/CosmicClean layout.
 const SASH_OFFICER_PRESET_BUILDINGS = [
-  [8, 7],
-  [8, 11],
+  [8, 8],
+  [8, 12],
   [12, 0],
   [12, 4],
   [12, 8],
@@ -1810,23 +1811,23 @@ const SASH_OFFICER_PRESET_BUILDINGS = [
 ];
 
 const SASH_OFFICER_PRESET_COSMIC = [
-  [0, 9],
-  [0, 12],
-  [0, 15],
-  [4, 9],
-  [4, 12],
-  [4, 15],
-  [5, 4],
-  [8, 0],
+  [0, 11],
+  [0, 14],
+  [0, 17],
+  [4, 11],
+  [4, 14],
+  [4, 17],
+  [8, 1],
+  [8, 4],
 ];
 
 const SASH_OFFICER_PRESET_FILLERS = [
-  [0, 18],
-  [3, 18],
+  [0, 9],
+  [3, 9],
   [5, 7],
 ];
 
-const SASH_OFFICER_PRESET_FLORA = [[9, 3]];
+const SASH_OFFICER_PRESET_FLORA = [[5, 4]];
 
 const SASH_OFFICER_PIZZA_PRESET_HUB = [0, 4];
 
